@@ -34,9 +34,9 @@ jobs:
       - name: Build the project
         run: npm run ciBuild
 
-      # upload artifact
+      # zip and upload artifact
       - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v2
         with:
           name: build
           path: build
@@ -54,4 +54,4 @@ jobs:
           path: build
 
       - name: Copy build folder to the website folder
-        run: xcopy /Y /S /I build\* C:\inetpub\wwwroot\esms\
+        run: xcopy /Y /S /I build\* C:\inetpub\wwwroot\enp-production\
