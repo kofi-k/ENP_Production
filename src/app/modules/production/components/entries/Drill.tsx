@@ -1,7 +1,8 @@
-import { Button, Divider, Input, Modal, Space, Table, TabsProps, Tag, Upload, UploadFile, UploadProps, message } from 'antd';
+import { UploadOutlined } from '@ant-design/icons';
+import { Button, Divider, Input, Modal, Space, Table, Tabs, TabsProps, Tag, Upload, UploadProps, message } from 'antd';
 import moment from 'moment';
 import { useEffect, useState } from "react";
-import { set, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import * as XLSX from 'xlsx';
 import { KTCardBody } from '../../../../../_metronic/helpers';
@@ -9,18 +10,13 @@ import { deleteItem, fetchDocument, postItem, updateItem } from '../../urls';
 import {
     ModalFooterButtons, PageActionButtons, calculateVolumesByField,
     convertExcelDateToJSDate, convertExcelTimeToJSDate, excelDateToJSDate,
-    extractDateFromTimestamp, extractTimeFromISOString, getDateFromDateString, groupByBatchNumber, roundOff,
-    timeFormat, timeStamp
+    extractDateFromTimestamp, groupByBatchNumber, roundOff,
+    timeFormat
 } from '../CommonComponents';
-import { Tabs } from 'antd';
-import { TableProps } from 'react-bootstrap';
-import { UploadChangeParam } from 'antd/es/upload';
-import { time } from 'console';
-import { UploadOutlined } from '@ant-design/icons';
 
 
 
-const CycleDetailsTable = () => {
+const DrillEntry = () => {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false) // to show the upload modal
     const [uploadedFile, setUploadedFile] = useState<any>(null)
@@ -62,12 +58,13 @@ const CycleDetailsTable = () => {
     const [fileName, setFileName] = useState('') // to hold the name of the uploaded file
     const [isConfirmSaveModalOpen, setIsConfirmSaveModalOpen] = useState(false) // to show the modal to confirm the save
 
-    // state to hold added items that will be batched and saved 
-    const [batchData, setBatchData] : any = useState<any[]>([]);
-
-
     const handleChange = (event: any) => {
         event.preventDefault()
+        // if (event.target.name === 'cycleDate') {
+        //     const selectedDate = new Date(event.target.value);
+        //     const isoDate = selectedDate.toISOString();
+        //     // Use the isoDate value as needed
+        //   }
         setTempData({ ...tempData, [event.target.name]: event.target.value });
     }
 
@@ -187,14 +184,6 @@ const CycleDetailsTable = () => {
         deleteData(item)
     }
 
-    const removeItemFromBatchData = (itemToRemove: any) => {
-        setBatchData((prevBatchData: any[]) => {
-          const updatedBatchData: any = prevBatchData.filter((item) => item !== itemToRemove);
-          setGridData(updatedBatchData)
-          return updatedBatchData;
-        });
-      };
-
     const getRecordName = (id: any, data: any) => {
         let name = ''
         data?.map((item: any) => {
@@ -209,7 +198,7 @@ const CycleDetailsTable = () => {
         let name = ''
         data?.map((item: any) => {
             if (item.id === id) {
-                name = item.equipmentId
+                name = item.modelName
             }
         })
         return name
@@ -225,131 +214,6 @@ const CycleDetailsTable = () => {
         return name
     }
 
-     const columns2: any = [
-        {
-            title: 'Date',
-            dataIndex: 'cycleDate',
-            key: 'date',
-            fixed: 'left',
-            width: 120,
-            render: (text: any) => <span>{moment(text).format('YYYY-MM-DD')}</span>
-        },
-        {
-            title: 'Shift',
-            dataIndex: 'shiftId',
-            width: 100,
-            render: (text: any) => <span>{getRecordName(text, allShifts?.data)}</span>
-        },
-        {
-            title: 'Time',
-            dataIndex: 'cycleTime',
-            width: 100,
-            render: (text: any) => <span>{extractTimeFromISOString(text)}</span>
-        },
-        {
-            title: 'Loader Unit',
-            dataIndex: 'loaderUnitId',
-            width: 150,
-            render: (text: any) => <span>{getUnitRecordName(text, allLoaderUnits?.data)}</span>
-        },
-        {
-            title: 'Loader Operator',
-            dataIndex: 'loader',
-            width: 150,
-        },
-        {
-            title: 'Hauler Unit',
-            dataIndex: 'haulerUnitId',
-            width: 150,
-            render: (text: any) => <span>{getUnitRecordName(text, allHaulerUnits?.data)}</span>
-        },
-        {
-            title: 'Hauler Operator',
-            dataIndex: 'hauler',
-            width: 150,
-        },
-        {
-            title: 'Origin',
-            dataIndex: 'originId',
-            width: 150,
-            render: (text: any) => <span>{getRecordName(text, allOrigins?.data)}</span>
-        },
-        {
-            title: 'Material',
-            dataIndex: 'materialId',
-            width: 120,
-            render: (text: any) => <span>{getRecordName(text, allMaterials?.data)}</span>
-        },
-        {
-            title: 'Destination',
-            dataIndex: 'destinationId',
-            width: 150,
-            render: (text: any) => <span>{getRecordName(text, destinations?.data)}</span>
-        },
-        {
-            title: 'Nominal Weight',
-            dataIndex: 'nominalWeight',
-            width: 100,
-            render: (text: any) => <span>{text.toLocaleString()}</span> 
-        },
-        {
-            title: 'Weight',
-            dataIndex: 'weight',
-            width: 100,
-            render: (text: any) => <span>{text.toLocaleString()}</span> 
-        },
-        {
-            title: 'Payload Weight',
-            dataIndex: 'payloadWeight',
-            width: 100,
-            render: (text: any) => <span>{text.toLocaleString()}</span> 
-        },
-        {
-            title: 'Reported Weight',
-            dataIndex: 'reportedWeight',
-            width: 100,
-            render: (text: any) => <span>{text.toLocaleString()}</span> 
-        },
-        {
-            title: 'Volume',
-            dataIndex: 'volumes',
-            width: 100,
-            render: (text: any) => <span>{text.toLocaleString()}</span> 
-        },
-        {
-            title: 'Loads',
-            dataIndex: 'loads',
-            width: 100,
-            render: (text: any) => <span>{text.toLocaleString()}</span> 
-        },
-        {
-            title: 'Time at loader',
-            dataIndex: 'timeAtLoader',
-            width: 100,
-            render: (text: any) => <span>{extractTimeFromISOString(text)}</span>
-        },
-        {
-            title: 'Duration',
-            dataIndex: 'duration',
-            width: 100,
-            render: (text: any) => <span>{text.toLocaleString()}</span> 
-        },
-        {
-            title: 'Action',
-            fixed: 'right',
-            width: 180,
-            render: (_: any, record: any) => (
-                <Space size='middle'>
-                    <a onClick={() => showUpdateModal(record)} className='btn btn-light-info btn-sm'>
-                        Update
-                    </a>
-                    <a onClick={() => removeItemFromBatchData(record)} className='btn btn-light-success btn-sm'>
-                        Delete
-                    </a>
-                </Space>
-            ),
-        },
-    ]
     const columns: any = [
         {
             title: 'Date',
@@ -413,7 +277,7 @@ const CycleDetailsTable = () => {
         { title: 'Volume', dataIndex: 'volumes', width: 100 },
         { title: 'Loads', dataIndex: 'loads', width: 100 },
         { title: 'Cycle Time', dataIndex: 'cycleTime', width: 100 },
-        { title: 'Duration', dataIndex: 'duration', width: 150, render: (text: any) => <span>{text.toLocaleString()}</span> },
+        { title: 'Duration', dataIndex: 'duration', width: 150, render: (text: any) => <span>{text.toLocaleString()}</span>  },
     ]
 
     const uploadProps: UploadProps = {
@@ -460,7 +324,6 @@ const CycleDetailsTable = () => {
             message.success(`Saving ${filteredSavedData.length}  of ${dataToSave.length} ${filteredSavedData.length > 1 ? 'records' : 'record'} of uploaded data`, 6)
             loadData()
             setIsFileUploaded(false)
-            setIsConfirmSaveModalOpen(false)
             setUploadedFile(null)
             setUploadData([])
             setDataToSave([])
@@ -734,9 +597,9 @@ const CycleDetailsTable = () => {
     const loadData = async () => {
         setLoading(true)
         try {
-            // const response = await fetchDocument(`cycleDetails/tenant/${tenantId}`)
-            // const data: any = countRowsPerBatch(response.data)
-            // setGridData(batchData)
+            const response = await fetchDocument(`cycleDetails/tenant/${tenantId}`)
+            const data: any = countRowsPerBatch(response.data)
+            setGridData(data)
             setLoading(false)
         } catch (error) {
             setLoading(false)
@@ -804,27 +667,7 @@ const CycleDetailsTable = () => {
         setIsUpdateModalOpen(true)
         setTempData(values);
         console.log(values)
-        removeItemFromBatchData(values)
     }
-
-    // const updateItemInBatchData = (updatedItem, index) => {
-    //     setBatchData((prevBatchData: any) => {
-    //       const updatedBatchData = [...prevBatchData];
-    //       updatedBatchData[index] = updatedItem;
-    //       return updatedBatchData;
-    //     });
-    //   };
-
-    const updateItemInBatchData = (updatedItem: any) => {
-        setBatchData((prevBatchData: any[]) => {
-          const updatedBatchData: any = prevBatchData.map((item) =>
-            item === updatedItem ? updatedItem : item
-          );
-          setGridData(updatedBatchData)
-          return updatedBatchData;
-        });
-      };      
-      
 
     //hide Update table 
     const clearUpdateTable = () => {
@@ -869,74 +712,6 @@ const CycleDetailsTable = () => {
         postData(item)
 
     })
-
-    const handleAddItem = handleSubmit(async (values) => {
-        const selectedDate = new Date(values.cycleDate);
-        const data = {
-            cycleDate: selectedDate.toISOString(),
-            shiftId: parseInt(values.shiftId),
-            cycleTime: timeFormat(values.cycleTime).toISOString(),
-            loader: values.loader,
-            hauler: values.hauler,
-            haulerUnitId: parseInt(values.haulerUnitId),
-            loaderUnitId: parseInt(values.loaderUnitId),
-            originId: parseInt(values.originId),
-            materialId: parseInt(values.materialId),
-            destinationId: parseInt(values.destinationId),
-            nominalWeight: parseInt(values.nominalWeight),
-            weight: parseInt(values.weight),
-            payloadWeight: parseInt(values.payloadWeight),
-            reportedWeight: parseInt(values.reportedWeight),
-            volumes: parseInt(values.volumes),
-            loads: parseInt(values.loads),
-            timeAtLoader: timeFormat(values.timeAtLoader).toISOString(),
-            duration: parseInt(values.duration),
-            tenantId: tenantId,
-        }
-        for (const [key, value] of Object.entries(data)) {
-            if (value === null || value === '') {
-                message.error(`Please fill in all fields`)
-                setSubmitLoading(false)
-                return
-            }
-        }
-        setBatchData((prevBatchData: any) => [...prevBatchData, data]);
-        reset()
-        // setGridData(batchData)
-        setIsModalOpen(false)
-        console.log('batch', batchData)
-    })
-
-    useEffect(() => {
-        console.log('batch', batchData);
-        if (batchData.length > 0) {
-            setGridData(batchData)
-        }
-      }, [batchData]);
-
-    const clearBatchData = () => {
-        setBatchData([])
-        setGridData([])
-    }
-
-    const handleManualSave = () => {
-        const dateStamp = new Date().getTime()
-        const batchDataWithDateStamp = batchData.map((obj: any) => {
-            setLoading(true)
-            return {
-                ...obj,
-                dateStamp: dateStamp
-            };
-        });
-
-        const item = {
-            data: batchDataWithDateStamp,
-            url: 'cycleDetails',
-        };
-        postData(item)
-        setBatchData([])
-        setLoading(false)
-    }
 
     const { mutate: postData, isLoading: postLoading } = useMutation(postItem, {
         onSuccess: (data) => {
@@ -1017,40 +792,14 @@ const CycleDetailsTable = () => {
                                     </Button>
                                 </Space>
                                 :
-                                <>
-                                    <PageActionButtons
-                                        onAddClick={showModal}
-                                        onExportClicked={() => { console.log('export clicked') }}
-                                        onUploadClicked={showUploadModal}
-                                        hasAddButton={true}
-                                        hasExportButton={batchData.length < 1}
-                                        hasUploadButton={batchData.length < 1}
-                                    />
-                                    {
-                                        batchData.length > 0 &&
-                                        <Space>
-                                            <Button onClick={handleSaveClicked}
-                                                type='primary' size='large'
-                                                style={{
-                                                    display: 'flex',
-                                                    justifyContent: 'center',
-                                                    alignItems: 'center',
-                                                }} className='btn btn-light-success btn-sm'>
-                                                Save
-                                            </Button>
-
-                                            <Button onClick={clearBatchData}
-                                                type='primary' size='large'
-                                                style={{
-                                                    display: 'flex',
-                                                    justifyContent: 'center',
-                                                    alignItems: 'center',
-                                                }} className='btn btn-light-info btn-sm'>
-                                                Clear
-                                            </Button>
-                                        </Space>
-                                    }
-                                </>
+                                <PageActionButtons
+                                    onAddClick={showModal}
+                                    onExportClicked={() => { console.log('export clicked') }}
+                                    onUploadClicked={showUploadModal}
+                                    hasAddButton={true}
+                                    hasExportButton={true}
+                                    hasUploadButton={true}
+                                />
                         }
                     </Space>
                 </div>
@@ -1062,9 +811,9 @@ const CycleDetailsTable = () => {
                     </div>
 
                     <Table
-                        columns={isFileUploaded ? uploadColumns : columns2}
+                        columns={isFileUploaded ? uploadColumns : columns}
                         dataSource={isFileUploaded ? uploadData : gridData}
-                        scroll={{ x: 1300 }}
+                        scroll={isFileUploaded ? { x: 1300 } : {}}
                         loading={loading}
                     />
 
@@ -1077,26 +826,26 @@ const CycleDetailsTable = () => {
                         footer={
                             <ModalFooterButtons
                                 onCancel={handleCancel}
-                                onSubmit={ handleAddItem} />
+                                onSubmit={isUpdateModalOpen ? handleUpdate : OnSubmit} />
                         }
                     >
-                        <form onSubmit={handleAddItem}>
+                        <form onSubmit={isUpdateModalOpen ? handleUpdate : OnSubmit}>
                             <Divider orientation="left">
                                 Selectors
                             </Divider>
                             <div style={{ padding: "20px 20px 0 20px" }} className='row mb-0 '>
                                 <div className='col-4'>
                                     <label htmlFor="exampleFormControlInput1" className="required form-label text-gray-500">Date</label>
-                                    <input type="date" {...register("cycleDate")} name="cycleDate" defaultValue={!isUpdateModalOpen ? '' : getDateFromDateString(tempData?.cycleDate)} onChange={handleChange} className="form-control form-control-white" />
+                                    <input type="date" {...register("cycleDate")} name="cycleDate" defaultValue={!isUpdateModalOpen ? '' : tempData?.cycleDate} onChange={handleChange} className="form-control form-control-white" />
                                 </div>
                                 <div className='col-4'>
                                     <label htmlFor="exampleFormControlInput1" className="required form-label text-gray-500">Time</label>
-                                    <input type="time" {...register("cycleTime")} name="cycleTime" defaultValue={!isUpdateModalOpen ? '' : extractTimeFromISOString(tempData?.cycleTime)} onChange={handleChange} className="form-control form-control-white" />
+                                    <input type="time" {...register("cycleTime")} name="cycleTime" defaultValue={!isUpdateModalOpen ? '' : tempData?.cycleTime} onChange={handleChange} className="form-control form-control-white" />
                                 </div>
 
                                 <div className='col-4'>
                                     <label htmlFor="exampleFormControlInput1" className="required form-label text-gray-500">Time at Loader</label>
-                                    <input type="time" {...register("timeAtLoader")} name="timeAtLoader" defaultValue={!isUpdateModalOpen ? '' : extractTimeFromISOString(tempData?.timeAtLoader)} onChange={handleChange} className="form-control form-control-white" />
+                                    <input type="time" {...register("timeAtLoader")} name="timeAtLoader" defaultValue={!isUpdateModalOpen ? '' : tempData?.timeAtLoader} onChange={handleChange} className="form-control form-control-white" />
                                 </div>
                             </div>
                             <div style={{ padding: "0 20px 0 20px" }} className='row mb-0 '>
@@ -1256,7 +1005,7 @@ const CycleDetailsTable = () => {
                             <div style={{ padding: "0 20px 0 20px" }} className='row mb-0 '>
                                 <div className='col-4 mt-3'>
                                     <label htmlFor="exampleFormControlInput1" className="required form-label text-gray-500">Reported Weight</label>
-                                    <input type="number" {...register("reportedWeight")} name="reportedWeight" min={0} defaultValue={!isUpdateModalOpen ? 0 : tempData?.reportedWeight} onChange={handleChange} className="form-control form-control-white" />
+                                    <input type="number" {...register("reportedWeight")} name="reported_weight" min={0} defaultValue={!isUpdateModalOpen ? 0 : tempData?.reportedWeight} onChange={handleChange} className="form-control form-control-white" />
                                 </div>
                                 <div className='col-4 mt-3'>
                                     <label htmlFor="exampleFormControlInput1" className="required form-label text-gray-500">Volume</label>
@@ -1348,7 +1097,7 @@ const CycleDetailsTable = () => {
                                     className='btn btn-danger btn-sm w'>
                                     Cancel
                                 </Button>
-                                <Button onClick={ batchData > 1 ? handleManualSave : saveTableObjects}
+                                <Button onClick={saveTableObjects}
                                     type='primary'
                                     style={{
                                         display: 'flex',
@@ -1360,11 +1109,11 @@ const CycleDetailsTable = () => {
                                 </Button>
                             </Space>}
                     >
-                        <Divider />
+                        <Divider/>
                         <div className='row'>
                             <div className='col-12'>
                                 <p className='fw-bold text-gray-800 d-block fs-3'>Are you sure you want to save?</p>
-                                <p className='fw-bold text-gray-800 d-block fs-3'>There are {  batchData > 1 ? batchData.lenght : rowCount} records to be saved.</p>
+                                <p className='fw-bold text-gray-800 d-block fs-3'>There are {rowCount} records to be saved.</p>
                             </div>
                         </div>
                     </Modal>
@@ -1374,5 +1123,5 @@ const CycleDetailsTable = () => {
     )
 }
 
-export { CycleDetailsTable };
+export { DrillEntry };
 

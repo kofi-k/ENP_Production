@@ -277,11 +277,19 @@ const getDateFromDateString = (dateString: any) => {
     return `${year}-${month}-${day}`;
   };
 
+  const extractTimeFromISOString = (dateString: any) => {
+    const dateObject = new Date(dateString);
+    const hours = dateObject.getUTCHours().toString().padStart(2, '0');
+    const minutes = dateObject.getUTCMinutes().toString().padStart(2, '0');
+    const timeString = `${hours}:${minutes}`;
+    return timeString;
+  };
+
 
 export {
     PageActionButtons, ModalFooterButtons, excelDateToJSDate,
     roundOff, timeStamp, calculateVolumesByField,
     extractDateFromTimestamp, batchVolumesThirtyDaysRolling,
     groupByBatchNumber, fuelIntakeData, convertExcelDateToJSDate, 
-    convertExcelTimeToJSDate, timeFormat, getDateFromDateString
+    convertExcelTimeToJSDate, timeFormat, getDateFromDateString, extractTimeFromISOString
 }

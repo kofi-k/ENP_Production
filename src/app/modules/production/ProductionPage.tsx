@@ -1,37 +1,24 @@
-import React, { FC, Suspense } from 'react'
-import { Navigate, Route, Routes, Outlet } from 'react-router-dom'
-import { PageLink, PageTitle } from '../../../_metronic/layout/core'
+import React, { FC, Suspense } from 'react';
+import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
+import TopBarProgress from 'react-topbar-progress-indicator';
+import { getCSSVariableValue } from '../../../_metronic/assets/ts/_utils';
+import { WithChildren } from '../../../_metronic/helpers';
+import { PageLink, PageTitle } from '../../../_metronic/layout/core';
+import { CycleDetailsTable } from "./components/entries/CycleDetailsTable";
+import { PlannedOutputTable } from "./components/entries/PlannedOutputTable";
+import { EquipmentFuelTable } from './components/entries/fuel/EquipmentFuelTable';
+import { ActivityStatsReport } from './components/report/ActivityStatsReport';
+import { EquipmentKpiReport } from "./components/report/EquipmentKpi";
 import { ProductionReportTable } from "./components/report/ProductionReports";
 import { FuelReportTable } from "./components/report/fuel/CycleDetailsList";
-import { CycleDetailsTable } from "./components/entries/CycleDetailsTable";
-import { CycleGradesTable } from "./components/entries/CycleGradesTable";
-import { PlannedOutputTable } from "./components/entries/PlannedOutputTable";
-import { ActivityTable } from "./components/setup/activity/ActivityTable";
-import { DestinationTable } from "./components/setup/locations/DestinationTable";
+import { ProductionDrill } from './components/setup/Drill';
 import { ShiftPage } from './components/setup/ShiftPage';
-import { OriginPage } from './components/setup/locations/OriginPage';
-import { LoaderUnit } from './components/setup/loader/LoaderUnit';
-import { HaulerOperator } from './components/setup/hauler/HaulerOperator';
-import { HaulerUnit } from './components/setup/hauler/HaulerUnit';
-import { MineArea } from './components/setup/locations/MineArea';
-import { ProcessedMaterial } from './components/setup/materials/ProcessedMaterial';
-import { MaterialRaw } from './components/setup/materials/MaterialRaw';
-import { LoaderOperator } from './components/setup/loader/LoaderOperator';
-import { EquipmentKpiReport } from "./components/report/EquipmentKpi";
-import { ActivityStatsReport } from './components/report/ActivityStatsReport';
-import { EquipmentFuelTable } from './components/entries/fuel/EquipmentFuelTable';
-import { FuelReceipt } from './components/entries/fuel/Receipt';
-import { FuelIssue } from './components/entries/fuel/Issue';
-import { FuelPump } from './components/setup/locations/fuelPump';
-import { ProductionLoader } from './components/setup/loader/Loader';
+import { ActivityDetails } from './components/setup/activity/ActivityDetails';
+import { ActivityTable } from "./components/setup/activity/ActivityTable";
 import { ProductionHauler } from './components/setup/hauler/Hauler';
+import { ProductionLoader } from './components/setup/loader/Loader';
 import { ProductionLocations } from './components/setup/locations/Locations';
 import { ProductionMaterials } from './components/setup/materials/Materials';
-import { ProductionDrill } from './components/setup/Drill';
-import { WithChildren } from '../../../_metronic/helpers';
-import { getCSSVariableValue } from '../../../_metronic/assets/ts/_utils';
-import TopBarProgress from 'react-topbar-progress-indicator';
-import { ActivityDetails } from './components/setup/activity/ActivityDetails';
 
 const accountBreadCrumbs: Array<PageLink> = [
   {
