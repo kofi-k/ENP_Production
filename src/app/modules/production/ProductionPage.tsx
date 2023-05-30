@@ -19,6 +19,7 @@ import { ProductionHauler } from './components/setup/hauler/Hauler';
 import { ProductionLoader } from './components/setup/loader/Loader';
 import { ProductionLocations } from './components/setup/locations/Locations';
 import { ProductionMaterials } from './components/setup/materials/Materials';
+import { DrillEntry } from './components/entries/Drill';
 
 const accountBreadCrumbs: Array<PageLink> = [
   {
@@ -73,6 +74,15 @@ const ProductionPage: React.FC = () => {
             <>
               <PageTitle>Fuel</PageTitle>
               <EquipmentFuelTable />
+            </>
+          }
+        />
+        <Route
+          path='drill'
+          element={
+            <>
+              <PageTitle>Drill Entry</PageTitle>
+             <DrillEntry />
             </>
           }
         />

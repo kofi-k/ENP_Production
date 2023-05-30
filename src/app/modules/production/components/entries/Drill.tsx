@@ -811,8 +811,8 @@ const DrillEntry = () => {
                     </div>
 
                     <Table
-                        columns={isFileUploaded ? uploadColumns : columns}
-                        dataSource={isFileUploaded ? uploadData : gridData}
+                        columns={[]}
+                        dataSource={[]}
                         scroll={isFileUploaded ? { x: 1300 } : {}}
                         loading={loading}
                     />

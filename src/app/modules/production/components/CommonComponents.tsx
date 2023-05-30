@@ -1,5 +1,5 @@
 import { KTSVG } from "../../../../_metronic/helpers"
-import { Button } from 'antd'
+import { Button, Space } from 'antd'
 
 const PageActionButtons = (
     { onAddClick, onExportClicked, onUploadClicked, hasAddButton, hasExportButton, hasUploadButton }: any,
@@ -83,6 +83,19 @@ const ModalFooterButtons = ({ onCancel, onSubmit }: any) => {
     )
 }
 
+const ColumnActionButtons = ({ onUpdateClicked, onDeleteClicked }: any) => {
+    return (
+        <Space size='middle'>
+            <a onClick={onUpdateClicked} className='btn btn-light-info btn-sm'>
+                Update
+            </a>
+            <a onClick={onDeleteClicked} className='btn btn-light-success btn-sm'>
+                Delete
+            </a>
+        </Space>
+    )
+}
+
 //to convert excel date to js date
 const excelDateToJSDate = (serial: number) => {
     const utcDays = Math.floor(serial - 25569)
@@ -115,13 +128,13 @@ function extractDateFromTimestamp(timestamp: any) {
 
 const convertExcelDateToJSDate = (serialNumber: any) => {
     return new Date(Date.UTC(1900, 0, serialNumber - 1));
-  };
-  
-  const convertExcelTimeToJSDate = (decimalTime: any) => {
+};
+
+const convertExcelTimeToJSDate = (decimalTime: any) => {
     const millisecondsInDay = 24 * 60 * 60 * 1000;
     const timeMilliseconds = Math.floor((decimalTime % 1) * millisecondsInDay);
     return new Date(timeMilliseconds);
-  };
+};
 
 
 const timeStamp = () => {
@@ -251,7 +264,7 @@ const fuelIntakeData = (data: any) => {
         const records = groupedByBatchNumber[batchNumber];
         const itemsCount = records.length;
         // Sum the values of the 'quantity' property for each batch
-        
+
         const totalQuantity = records.reduce(
             (sum: number, record: any) => sum + record.quantity,
             0
@@ -272,24 +285,25 @@ const getDateFromDateString = (dateString: any) => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0'); // Adding 1 and padding with leading zeros
     const day = String(date.getDate()).padStart(2, '0'); // Padding with leading zeros
-    
+
     // Return the formatted date string
     return `${year}-${month}-${day}`;
-  };
+};
 
-  const extractTimeFromISOString = (dateString: any) => {
+const extractTimeFromISOString = (dateString: any) => {
     const dateObject = new Date(dateString);
     const hours = dateObject.getUTCHours().toString().padStart(2, '0');
     const minutes = dateObject.getUTCMinutes().toString().padStart(2, '0');
     const timeString = `${hours}:${minutes}`;
     return timeString;
-  };
+};
 
 
 export {
     PageActionButtons, ModalFooterButtons, excelDateToJSDate,
     roundOff, timeStamp, calculateVolumesByField,
     extractDateFromTimestamp, batchVolumesThirtyDaysRolling,
-    groupByBatchNumber, fuelIntakeData, convertExcelDateToJSDate, 
-    convertExcelTimeToJSDate, timeFormat, getDateFromDateString, extractTimeFromISOString
+    groupByBatchNumber, fuelIntakeData, convertExcelDateToJSDate,
+    convertExcelTimeToJSDate, timeFormat, getDateFromDateString, extractTimeFromISOString,
+    ColumnActionButtons
 }
