@@ -191,6 +191,13 @@ const OperatorComponent = (props: any) => {
             },
             url: props.data.url
         }
+        for (const [key, value] of Object.entries(item.data)) {
+            if (value === null || value === '') {
+                message.error(`Please fill in all fields`)
+                setSubmitLoading(false)
+                return
+            }
+        }
 
         console.log(item.data)
         postData(item)
@@ -205,12 +212,16 @@ const OperatorComponent = (props: any) => {
             setIsModalOpen(false)
             setSubmitLoading(false)
         },
-        onError: (error) => {
+        onError: (error: any) => {
             reset()
             setSubmitLoading(false)
             setIsModalOpen(false)
             console.log('post error: ', error)
-            message.error(`${error}`)
+            if (error?.response.status === 409) {
+                message.error(`EmpCode already exists for ${tenantId}`)
+            } else {
+                message.error(`${error}`)
+            }
         }
     })
 

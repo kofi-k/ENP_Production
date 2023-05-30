@@ -35,6 +35,8 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
     const [fileList, setFileList] = useState([]);
     const { data: pumps } = useQuery('pump', () => fetchDocument(`ProPump/tenant/${tenantId}`), { cacheTime: 5000 })
     const { data: equipments } = useQuery('equipmments', () => fetchDocument(`equipments/tenant/${tenantId}`), { cacheTime: 5000 })
+    const [fileName, setFileName] = useState('') // to hold the name of the uploaded file
+    const [isConfirmSaveModalOpen, setIsConfirmSaveModalOpen] = useState(false) // to show the modal to confirm the save
 
 
     const [uploadColumns, setUploadColumns] = useState<any>([]) //to hold the table columns of the uploaded file
@@ -46,6 +48,9 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
         event.preventDefault()
         setTempData({ ...tempData, [event.target.name]: event.target.value });
     }
+
+    // state to hold added items that will be batched and saved 
+    let [batchData, setBatchData] = useState<any>([])
 
     const handleCancel = () => {
         reset()
@@ -65,6 +70,14 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
 
     const showUploadModal = () => {
         setIsUploadModalOpen(true)
+    }
+
+    const handleConfirmSaveCancel = () => {
+        setIsConfirmSaveModalOpen(false)
+    }
+
+    const handleSaveClicked = () => {
+        setIsConfirmSaveModalOpen(true)
     }
 
     //hide Update table 
@@ -131,6 +144,7 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
                 else {
                     const updatedFileList: any = [...fileList, file]; // Add the uploaded file to the fileList
                     setFileList(updatedFileList);
+                    setFileName(file.name)
                     resolve(true)
                     setUploadedFile(file)
                 }
@@ -205,6 +219,13 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
             ],
             url: url
         }
+        for (const [key, value] of Object.entries(item.data[0])) {
+            if (value === null || value === '') {
+                message.error(`Please fill in all fields`)
+                setSubmitLoading(false)
+                return
+            }
+        }
         console.log(item.data)
         postData(item)
     })
@@ -218,10 +239,14 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
             setIsModalOpen(false)
             setSubmitLoading(false)
         },
-        onError: (error) => {
+        onError: (error: any) => {
             setSubmitLoading(false)
             console.log('post error: ', error)
-            message.error(`${error}`)
+            if (error?.response.status === 409) {
+                message.error(`Data already exists for ${tenantId}`)
+            } else {
+                message.error(`${error}`)
+            }
         }
     })
 
@@ -239,8 +264,10 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
             dataIndex: 'itemsCount',
             render: (text: any) => <Tag color="geekblue">{text} {text > 1 ? 'records' : 'record'} </Tag>
         },
-        { title: title == 'Fuel Issue' ? 'Total Qty Issued' : 'Total Qty Received', 
-        dataIndex: 'totalQuantity',  render: (text: any) => <span>{text.toLocaleString()}</span> },
+        {
+            title: title == 'Fuel Issue' ? 'Total Qty Issued' : 'Total Qty Received',
+            dataIndex: 'totalQuantity', render: (text: any) => <span>{text.toLocaleString()}</span>
+        },
 
         {
             title: 'Action',
@@ -274,7 +301,7 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
         { title: 'Date', dataIndex: 'intakeDate', render: (text: any) => moment(excelDateToJSDate(text), 'YYYY-MM-DD').format('YYYY-MM-DD') },
         { title: 'Pump', dataIndex: 'pump' },
         { title: 'Equipment', dataIndex: 'equipment' },
-        { title: 'Quantity', dataIndex: 'quantity' },
+        { title: 'Quantity', dataIndex: 'quantity', render: (text: any) => <span>{text.toLocaleString()}</span> },
     ] : [
         { title: 'Date', dataIndex: 'intakeDate', render: (text: any) => moment(excelDateToJSDate(text), 'YYYY-MM-DD').format('YYYY-MM-DD') },
         { title: 'Pump', dataIndex: 'pump' },
@@ -295,14 +322,14 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
         key: React.Key;
         pumpId: number;
         equipmentId: string;
-      }
+    }
 
     const expandedRowRender = (record: any) => {
         const rowColumns: TableColumnsType<ExpandedDataType> = [
             { title: 'Pump', dataIndex: 'pumpId', key: 'pump', render: (record: any) => <span>{getRecordName(record?.id, pumps?.data)}</span> },
             { title: 'Equipment', dataIndex: 'equipmentId', key: 'equipment', },
         ]
-        return <Table columns={rowColumns} dataSource={record.records[0]}  pagination={false} />
+        return <Table columns={rowColumns} dataSource={record.records[0]} pagination={false} />
     }
 
     const handleUpload = () => {
@@ -346,6 +373,7 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
             message.success(`Saving ${filteredSavedData.length}  of ${dataToSave.length} ${filteredSavedData.length > 1 ? 'records' : 'record'} of uploaded data`, 6)
             loadData()
             setIsFileUploaded(false)
+            setIsConfirmSaveModalOpen(false)
             setUploadedFile(null)
             setUploadData([])
             setDataToSave([])
@@ -362,7 +390,9 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
             <div className="card-header" style={{ borderBottom: 'none' }}>
                 <Space style={{ marginBottom: 16 }}>
                     {
-                        isFileUploaded ? '' :
+                        isFileUploaded ?
+                            <span className="fw-bold text-gray-800 d-block fs-3">Showing data read from {fileName}</span>
+                            :
                             <>
                                 <Input
                                     placeholder='Enter Search Text'
@@ -393,7 +423,7 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
                                         Check data
                                     </Button> */}
                                     <Button
-                                        onClick={saveTableObjects}
+                                        onClick={handleSaveClicked}
                                         type='primary' size='large'
                                         style={{
                                             display: 'flex',
@@ -570,6 +600,45 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
                                     icon={<UploadOutlined rev={''} />}>Click to Upload</Button>
                             </Upload>
                         </Space>
+                    </Modal>
+
+                    {/* confirm save modal */}
+                    <Modal
+                        title='Confirm Save'
+                        open={isConfirmSaveModalOpen}
+                        onCancel={handleConfirmSaveCancel}
+                        closable={true}
+                        footer={
+                            <Space>
+                                <Button onClick={handleConfirmSaveCancel}
+                                    type='primary'
+                                    style={{
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                    }}
+                                    className='btn btn-danger btn-sm w'>
+                                    Cancel
+                                </Button>
+                                <Button onClick={saveTableObjects}
+                                    type='primary'
+                                    style={{
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                    }}
+                                    className='btn btn-success btn-sm w'>
+                                    Proceed
+                                </Button>
+                            </Space>}
+                    >
+                        <Divider />
+                        <div className='row'>
+                            <div className='col-12'>
+                                <p className='fw-bold text-gray-800 d-block fs-3'>Are you sure you want to save?</p>
+                                <p className='fw-bold text-gray-800 d-block fs-3'>There are {rowCount} records to be saved.</p>
+                            </div>
+                        </div>
                     </Modal>
 
                 </div>

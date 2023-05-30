@@ -62,7 +62,7 @@ const ProUnitComponent = (props: any) => {
 
     const handleChange = (event: any) => {
         event.preventDefault()
-        setTempData({ ...tempData, [event.target.name]: event.target.value });      
+        setTempData({ ...tempData, [event.target.name]: event.target.value });
         setEquipmentDes(event.target.value)
     }
 
@@ -232,8 +232,8 @@ const ProUnitComponent = (props: any) => {
             data: {
                 equipmentId: tempData.equipmentId,
                 modelName: tempData.modelName,
-                description: tempData.description ,
-                tenantId:tenantId,
+                description: tempData.description,
+                tenantId: tenantId,
             }
         }
         updateData(item)
@@ -255,14 +255,20 @@ const ProUnitComponent = (props: any) => {
             data: {
                 equipmentId: values.equipmentId,
                 modelName: modelName,
-                description: equipmentDes ,
-                tenantId:tenantId,
+                description: equipmentDes,
+                tenantId: tenantId,
             },
             url: props.data.url
         }
+        for (const [key, value] of Object.entries(item.data)) {
+            if (value === null || value === '') {
+                message.error(`Please fill in all fields`)
+                setSubmitLoading(false)
+                return
+            }
+        }
         console.log(item.data)
         postData(item)
-
     })
 
     const { mutate: postData, isLoading: postLoading } = useMutation(postItem, {
@@ -277,10 +283,14 @@ const ProUnitComponent = (props: any) => {
             setIsModalOpen(false)
             setSubmitLoading(false)
         },
-        onError: (error) => {
+        onError: (error: any) => {
             setSubmitLoading(false)
             console.log('post error: ', error)
-            message.error(`${error}`)
+            if (error?.response.status === 409) {
+                message.error(`Equipment already exists for ${tenantId}`)
+            } else {
+                message.error(`${error}`)
+            }
         }
     })
 
@@ -346,7 +356,7 @@ const ProUnitComponent = (props: any) => {
                                 </div>
                                 <div className=' mb-7'>
                                     <label htmlFor="exampleFormControlInput1" className="form-label text-gray-500">Model name</label>
-                                    <input {...register("modelName")} disabled={true} name='modelName' defaultValue={!isUpdateModalOpen ? modelName : tempData?.modelName}  className="form-control form-control-white" />
+                                    <input {...register("modelName")} disabled={true} name='modelName' defaultValue={!isUpdateModalOpen ? modelName : tempData?.modelName} className="form-control form-control-white" />
                                 </div>
                                 <div className=' mb-7'>
                                     <label htmlFor="exampleFormControlInput1" className="form-label text-gray-500">Description</label>
