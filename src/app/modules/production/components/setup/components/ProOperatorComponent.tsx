@@ -44,13 +44,13 @@ const OperatorComponent = (props: any) => {
     }
 
     const { mutate: deleteData, isLoading: deleteLoading } = useMutation(deleteItem, {
-        onSuccess: (dataD) => {
-            queryClient.setQueryData([props.data.url, tempData], dataD);
+        onSuccess: (data) => {
+            queryClient.setQueryData([props.data.url, tempData], data);
             loadData()
         },
         onError: (error) => {
             console.log('delete error: ', error)
-            message.error(`${error}`)
+            message.error(`Failed to delete data`)
         }
     })
 
@@ -215,10 +215,9 @@ const OperatorComponent = (props: any) => {
         onError: (error: any) => {
             reset()
             setSubmitLoading(false)
-            setIsModalOpen(false)
             console.log('post error: ', error)
             if (error?.response.status === 409) {
-                message.error(`EmpCode already exists for ${tenantId}`)
+                message.error(`EmpCode already exists for ${props.data.title}`)
             } else {
                 message.error(`${error}`)
             }

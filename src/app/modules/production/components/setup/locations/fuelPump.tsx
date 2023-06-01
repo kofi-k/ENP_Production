@@ -4,7 +4,7 @@ import { SetupComponent } from "../components/DynamicComponent"
 const FuelPump = () => {
     const data = {
       url: 'ProPump',
-      title: 'pump',
+      title: 'Pump',
     }
   
     return (

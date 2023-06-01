@@ -130,19 +130,19 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
 
     const uploadProps: UploadProps = {
         name: 'file',
-        accept: '.xlsx, .xls',
+        accept: '.xlsx, .xls, .csv',
         action: '',
         maxCount: 1,
         fileList: fileList,
         beforeUpload: (file: any) => {
             return new Promise((resolve, reject) => {
                 // check if file is not uploaded
-                if (!file || fileList.length === 1) {
+                if (!file) {
                     message.error('No file uploaded!');
                     reject(false)
-                }
+                } 
                 else {
-                    const updatedFileList: any = [...fileList, file]; // Add the uploaded file to the fileList
+                    const updatedFileList: any = [file]; // Add the uploaded file to the fileList
                     setFileList(updatedFileList);
                     setFileName(file.name)
                     resolve(true)
@@ -222,6 +222,12 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
         for (const [key, value] of Object.entries(item.data[0])) {
             if (value === null || value === '') {
                 message.error(`Please fill in all fields`)
+                setSubmitLoading(false)
+                return
+            }
+            // make sure quantity is not negative
+            if (key === 'quantity' && value < 0) {
+                message.error(`Quantity cannot be negative`)
                 setSubmitLoading(false)
                 return
             }
@@ -383,8 +389,6 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
         }
     }
 
-
-
     return (
         <div className="card-custom card-flush">
             <div className="card-header" style={{ borderBottom: 'none' }}>
@@ -460,20 +464,6 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
                     <Table
                         loading={loading}
                         columns={isFileUploaded ? uploadColumns : columns}
-                        expandable={{
-                            // expandIcon: ({ expanded, onExpand, record }) => {
-                            //     if (record.records.length > 1) {
-                            //         return <></>
-                            //     }
-                            //     return expanded ? (
-                            //         <MinusCircleOutlined onClick={e => onExpand(record, e)} rev={undefined} />
-                            //     ) : (
-                            //         <PlusCircleOutlined onClick={e => onExpand(record, e)} rev={undefined} />
-                            //     )
-                            // },
-                            expandedRowRender: (record) => expandedRowRender(record),
-                            rowExpandable: (records) => records.length === 1,
-                        }}
                         dataSource={isFileUploaded ? uploadData : gridData}
                     />
 
@@ -516,7 +506,7 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
                                                     {
                                                         equipments?.data.map((item: any) => (
                                                             <option
-                                                                selected={isUpdateModalOpen && tempData.equipmentId}
+                                                                selected={isUpdateModalOpen && tempData.equipmentId === item.equipmentId}
                                                                 value={item.equipmentId}>{item.equipmentId}</option>
                                                         ))
                                                     }
@@ -533,7 +523,7 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
                                                     {
                                                         pumps?.data.map((item: any) => (
                                                             <option
-                                                                selected={isUpdateModalOpen && tempData.pump?.id}
+                                                            selected={isUpdateModalOpen && tempData.pumpId === item.id}
                                                                 value={item.id}>{item.name}</option>
                                                         ))
                                                     }
@@ -559,7 +549,7 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
                                                     {
                                                         pumps?.data.map((item: any) => (
                                                             <option
-                                                                selected={isUpdateModalOpen && tempData.pump?.pumpId}
+                                                                selected={isUpdateModalOpen && tempData.pumpId === item.id}
                                                                 value={item.id}>{item.name}</option>
                                                         ))
                                                     }
@@ -581,7 +571,6 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
                         title='Upload File'
                         open={isUploadModalOpen}
                         onOk={onOkay}
-                        confirmLoading={uploading}
                         onCancel={handleCancel}
                         closable={true}
                     >

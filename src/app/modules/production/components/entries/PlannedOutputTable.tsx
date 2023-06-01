@@ -78,17 +78,17 @@ const PlannedOutputTable = () => {
 
   const columns: any = [
     {
-      title: 'Destination',
-      dataIndex: 'destinationId',
-      render: (record: any) => {
-        return getRecordName(record, destinations?.data)
-      }
-    },
-    {
       title: 'Activity',
       dataIndex: 'activityId',
       render: (record: any) => {
         return getRecordName(record, productionActivities?.data)
+      }
+    },
+    {
+      title: 'Destination',
+      dataIndex: 'destinationId',
+      render: (record: any) => {
+        return getRecordName(record, destinations?.data)
       }
     },
     {
@@ -195,6 +195,16 @@ const PlannedOutputTable = () => {
       },
       url: 'plannedOutput'
     }
+    //make sure field are not empty
+    if (item.data.destinationId === 'Select' || item.data.activityId === 'Select' ) {
+      message.error('All fields are required', 3)
+      setSubmitLoading(false)
+      return
+    } else if (item.data.quantity < 0) {
+      message.error('Quantity cannot be negative', 3)
+      setSubmitLoading(false)
+      return
+    }
     console.log(item.data)
     postData(item)
   })
@@ -208,9 +218,14 @@ const PlannedOutputTable = () => {
       setIsModalOpen(false)
       setSubmitLoading(false)
     },
-    onError: (error) => {
+    onError: (error: any) => {
       setSubmitLoading(false)
       console.log('post error: ', error)
+      // check if error is 400
+      if (error.response.status === 400) {
+        message.error(`Select all required fields`, 3)
+        return 
+      }
       message.error(`${error}`)
     }
   })
@@ -261,30 +276,11 @@ const PlannedOutputTable = () => {
             <form onSubmit={isUpdateModalOpen ? handleUpdate : OnSubmit}>
 
               <hr></hr>
-              <div style={{ padding: "20px 20px 0 20px" }} className='row mb-0 '>
-                <div className=' mb-7'>
-                  <label htmlFor="exampleFormControlInput1" className="required form-label text-gray-500">Quantity</label>
-                  <input type="number" {...register("quantity")} min={0} step={1} name="quantity" defaultValue={!isUpdateModalOpen ? 0 : tempData?.quantity} onChange={handleChange} className="form-control form-control-white" />
-                </div>
-              </div>
+
 
               <div style={{ padding: "0px 20px 0 20px" }} className='row mb-0 '>
-                <div className='mb-7'>
-                  <label htmlFor="exampleFormControlInput1" className="required form-label text-gray-500">Destination</label>
-                  <select
-                    {...register("destinationId")}
-                    onChange={handleChange}
-                    className="form-select form-select-white" aria-label="Select example">
-                    {!isUpdateModalOpen && <option>Select</option>}
-                    {
-                      destinations?.data.map((item: any) => (
-                        <option
-                          selected={isUpdateModalOpen && item.id === tempData.destinationId}
-                          value={item.id}>{item.name}</option>
-                      ))
-                    }
-                  </select>
-                  <div className='mt-7'>
+                <div className='mb-0'>
+                  <div className='mt-7 mb-7'>
                     <label htmlFor="exampleFormControlInput1" className="required form-label text-gray-500">Activity</label>
                     <select
                       {...register("activityId")}
@@ -300,6 +296,28 @@ const PlannedOutputTable = () => {
                       }
                     </select>
                   </div>
+
+                  <label htmlFor="exampleFormControlInput1" className="required form-label text-gray-500">Destination</label>
+                  <select
+                    {...register("destinationId")}
+                    onChange={handleChange}
+                    className="form-select form-select-white" aria-label="Select example">
+                    {!isUpdateModalOpen && <option>Select</option>}
+                    {
+                      destinations?.data.map((item: any) => (
+                        <option
+                          selected={isUpdateModalOpen && item.id === tempData.destinationId}
+                          value={item.id}>{item.name}</option>
+                      ))
+                    }
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ padding: "20px 20px 0 20px" }} className='row mb-0 '>
+                <div className=' mb-7'>
+                  <label htmlFor="exampleFormControlInput1" className="required form-label text-gray-500">Quantity</label>
+                  <input type="number" {...register("quantity")} min={0} step={1} name="quantity" defaultValue={!isUpdateModalOpen ? 0 : tempData?.quantity} onChange={handleChange} className="form-control form-control-white" />
                 </div>
               </div>
             </form>

@@ -298,6 +298,16 @@ const extractTimeFromISOString = (dateString: any) => {
     return timeString;
 };
 
+    const getRecordName = (id: any, data: any) => {
+        let name = ''
+        data?.map((item: any) => {
+            if (item.id === id) {
+                name = item.name
+            }
+        })
+        return name
+    }
+
 
 export {
     PageActionButtons, ModalFooterButtons, excelDateToJSDate,
@@ -305,5 +315,5 @@ export {
     extractDateFromTimestamp, batchVolumesThirtyDaysRolling,
     groupByBatchNumber, fuelIntakeData, convertExcelDateToJSDate,
     convertExcelTimeToJSDate, timeFormat, getDateFromDateString, extractTimeFromISOString,
-    ColumnActionButtons
+    ColumnActionButtons, getRecordName
 }
