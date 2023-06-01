@@ -93,52 +93,52 @@ const CycleDetailsTable = () => {
         setFileList([]);
     };
 
-    const populateBatchData = (values: any) => {
-        // group by hauler unit
-        const groupedByHauler: any = {};
-        values?.forEach((item: any) => {
-            if (!groupedByHauler[item.haulerUnit.equipmentId]) {
-                groupedByHauler[item.haulerUnit.equipmentId] = [];
-            }
-            groupedByHauler[item.haulerUnit.equipmentId].push(item);
-        });
+    // const populateBatchData = (values: any) => {
+    //     // group by hauler unit
+    //     const groupedByHauler: any = {};
+    //     values?.forEach((item: any) => {
+    //         if (!groupedByHauler[item.haulerUnit.equipmentId]) {
+    //             groupedByHauler[item.haulerUnit.equipmentId] = [];
+    //         }
+    //         groupedByHauler[item.haulerUnit.equipmentId].push(item);
+    //     });
 
-        const groupedByLoader: any = {};
-        values?.forEach((item: any) => {
-            if (!groupedByLoader[item.loaderUnit.equipmentId]) {
-                groupedByLoader[item.loaderUnit.equipmentId] = [];
-            }
-            groupedByLoader[item.loaderUnit.equipmentId].push(item);
-        });
+    //     const groupedByLoader: any = {};
+    //     values?.forEach((item: any) => {
+    //         if (!groupedByLoader[item.loaderUnit.equipmentId]) {
+    //             groupedByLoader[item.loaderUnit.equipmentId] = [];
+    //         }
+    //         groupedByLoader[item.loaderUnit.equipmentId].push(item);
+    //     });
 
-        const groupedByOrigin: any = {};
-        values?.forEach((item: any) => {
-            if (!groupedByOrigin[item.origin.name]) {
-                groupedByOrigin[item.origin.name] = [];
-            }
-            groupedByOrigin[item.origin.name].push(item);
-        });
+    //     const groupedByOrigin: any = {};
+    //     values?.forEach((item: any) => {
+    //         if (!groupedByOrigin[item.origin.name]) {
+    //             groupedByOrigin[item.origin.name] = [];
+    //         }
+    //         groupedByOrigin[item.origin.name].push(item);
+    //     });
 
-        const groupedByDestination: any = {};
-        values?.forEach((item: any) => {
-            if (!groupedByDestination[item.destination.name]) {
-                groupedByDestination[item.destination.name] = [];
-            }
-            groupedByDestination[item.destination.name].push(item);
-        });
-        setBatchRowsCount(values.length)
+    //     const groupedByDestination: any = {};
+    //     values?.forEach((item: any) => {
+    //         if (!groupedByDestination[item.destination.name]) {
+    //             groupedByDestination[item.destination.name] = [];
+    //         }
+    //         groupedByDestination[item.destination.name].push(item);
+    //     });
+    //     setBatchRowsCount(values.length)
 
-        setBatchVolumesByDestination(calculateVolumesByField(groupedByDestination))
-        setBatchVolumesByOrigin(calculateVolumesByField(groupedByOrigin))
-        setBatchVolumesByLoader(calculateVolumesByField(groupedByLoader))
-        setBatchVolumesByHauler(calculateVolumesByField(groupedByHauler))
-    }
+    //     setBatchVolumesByDestination(calculateVolumesByField(groupedByDestination))
+    //     setBatchVolumesByOrigin(calculateVolumesByField(groupedByOrigin))
+    //     setBatchVolumesByLoader(calculateVolumesByField(groupedByLoader))
+    //     setBatchVolumesByHauler(calculateVolumesByField(groupedByHauler))
+    // }
 
     const showBatchDataCheckModal = (values: any) => {
         setIsBatchDataCheckModalOpen(true)
         setIsCheckDataModalOpen(true)
         console.log('batchValues: ', values)
-        populateBatchData(values)
+        // populateBatchData(values)
     }
 
     const handleCancel = () => {
@@ -549,7 +549,7 @@ const CycleDetailsTable = () => {
                 setIsUploadModalOpen(false)
                 message.success(`${uploadableData.length} rows uploaded from ${fileName}`)
             }
-            
+
         } catch (error) {
             setIsUploadModalOpen(false)
         }
@@ -564,10 +564,9 @@ const CycleDetailsTable = () => {
         }
         groupedByHauler[item.haulerUnitId].push(item);
     });
-    console.log('groupedByHauler: ', groupedByHauler)
 
     // sum volumes per hauler
-    const volumesByHauler = calculateVolumesByField(groupedByHauler);
+    const volumesByHauler = calculateVolumesByField(groupedByHauler, allHaulerUnits?.data, 'unitId');
     console.log('volumesByHauler: ', volumesByHauler)
 
     // group by loader unit
@@ -580,8 +579,8 @@ const CycleDetailsTable = () => {
     });
 
     // sum volumes per loader
-    const volumesByLoader = calculateVolumesByField(groupedByLoader);
-
+    const volumesByLoader = calculateVolumesByField(groupedByLoader, allLoaderUnits?.data, 'unitId');
+    console.log('volumesByLoader: ', volumesByLoader)
 
     // group by origin
     const groupedByOrigin: any = {};
@@ -593,8 +592,8 @@ const CycleDetailsTable = () => {
     });
 
     // sum volumes per origin
-    const volumesByOrigin = calculateVolumesByField(groupedByOrigin);
-
+    const volumesByOrigin = calculateVolumesByField(groupedByOrigin, allOrigins?.data, 'originId');
+    console.log('volumesByOrigin: ', volumesByOrigin)
 
     // group by destination
     const groupedByDestination: any = {};
@@ -606,8 +605,8 @@ const CycleDetailsTable = () => {
     });
 
     // sum volumes per destination
-    const volumesByDestination = calculateVolumesByField(groupedByDestination);
-
+    const volumesByDestination = calculateVolumesByField(groupedByDestination, destinations?.data, 'destinationId');
+    console.log('volumesByDestination: ', volumesByDestination)
     // get record name from title
     const recordNameForDynamicColoumn = (title: any, record: any, data: any) => {
         let name = ''
@@ -620,11 +619,7 @@ const CycleDetailsTable = () => {
             {
                 title: title, dataIndex: 'field',
                 render: (record: any) => <span style={{ color: '#3699FF' }}>
-                    {
-                        recordNameForDynamicColoumn(
-                            title, record, data
-                        )
-                    }
+                    {record}
                 </span>,
             },
             {
@@ -646,9 +641,9 @@ const CycleDetailsTable = () => {
         {
             key: '1', label: `Hauler Units`,
             children: (
-                <><Table dataSource={isBatchDataCheckModalOpen ? batchVolumesByHauler : volumesByHauler} columns={dynamicColumns('Hauler', allHaulerUnits)}
+                <><Table dataSource={volumesByHauler} columns={dynamicColumns('Hauler', allHaulerUnits)}
                     pagination={{ pageSize: 20 }} scroll={{ y: 240 }}
-                    footer={() => summaryFooter(isBatchDataCheckModalOpen ? batchVolumesByHauler.length : volumesByHauler.length)}
+                    footer={() => summaryFooter(volumesByHauler.length)}
                     bordered
                     size="middle"
                 /></>
@@ -657,9 +652,9 @@ const CycleDetailsTable = () => {
         {
             key: '2', label: `Loader Units`,
             children: (
-                <><Table dataSource={isBatchDataCheckModalOpen ? batchVolumesByLoader : volumesByLoader} columns={dynamicColumns('Loader', allLoaderUnits)}
+                <><Table dataSource={volumesByLoader} columns={dynamicColumns('Loader', allLoaderUnits)}
                     pagination={{ pageSize: 20 }} scroll={{ y: 240 }}
-                    footer={() => summaryFooter(isBatchDataCheckModalOpen ? batchVolumesByLoader.length : volumesByLoader.length)}
+                    footer={() => summaryFooter(volumesByLoader.length)}
                     bordered
                     size="middle"
                 /></>
@@ -667,9 +662,9 @@ const CycleDetailsTable = () => {
         },
         {
             key: '3', label: `Origins`, children: (
-                <><Table dataSource={isBatchDataCheckModalOpen ? batchVolumesByOrigin : volumesByOrigin} columns={dynamicColumns('Origin', allOrigins)}
+                <><Table dataSource={volumesByOrigin} columns={dynamicColumns('Origin', allOrigins)}
                     pagination={{ pageSize: 20 }} scroll={{ y: 240 }}
-                    footer={() => summaryFooter(isBatchDataCheckModalOpen ? batchVolumesByOrigin.length : volumesByOrigin.length)}
+                    footer={() => summaryFooter(volumesByOrigin.length)}
                     bordered
                     size="middle"
                 /></>
@@ -677,9 +672,9 @@ const CycleDetailsTable = () => {
         },
         {
             key: '4', label: `Destinations`, children: (
-                <><Table dataSource={isBatchDataCheckModalOpen ? batchVolumesByDestination : volumesByDestination} columns={dynamicColumns('Destination', destinations)}
+                <><Table dataSource={volumesByDestination} columns={dynamicColumns('Destination', destinations)}
                     pagination={{ pageSize: 20 }} scroll={{ y: 240 }}
-                    footer={() => summaryFooter(isBatchDataCheckModalOpen ? batchVolumesByDestination.length : volumesByDestination.length)}
+                    footer={() => summaryFooter(volumesByDestination.length)}
                     bordered
                     size="middle"
                 /></>
@@ -915,7 +910,19 @@ const CycleDetailsTable = () => {
                                 <span className="fw-bold text-gray-800 d-block fs-3">Showing data read from {fileName}</span>
                             </> :
                             <>
-                                <Input
+                                <Button onClick={showCheckDataModal}
+                                    type='primary' size='large'
+                                    style={{
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                    }}
+                                    className= {dataFromAddB.length <= 0 ? 'btn btn-secondary btn-sm' : 'btn btn-light-success btn-sm'}
+                                    disabled = { dataFromAddB.length <= 0}
+                                >
+                                    Check data
+                                </Button>
+                                {/* <Input
                                     placeholder='Enter Search Text'
                                     type='text'
                                     allowClear size='large'
@@ -923,52 +930,14 @@ const CycleDetailsTable = () => {
                                 <Button type='primary' size='large'>
                                     Search
                                 </Button>
-                            </>
+                            */}
+                             </>
                     }
 
                 </Space>
                 <div className="card-toolbar">
                     <Space style={{ marginBottom: 16 }}>
                         {
-                            // isFileUploaded ?
-                            //     <Space>
-                            //         <PageActionButtons
-                            //             onAddClick={showModal}
-                            //             hasAddButton={true}
-                            //             hasExportButton={false}
-                            //             hasUploadButton={false}
-                            //         />
-                            //         <Button onClick={showCheckDataModal}
-                            //             type='primary' size='large'
-                            //             style={{
-                            //                 display: 'flex',
-                            //                 justifyContent: 'center',
-                            //                 alignItems: 'center',
-                            //             }}
-                            //             className='btn btn-light-success btn-sm'
-                            //         >
-                            //             Check data
-                            //         </Button>
-                            //         <Button onClick={handleSaveClicked}
-                            //             type='primary' size='large'
-                            //             style={{
-                            //                 display: 'flex',
-                            //                 justifyContent: 'center',
-                            //                 alignItems: 'center',
-                            //             }} className='btn btn-light-success btn-sm'>
-                            //             Save
-                            //         </Button>
-                            //         <Button onClick={clearUploadGrid}
-                            //             type='primary' size='large'
-                            //             style={{
-                            //                 display: 'flex',
-                            //                 justifyContent: 'center',
-                            //                 alignItems: 'center',
-                            //             }} className='btn btn-light-info btn-sm'>
-                            //             Clear
-                            //         </Button>
-                            //     </Space>
-                            //     :
                             <>
                                 <PageActionButtons
                                     onAddClick={showModal}
