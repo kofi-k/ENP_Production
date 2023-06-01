@@ -1,5 +1,7 @@
+import { useQuery } from "react-query"
 import { KTSVG } from "../../../../_metronic/helpers"
 import { Button, Space } from 'antd'
+import { fetchDocument } from "../urls"
 
 const PageActionButtons = (
     { onAddClick, onExportClicked, onUploadClicked, hasAddButton, hasExportButton, hasUploadButton }: any,
@@ -167,8 +169,8 @@ const roundOff = (num: number) => {
 }
 
 // calculate volumes by field for cycle details
-function calculateVolumesByField(groupedByField: any) {
-    const volumesByField = [];
+function calculateVolumesByField(groupedByField: any, queryData: any, objProp: any ) {
+    const volumesByField = [];    
 
     for (const field in groupedByField) {
         const volumes = groupedByField[field].map((item: any) => item.volumes);
@@ -179,12 +181,25 @@ function calculateVolumesByField(groupedByField: any) {
         const sumLoads = loads.reduce((accumulator: any, currentValue: any) => accumulator + currentValue);
         const sumNominalWeights = nominalWeights.reduce((accumulator: any, currentValue: any) => accumulator + currentValue);
         const sumPayloadWeights = payloadWeights.reduce((accumulator: any, currentValue: any) => accumulator + currentValue);
-        volumesByField.push({ field, sum, sumLoads, sumNominalWeights, sumPayloadWeights });
+        
+        
+        const fieldName = objProp === 'unitId' ? getUnitFieldDisplayName(queryData, field) :  getFieldDisplayName(queryData, field)
+
+        volumesByField.push({ field: fieldName, sum, sumLoads, sumNominalWeights, sumPayloadWeights });
     }
 
     return volumesByField;
 }
 
+const getFieldDisplayName = (data: any, field: any ) => {
+   const itemName =  data.find((obj: any) => obj.id === parseInt(field));
+   return itemName?.name;
+}
+
+const getUnitFieldDisplayName = (data: any, field: any ) => {
+    const itemName =  data.find((obj: any) => obj.id === parseInt(field));
+    return itemName?.equipmentId;
+ }
 
 function batchVolumesThirtyDaysRolling(data: any) {
     // Group data by batchNumber

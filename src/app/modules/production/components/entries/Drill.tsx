@@ -124,10 +124,11 @@ const DrillEntry = () => {
         });
         setBatchRowsCount(values.length)
 
-        setBatchVolumesByDestination(calculateVolumesByField(groupedByDestination))
-        setBatchVolumesByOrigin(calculateVolumesByField(groupedByOrigin))
-        setBatchVolumesByLoader(calculateVolumesByField(groupedByLoader))
-        setBatchVolumesByHauler(calculateVolumesByField(groupedByHauler))
+        // setBatchVolumesByDestination(calculateVolumesByField(groupedByDestination))
+        // setBatchVolumesByOrigin(calculateVolumesByField(groupedByOrigin))
+        // setBatchVolumesByLoader(calculateVolumesByField(groupedByLoader))
+        // setBatchVolumesByHauler(calculateVolumesByField(groupedByHauler))
+        
     }
 
     const showBatchDataCheckModal = (values: any) => {
@@ -470,7 +471,7 @@ const DrillEntry = () => {
     });
 
     // sum volumes per hauler
-    const volumesByHauler = calculateVolumesByField(groupedByHauler);
+    const volumesByHauler = calculateVolumesByField(groupedByHauler, allHaulerUnits?.data, 'unitId');
 
     // group by loader unit
     const groupedByLoader: any = {};
@@ -482,7 +483,7 @@ const DrillEntry = () => {
     });
 
     // sum volumes per loader
-    const volumesByLoader = calculateVolumesByField(groupedByLoader);
+    const volumesByLoader = calculateVolumesByField(groupedByLoader, allLoaderUnits?.data, 'unitId');
 
 
     // group by origin
@@ -495,7 +496,7 @@ const DrillEntry = () => {
     });
 
     // sum volumes per origin
-    const volumesByOrigin = calculateVolumesByField(groupedByOrigin);
+    const volumesByOrigin = calculateVolumesByField(groupedByOrigin, allOrigins?.data, 'originId');
 
 
     // group by destination
@@ -508,7 +509,7 @@ const DrillEntry = () => {
     });
 
     // sum volumes per destination
-    const volumesByDestination = calculateVolumesByField(groupedByDestination);
+    const volumesByDestination = calculateVolumesByField(groupedByDestination, destinations?.data, 'destinationId');
 
 
     // columns for checking data summary
