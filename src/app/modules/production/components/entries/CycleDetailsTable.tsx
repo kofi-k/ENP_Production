@@ -547,10 +547,9 @@ const CycleDetailsTable = () => {
                 })
                 setUploading(false)
                 setIsUploadModalOpen(false)
-                setRowCount(batchDataToSave.length)
-                //show message of number of rows uploaded
-                message.success(`${batchDataToSave.length} rows uploaded from ${fileName}`)
+                message.success(`${uploadableData.length} rows uploaded from ${fileName}`)
             }
+            
         } catch (error) {
             setIsUploadModalOpen(false)
         }
@@ -559,19 +558,21 @@ const CycleDetailsTable = () => {
 
     // group by hauler unit
     const groupedByHauler: any = {};
-    uploadDataToSave.forEach((item: any) => {
+    dataFromAddB.forEach((item: any) => {
         if (!groupedByHauler[item.haulerUnitId]) {
             groupedByHauler[item.haulerUnitId] = [];
         }
         groupedByHauler[item.haulerUnitId].push(item);
     });
+    console.log('groupedByHauler: ', groupedByHauler)
 
     // sum volumes per hauler
     const volumesByHauler = calculateVolumesByField(groupedByHauler);
+    console.log('volumesByHauler: ', volumesByHauler)
 
     // group by loader unit
     const groupedByLoader: any = {};
-    uploadDataToSave.forEach((item: any) => {
+    dataFromAddB.forEach((item: any) => {
         if (!groupedByLoader[item.loaderUnitId]) {
             groupedByLoader[item.loaderUnitId] = [];
         }
@@ -584,7 +585,7 @@ const CycleDetailsTable = () => {
 
     // group by origin
     const groupedByOrigin: any = {};
-    uploadDataToSave.forEach((item: any) => {
+    dataFromAddB.forEach((item: any) => {
         if (!groupedByOrigin[item.originId]) {
             groupedByOrigin[item.originId] = [];
         }
@@ -597,7 +598,7 @@ const CycleDetailsTable = () => {
 
     // group by destination
     const groupedByDestination: any = {};
-    uploadDataToSave.forEach((item: any) => {
+    dataFromAddB.forEach((item: any) => {
         if (!groupedByDestination[item.destinationId]) {
             groupedByDestination[item.destinationId] = [];
         }
@@ -740,23 +741,7 @@ const CycleDetailsTable = () => {
         })
         setDataFromAddB(filteredData)
     }
-    const { isLoading: updateLoading, mutate: updateData } = useMutation(updateItem, {
-        onSuccess: (data) => {
-            setLoading(true)
-            queryClient.setQueryData(['cycleDetails', tempData], data);
-            reset()
-            setTempData({})
-            loadData()
-            setIsUpdateModalOpen(false)
-            setIsModalOpen(false)
-            setLoading(false)
-        },
-        onError: (error) => {
-            setLoading(false)
-            console.log('error: ', error)
-            message.error(`${error}`)
-        }
-    })
+
 
     const showUpdateModal = (values: any) => {
         showModal()
@@ -793,40 +778,6 @@ const CycleDetailsTable = () => {
 
     };
 
-    const OnSubmit = handleSubmit(async (values) => {
-        setSubmitLoading(true)
-        const selectedDate = new Date(values.cycleDate);
-        const item = {
-            data: [
-                {
-                    cycleDate: selectedDate.toISOString(),
-                    shiftId: parseInt(values.shiftId),
-                    cycleTime: timeFormat(values.cycleTime).toISOString(),
-                    loader: values.loader,
-                    hauler: values.hauler,
-                    haulerUnitId: parseInt(values.haulerUnitId),
-                    loaderUnitId: parseInt(values.loaderUnitId),
-                    originId: parseInt(values.originId),
-                    materialId: parseInt(values.materialId),
-                    destinationId: parseInt(values.destinationId),
-                    nominalWeight: parseInt(values.nominalWeight),
-                    weight: parseInt(values.weight),
-                    payloadWeight: parseInt(values.payloadWeight),
-                    reportedWeight: parseInt(values.reportedWeight),
-                    volumes: parseInt(values.volumes),
-                    loads: parseInt(values.loads),
-                    timeAtLoader: timeFormat(values.timeAtLoader).toISOString(),
-                    duration: parseInt(values.duration),
-                    tenantId: tenantId,
-                    batchNumber: `${Date.now()}`,
-                },
-            ],
-            url: 'cycleDetails'
-        }
-        console.log(item.data)
-        postData(item)
-
-    })
 
     const handleAddItem = handleSubmit(async (values) => {
         // if date is not selected then show error message
