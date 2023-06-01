@@ -3,7 +3,7 @@ import { SetupComponent } from '../components/DynamicComponent'
 const OriginPage = () => {
   const data = {
     url: 'ProductionOrigin',
-    title: 'origin',
+    title: 'Origin',
   }
 
   return (

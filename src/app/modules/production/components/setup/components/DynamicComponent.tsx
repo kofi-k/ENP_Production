@@ -249,7 +249,7 @@ const SetupComponent = ({ data, hasDescription, hasDuration }: any) => {
             console.log('post error: ', error)
             //check if error status is 409 and show error message
             if (error?.response.status === 409) {
-                message.error(`Data already exists for ${tenantId}`)
+                message.error(`${data.title} already exists for ${tenantId}`)
             } else {
                 message.error(`${error}`)
             }

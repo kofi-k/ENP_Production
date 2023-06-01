@@ -302,7 +302,7 @@ const ProUnitComponent = (props: any) => {
             setSubmitLoading(false)
             console.log('post error: ', error)
             if (error?.response.status === 409) {
-                message.error(`Equipment already exists for ${tenantId}`)
+                message.error(`Equipment already exists for ${props.data.title}`)
             } else {
                 message.error(`${error}`)
             }

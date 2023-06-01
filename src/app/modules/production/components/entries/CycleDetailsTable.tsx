@@ -63,7 +63,7 @@ const CycleDetailsTable = () => {
     const [isConfirmSaveModalOpen, setIsConfirmSaveModalOpen] = useState(false) // to show the modal to confirm the save
 
     // state to hold added items that will be batched and saved 
-    const [manualBatchData, setManualBatchData]: any = useState<any[]>([]);
+    const [batchDataToSave, setBatchDataToSave]: any = useState<any[]>([]);
     const [uploadDataToSave, setUploadDataToSave]: any = useState<any[]>([]) // to hold the data to be saved from the uploaded file
     const [itemToUpdate, setItemToUpdate] = useState<any>(null) // to hold the item to be updated
     const handleChange = (event: any) => {
@@ -175,7 +175,7 @@ const CycleDetailsTable = () => {
 
     const handleSaveClicked = () => {
         setIsConfirmSaveModalOpen(true)
-        console.log('batchData: ', manualBatchData)
+        console.log('batchData: ', batchDataToSave)
     }
 
     const { mutate: deleteData, isLoading: deleteLoading } = useMutation(deleteItem, {
@@ -197,7 +197,7 @@ const CycleDetailsTable = () => {
     }
 
     const removeItemFromBatchData = (itemToRemove: any) => {
-        setManualBatchData((prevBatchData: any[]) => {
+        setBatchDataToSave((prevBatchData: any[]) => {
             const updatedBatchData: any = prevBatchData.filter((item) => item !== itemToRemove);
             setDataFromAddB(updatedBatchData)
             setRowCount(dataFromAddB.length)
@@ -212,6 +212,7 @@ const CycleDetailsTable = () => {
             setRowCount(uploadDataToSave.length)
             return updatedBatchData;
         });
+        message.success('Item removed from batch.')
     };
 
     const getRecordName = (id: any, data: any) => {
@@ -399,11 +400,11 @@ const CycleDetailsTable = () => {
 
 
     // convert populated data from excel file to database 
-    const saveTableObjects = () => {
+    const handleBatchSave = () => {
         setLoading(true)
         try {
             const dateStamp = new Date().getTime()
-            const dataToSaveWithDateStamp = uploadDataToSave
+            const dataToSaveWithDateStamp = batchDataToSave
                 .filter((data: any) => data !== null && data !== undefined)
                 .map((obj: any) => {
                     setLoading(true)
@@ -413,19 +414,20 @@ const CycleDetailsTable = () => {
                     };
                 });
 
+            console.log('batchData', batchDataToSave.slice(0, 10))
             // const filteredSavedData = dataToSave.filter((data: any) => data !== null && data !== undefined)
             const item = {
-                data: [dataToSaveWithDateStamp],
+                data: dataToSaveWithDateStamp,
                 url: 'cycleDetails',
             }
             postData(item)
             message.success(
-                `Saving ${dataToSaveWithDateStamp.length}  of ${uploadDataToSave.length} ${dataToSaveWithDateStamp.length > 1 ? 'records' : 'record'} of uploaded data`, 6
+                `Saving ${dataToSaveWithDateStamp.length} ${dataToSaveWithDateStamp.length > 1 ? 'records' : 'record'} of batch data`, 6
             )
-            setIsFileUploaded(false)
+            console.log('batchDataWithDateStamp', dataToSaveWithDateStamp.slice(0, 10))
+            handleConfirmSaveCancel()
             setIsConfirmSaveModalOpen(false)
-            setDataFromUpload([])
-            setUploadDataToSave([])
+            setLoading(false)
             clearBatchData()
         } catch (err) {
             console.log('fileSaveError: ', err)
@@ -444,7 +446,6 @@ const CycleDetailsTable = () => {
     }
 
     const handleUpload = () => {
-
         const reader = new FileReader()
         try {
             setUploading(true)
@@ -540,12 +541,15 @@ const CycleDetailsTable = () => {
                 });
                 console.log('uploadableData: ', uploadableData.slice(0, 20))
                 handleRemove()
-                setIsFileUploaded(true)
-                setUploadDataToSave(uploadableData)
+                // add each uploadable data to manual batch data
+                uploadableData.map((item: any) => {
+                    setBatchDataToSave((prevBatchData: any) => [...prevBatchData, item])
+                })
                 setUploading(false)
                 setIsUploadModalOpen(false)
-                setRowCount(uploadableData.length)
-                setDataFromUpload(uploadableData)
+                setRowCount(batchDataToSave.length)
+                //show message of number of rows uploaded
+                message.success(`${batchDataToSave.length} rows uploaded from ${fileName}`)
             }
         } catch (error) {
             setIsUploadModalOpen(false)
@@ -754,29 +758,12 @@ const CycleDetailsTable = () => {
         }
     })
 
-    const handleUpdate = (e: any) => {
-        e.preventDefault()
-        const item = {
-            url: 'cycleDetails',
-            data: tempData
-        }
-        updateData(item)
-        console.log('update: ', item.data)
-    }
-
     const showUpdateModal = (values: any) => {
         showModal()
         setIsUpdateModalOpen(true)
         setTempData(values);
         console.log(values)
         setItemToUpdate(values)
-    }
-
-    const showBatchUpdateModal = (values: any) => {
-        showModal()
-        setIsUpdateModalOpen(true)
-        setTempData(values);
-        console.log(values)
     }
 
 
@@ -793,7 +780,7 @@ const CycleDetailsTable = () => {
                 return updatedBatchData;
             })
             :
-            setManualBatchData((prevBatchData: any[]) => {
+            setBatchDataToSave((prevBatchData: any[]) => {
                 const updatedBatchData: any = prevBatchData.map((item) =>
                     item === tempData ? tempData : item
                 );
@@ -805,16 +792,6 @@ const CycleDetailsTable = () => {
             })
 
     };
-
-
-    //hide Update table 
-    const clearUploadGrid = () => {
-        setIsFileUploaded(false)
-        setUploadedFile(null)
-        setLoading(false)
-        setRowCount(0)
-    }
-
 
     const OnSubmit = handleSubmit(async (values) => {
         setSubmitLoading(true)
@@ -885,7 +862,7 @@ const CycleDetailsTable = () => {
                 setSubmitLoading(false)
                 return
             }
-            // make sure nominalWeight, weight, payloadWeight, reportedWeight, volumes, loads, duration are not negative
+            // check for negative values
             if (key === 'nominalWeight' || key === 'weight' || key === 'payloadWeight' || key === 'reportedWeight' || key === 'volumes' || key === 'loads' || key === 'duration') {
                 if (value < 0) {
                     message.error(`Please enter a positive number for ${key}`)
@@ -893,7 +870,6 @@ const CycleDetailsTable = () => {
                     return
                 }
             }
-            
         }
 
         const itemExists = (batchData: any) => batchData.some((item: any) => {
@@ -920,18 +896,16 @@ const CycleDetailsTable = () => {
             );
         });
 
-        if (itemExists(manualBatchData) || itemExists(uploadDataToSave)) {
+        if (itemExists(batchDataToSave)) {
             message.error('Item already exists');
             setSubmitLoading(false);
             return;
         }
-
-        isFileUploaded ? setUploadDataToSave((prevBatchData: any) => [...prevBatchData, data]) :
-            setManualBatchData((prevBatchData: any) => [...prevBatchData, data])
-        reset()
-        // setGridData(batchData)
+        setBatchDataToSave((prevBatchData: any) => [...prevBatchData, data])
         setIsModalOpen(false)
-        console.log('batch', manualBatchData)
+        message.success('Item added to batch.')
+        reset()
+        console.log('batchDataToSave', batchDataToSave)
     })
 
     const handleUpdateItem = handleSubmit(async (values) => {
@@ -943,61 +917,33 @@ const CycleDetailsTable = () => {
     })
 
     useEffect(() => {
-        console.log('batch', manualBatchData);
-        if (manualBatchData.length > 0) {
-            setDataFromAddB(manualBatchData)
+        console.log('batch', batchDataToSave);
+        if (batchDataToSave.length > 0) {
+            setDataFromAddB(batchDataToSave)
         }
-        setRowCount(manualBatchData.length)
-    }, [manualBatchData]);
-
-    useEffect(() => {
-        console.log('dataToSave', uploadDataToSave.slice(0, 5));
-        console.log('dataToSave length', uploadDataToSave.length);
-        setRowCount(uploadDataToSave.length)
-        setDataFromUpload(uploadDataToSave)
-    }, [uploadDataToSave]);
-
+        setRowCount(batchDataToSave.length)
+    }, [batchDataToSave]);
 
     const clearBatchData = () => {
-        setManualBatchData([])
+        setBatchDataToSave([])
         setDataFromAddB([])
-    }
-
-    const handleManualSave = () => {
-        const dateStamp = new Date().getTime()
-        console.log('batchData', manualBatchData)
-        const batchDataWithDateStamp = manualBatchData.map((obj: any) => {
-            setLoading(true)
-            return {
-                ...obj,
-                batchNumber: `${dateStamp}`
-            };
-        });
-        console.log('batchDataWithDateStamp', batchDataWithDateStamp)
-
-        const item = {
-            data: batchDataWithDateStamp,
-            url: 'cycleDetails',
-        };
-        postData(item)
-        clearBatchData()
-        handleConfirmSaveCancel()
-        setRowCount(0)
         setLoading(false)
+        setRowCount(0)
     }
+
 
     const { mutate: postData, isLoading: postLoading } = useMutation(postItem, {
         onSuccess: (data) => {
             setLoading(true)
             queryClient.setQueryData(['cycleDetails'], data);
             message.success(`Batch saved successfully`);
-            // setSavedCount(isFileUploaded ? savedCount + 1 : 0)
             reset()
             setTempData({})
             loadData()
             setIsModalOpen(false)
             setSubmitLoading(false)
             setLoading(false)
+
         },
         onError: (error) => {
             setLoading(false)
@@ -1033,79 +979,79 @@ const CycleDetailsTable = () => {
                 <div className="card-toolbar">
                     <Space style={{ marginBottom: 16 }}>
                         {
-                            isFileUploaded ?
-                                <Space>
-                                    <PageActionButtons
-                                        onAddClick={showModal}
-                                        hasAddButton={true}
-                                        hasExportButton={false}
-                                        hasUploadButton={false}
-                                    />
-                                    <Button onClick={showCheckDataModal}
-                                        type='primary' size='large'
-                                        style={{
-                                            display: 'flex',
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                        }}
-                                        className='btn btn-light-success btn-sm'
-                                    >
-                                        Check data
-                                    </Button>
-                                    <Button onClick={handleSaveClicked}
-                                        type='primary' size='large'
-                                        style={{
-                                            display: 'flex',
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                        }} className='btn btn-light-success btn-sm'>
-                                        Save
-                                    </Button>
-                                    <Button onClick={clearUploadGrid}
-                                        type='primary' size='large'
-                                        style={{
-                                            display: 'flex',
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                        }} className='btn btn-light-info btn-sm'>
-                                        Clear
-                                    </Button>
-                                </Space>
-                                :
-                                <>
-                                    <PageActionButtons
-                                        onAddClick={showModal}
-                                        onExportClicked={() => { console.log('export clicked') }}
-                                        onUploadClicked={showUploadModal}
-                                        hasAddButton={true}
-                                        hasExportButton={manualBatchData.length < 1}
-                                        hasUploadButton={manualBatchData.length < 1}
-                                    />
-                                    {
-                                        manualBatchData.length > 0 &&
-                                        <Space>
-                                            <Button onClick={handleSaveClicked}
-                                                type='primary' size='large'
-                                                style={{
-                                                    display: 'flex',
-                                                    justifyContent: 'center',
-                                                    alignItems: 'center',
-                                                }} className='btn btn-light-success btn-sm'>
-                                                Save
-                                            </Button>
+                            // isFileUploaded ?
+                            //     <Space>
+                            //         <PageActionButtons
+                            //             onAddClick={showModal}
+                            //             hasAddButton={true}
+                            //             hasExportButton={false}
+                            //             hasUploadButton={false}
+                            //         />
+                            //         <Button onClick={showCheckDataModal}
+                            //             type='primary' size='large'
+                            //             style={{
+                            //                 display: 'flex',
+                            //                 justifyContent: 'center',
+                            //                 alignItems: 'center',
+                            //             }}
+                            //             className='btn btn-light-success btn-sm'
+                            //         >
+                            //             Check data
+                            //         </Button>
+                            //         <Button onClick={handleSaveClicked}
+                            //             type='primary' size='large'
+                            //             style={{
+                            //                 display: 'flex',
+                            //                 justifyContent: 'center',
+                            //                 alignItems: 'center',
+                            //             }} className='btn btn-light-success btn-sm'>
+                            //             Save
+                            //         </Button>
+                            //         <Button onClick={clearUploadGrid}
+                            //             type='primary' size='large'
+                            //             style={{
+                            //                 display: 'flex',
+                            //                 justifyContent: 'center',
+                            //                 alignItems: 'center',
+                            //             }} className='btn btn-light-info btn-sm'>
+                            //             Clear
+                            //         </Button>
+                            //     </Space>
+                            //     :
+                            <>
+                                <PageActionButtons
+                                    onAddClick={showModal}
+                                    onExportClicked={() => { console.log('export clicked') }}
+                                    onUploadClicked={showUploadModal}
+                                    hasAddButton={true}
+                                    hasExportButton={batchDataToSave.length < 1}
+                                    hasUploadButton={true}
+                                />
+                                {
+                                    batchDataToSave.length > 0 &&
+                                    <Space>
+                                        <Button onClick={handleSaveClicked}
+                                            type='primary' size='large'
+                                            style={{
+                                                display: 'flex',
+                                                justifyContent: 'center',
+                                                alignItems: 'center',
+                                            }} className='btn btn-light-success btn-sm'>
+                                            Save
+                                        </Button>
 
-                                            <Button onClick={clearBatchData}
-                                                type='primary' size='large'
-                                                style={{
-                                                    display: 'flex',
-                                                    justifyContent: 'center',
-                                                    alignItems: 'center',
-                                                }} className='btn btn-light-info btn-sm'>
-                                                Clear
-                                            </Button>
-                                        </Space>
-                                    }
-                                </>
+                                        <Button onClick={clearBatchData}
+                                            type='primary' size='large'
+                                            style={{
+                                                display: 'flex',
+                                                justifyContent: 'center',
+                                                alignItems: 'center',
+                                            }} className='btn btn-light-info btn-sm'>
+                                            Clear
+                                        </Button>
+                                    </Space>
+                                }
+                            </>
                         }
                     </Space>
                 </div>
@@ -1118,7 +1064,7 @@ const CycleDetailsTable = () => {
 
                     <Table
                         columns={mainColumns}
-                        dataSource={isFileUploaded ? dataFromUpload : dataFromAddB}
+                        dataSource={dataFromAddB}
                         scroll={{ x: 1300 }}
                         loading={loading}
                     />
@@ -1126,7 +1072,7 @@ const CycleDetailsTable = () => {
                     <Modal
                         title={isUpdateModalOpen ? 'Update Cycle Details' : 'Cycle Details Setup'}
                         open={isModalOpen}
-                        onCancel={isModalOpen ? handleCancel : handleCancel}
+                        onCancel={handleCancel}
                         width={800}
                         closable={true}
                         footer={
@@ -1336,7 +1282,6 @@ const CycleDetailsTable = () => {
                         title='Upload Cycle Detail'
                         open={isUploadModalOpen}
                         onOk={onOkay}
-                        confirmLoading={uploading}
                         onCancel={handleIsUploadModalCancel}
                         closable={true}
                     >
@@ -1402,7 +1347,7 @@ const CycleDetailsTable = () => {
                                     className='btn btn-danger btn-sm w'>
                                     Cancel
                                 </Button>
-                                <Button onClick={rowCount > 1 ? handleManualSave : saveTableObjects}
+                                <Button onClick={handleBatchSave}
                                     type='primary'
                                     style={{
                                         display: 'flex',

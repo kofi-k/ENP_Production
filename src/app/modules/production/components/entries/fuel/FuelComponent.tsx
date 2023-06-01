@@ -571,7 +571,6 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
                         title='Upload File'
                         open={isUploadModalOpen}
                         onOk={onOkay}
-                        confirmLoading={uploading}
                         onCancel={handleCancel}
                         closable={true}
                     >
