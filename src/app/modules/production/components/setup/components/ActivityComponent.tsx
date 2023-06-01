@@ -5,32 +5,11 @@ import { useForm } from "react-hook-form"
 import { useMutation, useQuery, useQueryClient } from "react-query"
 import { KTCardBody } from "../../../../../../_metronic/helpers"
 import { deleteItem, fetchDocument, postItem, updateItem } from "../../../urls"
-import { ModalFooterButtons, PageActionButtons } from "../../CommonComponents"
+import { ModalFooterButtons, PageActionButtons, getRecordName } from "../../CommonComponents"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import { ArrowLeftOutlined } from "@ant-design/icons"
 
 
-
-const ActivityDummy = [
-    {
-        id: 1,
-        name: 'Activity 1',
-        code: 'ACT1',
-        activityType: 'Activity Type 1',
-    },
-    {
-        id: 2,
-        name: 'Activity 2',
-        code: 'ACT2',
-        activityType: 'Activity Type 2',
-    },
-    {
-        id: 3,
-        name: 'Activity 3',
-        code: 'ACT3',
-        activityType: 'Activity Type 3',
-    },
-]
 
 const ActivityComponent = ({ data, hasActivityType }: any) => {
 
@@ -41,6 +20,7 @@ const ActivityComponent = ({ data, hasActivityType }: any) => {
     let [filteredData] = useState([])
     const [submitLoading, setSubmitLoading] = useState(false)
     const [searchText, setSearchText] = useState('')
+    const [detailName, setDetailName] = useState('')
     const tenantId = localStorage.getItem('tenant')
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false)
@@ -52,6 +32,8 @@ const ActivityComponent = ({ data, hasActivityType }: any) => {
     const activityTypes: any = [
         'Haul', 'Load', 'Drill'
     ]
+    const { data: activities } = useQuery('activities', () => fetchDocument(`ProductionActivity/tenant/${tenantId}`), { cacheTime: 5000 })
+
 
     const handleChange = (event: any) => {
         event.preventDefault()
@@ -162,15 +144,15 @@ const ActivityComponent = ({ data, hasActivityType }: any) => {
         delete columns[2]
     }
 
-
-
     const loadData = async () => {
         setLoading(true)
         try {
             const response = await fetchDocument(`${data.url}/tenant/${tenantId}`)
-            if(data.url === 'ProActivityDetails'){
-                response.data = response.data.filter((item: any) => item.activityId === param.id)
-                console.log('response.data: ',response.data)
+            if (data.url === 'ProActivityDetails') {
+                const getActivity = activities?.data.find((item: any) => item.id.toString() === param.id)
+                const detName = getActivity?.name
+                setDetailName(detName)
+                console.log('detName: ', detName)
             }
             setGridData(response.data)
             setLoading(false)
@@ -184,6 +166,11 @@ const ActivityComponent = ({ data, hasActivityType }: any) => {
     useEffect(() => {
         loadData()
     }, [])
+
+    const dataByActivityDetails = gridData.filter((item: any) => item.activityId?.toString() === param.id)
+    console.log('dataByActivityDetails: ', dataByActivityDetails)
+
+
 
     const dataWithIndex = gridData.map((item: any, index) => ({
         ...item,
@@ -302,16 +289,18 @@ const ActivityComponent = ({ data, hasActivityType }: any) => {
                     <div className="mb-5">
                         {
                             !hasActivityType &&
-                            <Button
-                                onClick={() => navigate(-1)}
-                                className="btn btn-light-primary"
-                                style={{
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    display: 'flex',
-                                }}
-                                type="primary" shape="circle" icon={<ArrowLeftOutlined rev={''} />} size={'large'} />
-
+                            <Space>
+                                <Button
+                                    onClick={() => navigate(-1)}
+                                    className="btn btn-light-primary me-3"
+                                    style={{
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        display: 'flex',
+                                    }}
+                                    type="primary" shape="circle" icon={<ArrowLeftOutlined rev={''} />} size={'large'} />
+                                <span className="fw-bold text-gray-800 d-block fs-2">{detailName}</span>
+                            </Space>
                         }
 
                     </div>
@@ -339,7 +328,7 @@ const ActivityComponent = ({ data, hasActivityType }: any) => {
                             />
                         </Space>
                     </div>
-                    <Table columns={columns} dataSource={dataWithIndex} loading={loading} />
+                    <Table columns={columns} dataSource={data.url === 'ProActivityDetails' ? dataByActivityDetails : dataWithIndex} loading={loading} />
 
                     <Modal
                         title={isUpdateModalOpen ? `${data.title} Update` : `${data.title} Setup`}
@@ -375,7 +364,7 @@ const ActivityComponent = ({ data, hasActivityType }: any) => {
                                             {
                                                 activityTypes.map((item: any) => (
                                                     <option
-                                                        selected={isUpdateModalOpen ? tempData.activityType : ''}
+                                                        selected={isUpdateModalOpen && tempData.activityType === item}
                                                         value={item}>{item}
                                                     </option>
                                                 ))
@@ -383,7 +372,6 @@ const ActivityComponent = ({ data, hasActivityType }: any) => {
                                         </select>
                                     </div>
                                 }
-
                             </div>
                         </form>
                     </Modal>

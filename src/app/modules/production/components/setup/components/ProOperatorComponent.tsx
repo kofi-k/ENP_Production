@@ -215,7 +215,6 @@ const OperatorComponent = (props: any) => {
         onError: (error: any) => {
             reset()
             setSubmitLoading(false)
-            setIsModalOpen(false)
             console.log('post error: ', error)
             if (error?.response.status === 409) {
                 message.error(`EmpCode already exists for ${tenantId}`)

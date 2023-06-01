@@ -374,24 +374,19 @@ const CycleDetailsTable = () => {
 
     const uploadProps: UploadProps = {
         name: 'file',
-        accept: '.xlsx, .xls',
+        accept: '.xlsx, .xls, .csv,',
         action: '',
         maxCount: 1,
         fileList: fileList,
         beforeUpload: (file: any) => {
             return new Promise((resolve, reject) => {
                 // check if file is not uploaded
-                if (!file || fileList.length === 1) {
+                if (!file) {
                     message.error('No file uploaded!');
                     reject(false)
                 }
-                // upload excel file only 
-                if (file.type !== 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' && file.type !== 'application/vnd.ms-excel') {
-                    message.error(`${file.name} is not a excel file`);
-                    reject(false)
-                }
                 else {
-                    const updatedFileList: any = [...fileList, file]; // Add the uploaded file to the fileList
+                    const updatedFileList: any = [file]; // Add the uploaded file to the fileList
                     setFileList(updatedFileList);
                     setFileName(file.name)
                     resolve(true)
@@ -420,7 +415,7 @@ const CycleDetailsTable = () => {
 
             // const filteredSavedData = dataToSave.filter((data: any) => data !== null && data !== undefined)
             const item = {
-                data: dataToSaveWithDateStamp,
+                data: [dataToSaveWithDateStamp],
                 url: 'cycleDetails',
             }
             postData(item)
@@ -431,6 +426,7 @@ const CycleDetailsTable = () => {
             setIsConfirmSaveModalOpen(false)
             setDataFromUpload([])
             setUploadDataToSave([])
+            clearBatchData()
         } catch (err) {
             console.log('fileSaveError: ', err)
             setLoading(false)
@@ -503,7 +499,6 @@ const CycleDetailsTable = () => {
                         }
                     }).filter((item: any) => item !== null);
 
-                //log first 20 rows of filtered data
                 console.log('filteredData: ', filteredData.slice(0, 20))
 
                 const uploadableData = filteredData.slice(1).map((item: any,) => {
@@ -551,7 +546,6 @@ const CycleDetailsTable = () => {
                 setIsUploadModalOpen(false)
                 setRowCount(uploadableData.length)
                 setDataFromUpload(uploadableData)
-                // setUploadColumns(mainColumns)
             }
         } catch (error) {
             setIsUploadModalOpen(false)
@@ -610,7 +604,7 @@ const CycleDetailsTable = () => {
     const volumesByDestination = calculateVolumesByField(groupedByDestination);
 
     // get record name from title
-    const recordNameForDynamicColoumn = ( title: any, record: any, data: any ) => {
+    const recordNameForDynamicColoumn = (title: any, record: any, data: any) => {
         let name = ''
         title === 'Hauler' || 'Loader' ? name = getUnitRecordName(record, data?.data) : name = getRecordName(record, data?.data)
         return name
@@ -623,7 +617,7 @@ const CycleDetailsTable = () => {
                 render: (record: any) => <span style={{ color: '#3699FF' }}>
                     {
                         recordNameForDynamicColoumn(
-                         title, record, data
+                            title, record, data
                         )
                     }
                 </span>,
@@ -891,7 +885,47 @@ const CycleDetailsTable = () => {
                 setSubmitLoading(false)
                 return
             }
+            // make sure nominalWeight, weight, payloadWeight, reportedWeight, volumes, loads, duration are not negative
+            if (key === 'nominalWeight' || key === 'weight' || key === 'payloadWeight' || key === 'reportedWeight' || key === 'volumes' || key === 'loads' || key === 'duration') {
+                if (value < 0) {
+                    message.error(`Please enter a positive number for ${key}`)
+                    setSubmitLoading(false)
+                    return
+                }
+            }
+            
         }
+
+        const itemExists = (batchData: any) => batchData.some((item: any) => {
+            // Compare the properties that determine uniqueness
+            return (
+                item.cycleDate === data.cycleDate &&
+                item.cycleTime === data.cycleTime &&
+                item.timeAtLoader === data.timeAtLoader &&
+                item.shiftId === data.shiftId &&
+                item.loader === data.loader &&
+                item.hauler === data.hauler &&
+                item.haulerUnitId === data.haulerUnitId &&
+                item.loaderUnitId === data.loaderUnitId &&
+                item.originId === data.originId &&
+                item.materialId === data.materialId &&
+                item.destinationId === data.destinationId &&
+                item.nominalWeight === data.nominalWeight &&
+                item.weight === data.weight &&
+                item.payloadWeight === data.payloadWeight &&
+                item.reportedWeight === data.reportedWeight &&
+                item.volumes === data.volumes &&
+                item.loads === data.loads &&
+                item.duration === data.duration
+            );
+        });
+
+        if (itemExists(manualBatchData) || itemExists(uploadDataToSave)) {
+            message.error('Item already exists');
+            setSubmitLoading(false);
+            return;
+        }
+
         isFileUploaded ? setUploadDataToSave((prevBatchData: any) => [...prevBatchData, data]) :
             setManualBatchData((prevBatchData: any) => [...prevBatchData, data])
         reset()
@@ -906,7 +940,6 @@ const CycleDetailsTable = () => {
             message.error('Please select date and time')
             return
         }
-
     })
 
     useEffect(() => {
@@ -1002,6 +1035,12 @@ const CycleDetailsTable = () => {
                         {
                             isFileUploaded ?
                                 <Space>
+                                    <PageActionButtons
+                                        onAddClick={showModal}
+                                        hasAddButton={true}
+                                        hasExportButton={false}
+                                        hasUploadButton={false}
+                                    />
                                     <Button onClick={showCheckDataModal}
                                         type='primary' size='large'
                                         style={{
