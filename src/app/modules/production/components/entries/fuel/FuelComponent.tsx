@@ -1,4 +1,4 @@
-import { Button, Divider, Input, Modal, Space, Table, TableColumnsType, TabsProps, Tag, Upload, UploadFile, UploadProps, message } from 'antd';
+import { Button, Divider, Input, Modal, Space, Spin, Table, TableColumnsType, TabsProps, Tag, Upload, UploadFile, UploadProps, message } from 'antd';
 import moment from 'moment';
 import { useEffect, useState } from "react";
 import { set, useForm } from 'react-hook-form';
@@ -24,9 +24,6 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false) // to show the update modal
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false) // to show the upload modal
     const [isFileUploaded, setIsFileUploaded] = useState(false) // to check if the file is uploaded
-    const [isCheckDataModalOpen, setIsCheckDataModalOpen] = useState(false)  // to show the modal to check the data summaries from the uploaded file
-    const [isBatchDataCheckModalOpen, setIsBatchDataCheckModalOpen] = useState(false) // to show the modal to check the data summaries from batch data 
-    const [submitLoading, setSubmitLoading] = useState(false)
     const tenantId = localStorage.getItem('tenant')
     const [loading, setLoading] = useState(false)
     const { register, reset, handleSubmit } = useForm()
@@ -37,31 +34,40 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
     const { data: equipments } = useQuery('equipmments', () => fetchDocument(`equipments/tenant/${tenantId}`), { cacheTime: 5000 })
     const [fileName, setFileName] = useState('') // to hold the name of the uploaded file
     const [isConfirmSaveModalOpen, setIsConfirmSaveModalOpen] = useState(false) // to show the modal to confirm the save
+    const [isCheckDataModalOpen, setIsCheckDataModalOpen] = useState(false)  // to show the modal to check the data summaries from the uploaded file
 
+    const [batchDataToSave, setBatchDataToSave]: any = useState<any[]>([]);
 
-    const [uploadColumns, setUploadColumns] = useState<any>([]) //to hold the table columns of the uploaded file
-    const [uploadData, setUploadData] = useState<any>([]) // to hold the data read from the uploaded file
     const [rowCount, setRowCount] = useState(0) // to hold the number of rows read from the uploaded file
-    const [dataToSave, setDataToSave] = useState<any>([]) // to hold the data to be saved from the uploaded file
-    const [gridData, setGridData] = useState([])
     const handleChange = (event: any) => {
         event.preventDefault()
         setTempData({ ...tempData, [event.target.name]: event.target.value });
     }
+    const [dataFromAddB, setDataFromAddB] = useState([])
 
     // state to hold added items that will be batched and saved 
     let [batchData, setBatchData] = useState<any>([])
 
     const handleCancel = () => {
         reset()
-        setIsModalOpen(false)
-        setIsUpdateModalOpen(false)
-        setTempData(null)
-        setIsUploadModalOpen(false)
-        setIsFileUploaded(false)
-        handleRemove()
-        setUploadedFile(null)
-        setUploading(false)
+        if (isUpdateModalOpen && isFileUploaded) {
+            setIsModalOpen(false)
+            setIsUpdateModalOpen(false)
+            setTempData(null)
+        } else {
+            setIsModalOpen(false)
+            setTempData(null)
+            setIsUpdateModalOpen(false)
+        }
+    }
+
+
+
+    const clearBatchData = () => {
+        setBatchDataToSave([])
+        setDataFromAddB([])
+        setLoading(false)
+        setRowCount(0)
     }
 
     const showModal = () => {
@@ -78,6 +84,20 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
 
     const handleSaveClicked = () => {
         setIsConfirmSaveModalOpen(true)
+        console.log('batchDataToSave: ', batchDataToSave)
+    }
+    const showCheckDataModal = (values: any) => {
+        setIsCheckDataModalOpen(true)
+    }
+    const handleCheckDataCancel = () => {
+        setIsCheckDataModalOpen(false)
+    }
+
+
+    const handleIsUploadModalCancel = () => {
+        setIsUploadModalOpen(false)
+        handleRemove()
+        setUploading(false)
     }
 
     //hide Update table 
@@ -89,8 +109,10 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
     }
 
     const onOkay = () => {
+        setUploading(true)
         // check if no file is uploaded
         if (!uploadedFile) {
+            setUploading(false)
             message.error('No file uploaded!');
             return
         } else {
@@ -110,23 +132,6 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
         console.log(values)
     }
 
-    const { mutate: deleteData, isLoading: deleteLoading } = useMutation(deleteItem, {
-        onSuccess: (data) => {
-            queryClient.setQueryData([url, tempData], data);
-            loadData()
-        },
-        onError: (error) => {
-            console.log('delete error: ', error)
-        }
-    })
-
-    function handleDelete(element: any) {
-        const item = {
-            url: url,
-            data: element
-        }
-        deleteData(item)
-    }
 
     const uploadProps: UploadProps = {
         name: 'file',
@@ -140,7 +145,7 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
                 if (!file) {
                     message.error('No file uploaded!');
                     reject(false)
-                } 
+                }
                 else {
                     const updatedFileList: any = [file]; // Add the uploaded file to the fileList
                     setFileList(updatedFileList);
@@ -153,106 +158,159 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
         onRemove: () => { handleRemove() }
     }
 
-    const showBatchDataCheckModal = (values: any) => {
-        setIsBatchDataCheckModalOpen(true)
-        setIsCheckDataModalOpen(true)
-        console.log('batchValues: ', values)
-        //  populateBatchData(values)
-    }
-
 
     const loadData = async () => {
+        // setLoading(true)
+        // try {
+        //     // const response = await fetchDocument(`${url}/tenant/${tenantId}`)
+        //     // const data: any = fuelIntakeData(response.data)
+        //     // setGridData(response.data)
+        //     setLoading(false)
+        // } catch (error) {
+        //     setLoading(false)
+        //     console.log(error)
+        //     message.error(`${error}`)
+        // }
+    }
+
+    useEffect(() => {
+        console.log('batch', batchDataToSave);
+        if (batchDataToSave.length > 0) {
+            setDataFromAddB(batchDataToSave)
+        }
+        setRowCount(batchDataToSave.length)
+    }, [batchDataToSave]);
+
+
+    const updateItemInBatchData = () => {
+        setBatchDataToSave((prevBatchData: any[]) => {
+            const updatedBatchData: any = prevBatchData.map((item) =>
+                item === tempData ? tempData : item
+            );
+            console.log('manualUpdate: ', updatedBatchData)
+            setDataFromAddB(updatedBatchData)
+            setRowCount(updatedBatchData.length)
+            handleCancel()
+            return updatedBatchData;
+        })
+    };
+
+    const removeItemFromBatchData = (itemToRemove: any) => {
+        setBatchDataToSave((prevBatchData: any[]) => {
+            const updatedBatchData: any = prevBatchData.filter((item) => item !== itemToRemove);
+            setDataFromAddB(updatedBatchData)
+            setRowCount(dataFromAddB.length)
+            return updatedBatchData;
+        });
+    };
+
+    const handleAddItem = handleSubmit(async (values: any) => {
+        if (!values.intakeDate) {
+            message.error('Please pick a date')
+            return
+        }
+        const selectedDate = new Date(values.intakeDate);
+        const data = {
+            intakeDate: selectedDate.toISOString(),
+            quantity: values.quantity,
+            pumpId: parseInt(values.pumpId),
+            equipmentId: values.equipmentId,
+            transactionType: title,
+            tenantId: tenantId,
+        }
+
+        //validation check
+        for (const [key, value] of Object.entries(data)) {
+            if (title === 'Fuel Issue') {
+                if (value === 'Select' || value === null || value === '') {
+                    message.error(`Please fill in all fields`)
+                    return
+                }
+                // make sure quantity is not negative
+                if (key === 'quantity' && value < 0) {
+                    message.error(`Quantity cannot be negative`)
+                    return
+                }
+            } else {
+                if (value === 'Select') {
+                    message.error(`Please select pump`)
+                    return
+                }
+                // make sure quantity is not negative
+                if (key === 'quantity' && value < 0) {
+                    message.error(`Quantity cannot be negative`)
+                    return
+                }
+            }
+        }
+
+        const itemExists = (batchData: any) => batchData.some((item: any) => {
+            return (
+                item.pumpId === data.pumpId &&
+                item.intakeDate === data.intakeDate &&
+                item.equipmentId === data.equipmentId
+            )
+        })
+
+        if (itemExists(batchDataToSave)) {
+            message.error('Item already exists');
+            return;
+        }
+
+        setBatchDataToSave((prevBatchData: any) => [...prevBatchData, data])
+        setIsModalOpen(false)
+        message.success('Item added to batch.')
+        reset()
+        console.log('batchDataToSave', batchDataToSave)
+    })
+
+    const handleBatchSave = () => {
         setLoading(true)
         try {
-            const response = await fetchDocument(`${url}/tenant/${tenantId}`)
-            const data: any = fuelIntakeData(response.data)
-            setGridData(data)
+            const dateStamp = new Date().getTime()
+            const dataToSaveWithDateStamp = batchDataToSave
+                .filter((data: any) => data !== null && data !== undefined)
+                .map((obj: any) => {
+                    setLoading(true)
+                    return {
+                        ...obj,
+                        batchNumber: `${dateStamp}`
+                    };
+                });
+
+            console.log('batchData', batchDataToSave.slice(0, 10))
+            // const filteredSavedData = dataToSave.filter((data: any) => data !== null && data !== undefined)
+            const item = {
+                data: dataToSaveWithDateStamp,
+                url: url,
+            }
+            postData(item)
+            message.success(
+                `Saving ${dataToSaveWithDateStamp.length} ${dataToSaveWithDateStamp.length > 1 ? 'records' : 'record'} of batch data`, 6
+            )
+            console.log('batchDataWithDateStamp', dataToSaveWithDateStamp.slice(0, 10))
+            handleConfirmSaveCancel()
+            setIsConfirmSaveModalOpen(false)
             setLoading(false)
-        } catch (error) {
+            clearBatchData()
+        } catch (err) {
+            console.log('fileSaveError: ', err)
             setLoading(false)
-            console.log(error)
-            message.error(`${error}`)
         }
     }
-
-    const handleUpdate = (e: any) => {
-        setSubmitLoading(true)
-        e.preventDefault()
-        const item = {
-            url: url,
-            data: { ...tempData, pumpId: parseInt(tempData.pumpId), quantity: parseInt(tempData.quantity) }
-        }
-        updateData(item)
-        console.log('update: ', item.data)
-    }
-
-    const { isLoading: updateLoading, mutate: updateData } = useMutation(updateItem, {
-        onSuccess: (data) => {
-            queryClient.setQueryData([url, tempData], data);
-            reset()
-            setTempData({})
-            loadData()
-            setIsUpdateModalOpen(false)
-            setIsModalOpen(false)
-        },
-        onError: (error) => {
-            setSubmitLoading(false)
-            console.log('error: ', error)
-            message.error(`${error}`)
-        }
-    })
-
-    const OnSubmit = handleSubmit(async (values: any) => {
-        setSubmitLoading(true)
-        const selectedDate = new Date(values.intakeDate);
-        const item = {
-            data: [
-                {
-                    intakeDate: selectedDate.toISOString(),
-                    quantity: parseInt(values.quantity),
-                    pumpId: parseInt(values.pumpId),
-                    equipmentId: values.equipmentId,
-                    batchNumber: `${Date.now()}`,
-                    transactionType: title,
-                    tenantId: tenantId,
-                },
-            ],
-            url: url
-        }
-        for (const [key, value] of Object.entries(item.data[0])) {
-            if (value === null || value === '') {
-                message.error(`Please fill in all fields`)
-                setSubmitLoading(false)
-                return
-            }
-            // make sure quantity is not negative
-            if (key === 'quantity' && value < 0) {
-                message.error(`Quantity cannot be negative`)
-                setSubmitLoading(false)
-                return
-            }
-        }
-        console.log(item.data)
-        postData(item)
-    })
 
     const { mutate: postData, isLoading: postLoading } = useMutation(postItem, {
         onSuccess: (data) => {
             queryClient.setQueryData([url, tempData], data);
+            message.success(`Batch saved successfully`);
             reset()
             setTempData({})
             loadData()
             setIsModalOpen(false)
-            setSubmitLoading(false)
         },
         onError: (error: any) => {
-            setSubmitLoading(false)
-            console.log('post error: ', error)
-            if (error?.response.status === 409) {
-                message.error(`Data already exists for ${tenantId}`)
-            } else {
-                message.error(`${error}`)
-            }
+            console.log('batch post error: ', error)
+            message.error(`${error}`)
         }
     })
 
@@ -261,47 +319,63 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
     }, [])
 
 
-    const columns: ColumnsType = [
-        { title: 'Date', dataIndex: 'date', },
-        { title: 'Batch Number', dataIndex: 'batchNumber', },
-        // { title: 'Pump', dataIndex: 'pumpId', },
+    const mainColumns: any = title == 'Fuel Issue' ? [
         {
-            title: 'Items',
-            dataIndex: 'itemsCount',
-            render: (text: any) => <Tag color="geekblue">{text} {text > 1 ? 'records' : 'record'} </Tag>
+            title: 'Date', dataIndex: 'intakeDate',
+            render: (text: any) => <span>{moment(text).format('YYYY-MM-DD')}</span>
         },
+        { title: 'Equipment', dataIndex: 'equipmentId', },
         {
-            title: title == 'Fuel Issue' ? 'Total Qty Issued' : 'Total Qty Received',
-            dataIndex: 'totalQuantity', render: (text: any) => <span>{text.toLocaleString()}</span>
-        },
+            title: 'Pump', dataIndex: 'pumpId',
+            render: (text: any) => <span>{getRecordName(text, pumps?.data)}</span>
 
+        },
+        { title: 'Quantity', dataIndex: 'quantity', },
         {
             title: 'Action',
             fixed: 'right',
             width: 150,
             render: (_: any, record: any) => (
-                <Space size='middle'>
-                    {
-                        record.itemsCount == 1 &&
-                        <Space size='small'>
-                            <a onClick={() => showUpdateModal(record?.records[0])} className='btn btn-light-warning btn-sm'>
-                                Update
-                            </a>
-                            <a onClick={() => handleDelete(record?.records[0])} className='btn btn-light-danger btn-sm'>
-                                Delete
-                            </a>
-                        </Space>
-                    }
-                    {
-                        record.itemsCount > 1 &&
-                        <a className='btn btn-light-success btn-sm'>
-                            Check Data
-                        </a>
-                    }
+
+                <Space size='small'>
+                    <a onClick={() => showUpdateModal(record)} className='btn btn-light-warning btn-sm'>
+                        Update
+                    </a>
+                    <a onClick={() => removeItemFromBatchData(record)} className='btn btn-light-danger btn-sm'>
+                        Delete
+                    </a>
+                </Space>
+
+            ),
+        }
+    ] : [
+        {
+            title: 'Date', dataIndex: 'intakeDate',
+            render: (text: any) => <span>{moment(text).format('YYYY-MM-DD')}</span>
+        },
+        {
+            title: 'Pump', dataIndex: 'pumpId',
+            render: (text: any) => <span>{getRecordName(text, pumps?.data)}</span>
+
+        },
+        { title: 'Quantity', dataIndex: 'quantity', },
+        {
+            title: 'Action',
+            fixed: 'right',
+            width: 150,
+            render: (_: any, record: any) => (
+                <Space size='small'>
+                    <a onClick={() => showUpdateModal(record)} className='btn btn-light-warning btn-sm'>
+                        Update
+                    </a>
+                    <a onClick={() => removeItemFromBatchData(record)} className='btn btn-light-danger btn-sm'>
+                        Delete
+                    </a>
                 </Space>
             ),
         }
     ]
+
 
     const uploadFileColumns = title == 'Fuel Issue' ? [
         { title: 'Date', dataIndex: 'intakeDate', render: (text: any) => moment(excelDateToJSDate(text), 'YYYY-MM-DD').format('YYYY-MM-DD') },
@@ -324,19 +398,6 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
         return name
     }
 
-    interface ExpandedDataType {
-        key: React.Key;
-        pumpId: number;
-        equipmentId: string;
-    }
-
-    const expandedRowRender = (record: any) => {
-        const rowColumns: TableColumnsType<ExpandedDataType> = [
-            { title: 'Pump', dataIndex: 'pumpId', key: 'pump', render: (record: any) => <span>{getRecordName(record?.id, pumps?.data)}</span> },
-            { title: 'Equipment', dataIndex: 'equipmentId', key: 'equipment', },
-        ]
-        return <Table columns={rowColumns} dataSource={record.records[0]} pagination={false} />
-    }
 
     const handleUpload = () => {
 
@@ -352,13 +413,30 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
                 console.log('readRows: ', dataRead.slice(0, 10))
                 console.log('saveData: ', dataToUpload.slice(0, 10))
                 handleRemove()
-                setDataToSave(dataToUpload)
+
+                const ignoredRows: any[] = [];
+                dataToUpload.map((item: any) => {
+                    // Check if the item already exists in batchDataToSave
+                    const found = batchDataToSave.find((data: any) => data.intakeDate === item.intakeDate && data.pumpId === item.pumpId);
+
+                    // Add the item to batchDataToSave only if it doesn't already exist
+                    if (!found) {
+                        setBatchDataToSave((prevBatchData: any) => [...prevBatchData, item]);
+                    } else {
+                        ignoredRows.push(item);
+                    }
+                });
+                const ignoredRowCount = ignoredRows.length;
+                if (ignoredRowCount > 0) {
+                    message.info(`${ignoredRowCount} row(s) were ignored because they already exist.`);
+                    setUploading(false)
+                    setIsUploadModalOpen(false)
+                    return
+                }
                 setUploading(false)
                 setIsUploadModalOpen(false)
-                setIsFileUploaded(true)
-                setUploadData(dataRead)
-                setRowCount(dataRead.length)
-                setUploadColumns(uploadFileColumns)
+                message.success(`${dataToUpload.length} rows uploaded from ${fileName}`)
+
             }
         } catch (error) {
             setIsUploadModalOpen(false)
@@ -366,95 +444,79 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
         reader.readAsArrayBuffer(uploadedFile)
     }
 
-    const saveTableObjects = () => {
-        try {
-            setLoading(true)
-            const filteredSavedData = dataToSave.filter((data: any) => data !== null && data !== undefined)
-            const item = {
-                data: filteredSavedData,
-                url: url,
-            }
-            postData(item)
-            setLoading(true)
-            message.success(`Saving ${filteredSavedData.length}  of ${dataToSave.length} ${filteredSavedData.length > 1 ? 'records' : 'record'} of uploaded data`, 6)
-            loadData()
-            setIsFileUploaded(false)
-            setIsConfirmSaveModalOpen(false)
-            setUploadedFile(null)
-            setUploadData([])
-            setDataToSave([])
-        } catch (err) {
-            console.log('fileSaveError: ', err)
-            setLoading(false)
-        }
-    }
+    // const handleBatchSave1 = () => {
+    //     try {
+    //         setLoading(true)
+    //         const filteredSavedData = dataToSave.filter((data: any) => data !== null && data !== undefined)
+    //         const item = {
+    //             data: filteredSavedData,
+    //             url: url,
+    //         }
+    //         postData(item)
+    //         setLoading(true)
+    //         message.success(`Saving ${filteredSavedData.length}  of ${dataToSave.length} ${filteredSavedData.length > 1 ? 'records' : 'record'} of uploaded data`, 6)
+    //         loadData()
+    //         setIsFileUploaded(false)
+    //         setIsConfirmSaveModalOpen(false)
+    //         setUploadedFile(null)
+    //         setUploadData([])
+    //         setDataToSave([])
+    //     } catch (err) {
+    //         console.log('fileSaveError: ', err)
+    //         setLoading(false)
+    //     }
+    // }
 
     return (
         <div className="card-custom card-flush">
             <div className="card-header" style={{ borderBottom: 'none' }}>
                 <Space style={{ marginBottom: 16 }}>
-                    {
-                        isFileUploaded ?
-                            <span className="fw-bold text-gray-800 d-block fs-3">Showing data read from {fileName}</span>
-                            :
-                            <>
-                                <Input
-                                    placeholder='Enter Search Text'
-                                    type='text'
-                                    allowClear size='large'
-                                />
-                                <Button type='primary' size='large'>
-                                    Search
-                                </Button>
-                            </>
-                    }
-
+                    <Button onClick={showCheckDataModal}
+                        type='primary' size='large'
+                        style={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                        }}
+                        className={dataFromAddB.length <= 0 ? 'btn btn-secondary btn-sm' : 'btn btn-light-success btn-sm'}
+                        disabled={dataFromAddB.length <= 0}
+                    >
+                        Check data
+                    </Button>
                 </Space>
                 <div className="card-toolbar ">
                     <Space style={{ marginBottom: 16 }}>
+                        <PageActionButtons
+                            onAddClick={showModal}
+                            onExportClicked={() => { console.log('export clicked') }}
+                            onUploadClicked={showUploadModal}
+                            hasAddButton={true}
+                            hasExportButton={batchDataToSave.length < 1}
+                            hasUploadButton={true}
+                        />
                         {
-                            isFileUploaded ?
-                                <Space>
-                                    {/* <Button
-                                        type='primary' size='large'
-                                        style={{
-                                            display: 'flex',
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                        }}
-                                        className='btn btn-light-success btn-sm'
-                                    >
-                                        Check data
-                                    </Button> */}
-                                    <Button
-                                        onClick={handleSaveClicked}
-                                        type='primary' size='large'
-                                        style={{
-                                            display: 'flex',
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                        }} className='btn btn-light-success btn-sm'>
-                                        Save
-                                    </Button>
-                                    <Button onClick={clearUpdateTable}
-                                        type='primary' size='large'
-                                        style={{
-                                            display: 'flex',
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                        }} className='btn btn-light-info btn-sm'>
-                                        Clear
-                                    </Button>
-                                </Space>
-                                :
-                                <PageActionButtons
-                                    onAddClick={showModal}
-                                    onExportClicked={() => { console.log('export clicked') }}
-                                    onUploadClicked={showUploadModal}
-                                    hasAddButton={true}
-                                    hasExportButton={true}
-                                    hasUploadButton={true}
-                                />
+                            batchDataToSave.length > 0 &&
+                            <Space>
+                                <Button onClick={handleSaveClicked}
+                                    type='primary' size='large'
+                                    style={{
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                    }} className='btn btn-light-success btn-sm'>
+                                    Save
+                                </Button>
+
+                                <Button onClick={clearBatchData}
+                                    type='primary' size='large'
+                                    style={{
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                    }} className='btn btn-light-info btn-sm'>
+                                    Clear
+                                </Button>
+                            </Space>
                         }
                     </Space>
                 </div>
@@ -462,9 +524,9 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
             <KTCardBody className='py-4 '>
                 <div className='table-responsive'>
                     <Table
+                        columns={mainColumns}
+                        dataSource={dataFromAddB}
                         loading={loading}
-                        columns={isFileUploaded ? uploadColumns : columns}
-                        dataSource={isFileUploaded ? uploadData : gridData}
                     />
 
                     <Modal
@@ -475,10 +537,10 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
                         footer={
                             <ModalFooterButtons
                                 onCancel={handleCancel}
-                                onSubmit={isUpdateModalOpen ? handleUpdate : OnSubmit} />
+                                onSubmit={isUpdateModalOpen ? updateItemInBatchData : handleAddItem} />
                         }
                     >
-                        <form onSubmit={isUpdateModalOpen ? handleUpdate : OnSubmit}>
+                        <form onSubmit={isUpdateModalOpen ? updateItemInBatchData : handleAddItem}>
                             <hr></hr>
                             {
                                 title == 'Fuel Issue' ?
@@ -487,12 +549,12 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
                                         <div style={{ padding: "20px 20px 0 20px" }} className='row mb-0 '>
                                             <div className='col-6'>
                                                 <label htmlFor="exampleFormControlInput1" className="form-label text-gray-500">Date</label>
-                                                <input type="date" {...register("intakeDate")} name="intakeDate" defaultValue={!isUpdateModalOpen ? '' : getDateFromDateString(tempData?.intakeDate)} onChange={handleChange} className="form-control form-control-white" />
+                                                <input type="date" {...register("intakeDate")} name="intakeDate" defaultValue={!isUpdateModalOpen ? '' : getDateFromDateString(tempData?.intakeDate)} onChange={handleChange} className="form-control form-control-white form-control-solid border border-gray-300" />
                                             </div>
 
                                             <div className='col-6'>
                                                 <label htmlFor="exampleFormControlInput1" className="form-label text-gray-500">Quantity</label>
-                                                <input type="number" {...register("quantity")} min={0} name='quantity' defaultValue={!isUpdateModalOpen ? '' : tempData?.quantity} onChange={handleChange} className="form-control form-control-white" />
+                                                <input type="number" {...register("quantity")} min={0} name='quantity' defaultValue={!isUpdateModalOpen ? 0 : tempData?.quantity} onChange={handleChange} className="form-control form-control-white form-control-solid border border-gray-300" />
                                             </div>
                                         </div>
                                         <div style={{ padding: "20px 20px 0 20px" }} className='row mb-9 '>
@@ -501,7 +563,7 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
                                                 <select
                                                     {...register("equipmentId")}
                                                     onChange={handleChange}
-                                                    className="form-select form-select-white" aria-label="Select example">
+                                                    className="form-select form-select-white form-control-solid border border-gray-300" aria-label="Select example">
                                                     {!isUpdateModalOpen && <option>Select</option>}
                                                     {
                                                         equipments?.data.map((item: any) => (
@@ -518,12 +580,12 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
                                                 <select
                                                     {...register("pumpId")}
                                                     onChange={handleChange}
-                                                    className="form-select form-select-white" aria-label="Select example">
+                                                    className="form-select form-select-white form-control-solid border border-gray-300" aria-label="Select example">
                                                     {!isUpdateModalOpen && <option>Select</option>}
                                                     {
                                                         pumps?.data.map((item: any) => (
                                                             <option
-                                                            selected={isUpdateModalOpen && tempData.pumpId === item.id}
+                                                                selected={isUpdateModalOpen && tempData.pumpId === item.id}
                                                                 value={item.id}>{item.name}</option>
                                                         ))
                                                     }
@@ -536,7 +598,8 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
                                         <div style={{ padding: "20px 20px 0 20px" }} className='row mb-0 '>
                                             <div className=' mb-7 '>
                                                 <label htmlFor="exampleFormControlInput1" className="form-label text-gray-500">Date</label>
-                                                <input type="date" {...register("intakeDate")} name="intakeDate" defaultValue={!isUpdateModalOpen ? '' : getDateFromDateString(tempData?.intakeDate)} onChange={handleChange} className="form-control form-control-white" />
+                                                <input type="date" {...register("intakeDate")} name="intakeDate" defaultValue={!isUpdateModalOpen ? '' : getDateFromDateString(tempData?.intakeDate)} onChange={handleChange}
+                                                    className="form-control form-control-white form-control-solid border border-gray-300" />
                                             </div>
 
                                             <div className=' mb-7 '>
@@ -544,7 +607,7 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
                                                 <select
                                                     {...register("pumpId")}
                                                     onChange={handleChange}
-                                                    className="form-select form-select-white" aria-label="Select example">
+                                                    className="form-select form-control-solid border border-gray-300" aria-label="Select example">
                                                     {!isUpdateModalOpen && <option>Select</option>}
                                                     {
                                                         pumps?.data.map((item: any) => (
@@ -558,7 +621,8 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
 
                                             <div className=' mb-7 '>
                                                 <label htmlFor="exampleFormControlInput1" className="form-label text-gray-500">Quantity</label>
-                                                <input type="number" {...register("quantity")} min={0} name='quantity' defaultValue={!isUpdateModalOpen ? '' : tempData?.quantity} onChange={handleChange} className="form-control form-control-white" />
+                                                <input type="number" {...register("quantity")} min={0} name='quantity' defaultValue={!isUpdateModalOpen ? 0 : tempData?.quantity} onChange={handleChange}
+                                                    className="form-control form-control-white form-control-solid border border-gray-300" />
                                             </div>
                                         </div>
                                     </>
@@ -567,11 +631,12 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
                     </Modal>
 
                     {/* Modal to upload file */}
+
                     <Modal
                         title='Upload File'
                         open={isUploadModalOpen}
                         onOk={onOkay}
-                        onCancel={handleCancel}
+                        onCancel={handleIsUploadModalCancel}
                         closable={true}
                     >
                         <Divider />
@@ -609,7 +674,7 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
                                     className='btn btn-danger btn-sm w'>
                                     Cancel
                                 </Button>
-                                <Button onClick={saveTableObjects}
+                                <Button onClick={handleBatchSave}
                                     type='primary'
                                     style={{
                                         display: 'flex',
@@ -625,7 +690,9 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
                         <div className='row'>
                             <div className='col-12'>
                                 <p className='fw-bold text-gray-800 d-block fs-3'>Are you sure you want to save?</p>
-                                <p className='fw-bold text-gray-800 d-block fs-3'>There are {rowCount} records to be saved.</p>
+                                <p className='fw-bold text-gray-800 d-block fs-3'>
+                                    {rowCount === 1 ? `About to save ${rowCount} record.` : ` There are ${rowCount} records to be saved.`}
+                                </p>
                             </div>
                         </div>
                     </Modal>

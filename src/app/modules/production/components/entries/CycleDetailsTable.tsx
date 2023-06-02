@@ -1,23 +1,18 @@
-import { Button, Divider, Input, Modal, Space, Table, TabsProps, Tag, Upload, UploadFile, UploadProps, message } from 'antd';
+import { UploadOutlined } from '@ant-design/icons';
+import { Button, Divider, Modal, Space, Table, Tabs, TabsProps, Tag, Upload, UploadProps, message } from 'antd';
 import moment from 'moment';
 import { useEffect, useState } from "react";
-import { set, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import * as XLSX from 'xlsx';
 import { KTCardBody } from '../../../../../_metronic/helpers';
-import { deleteItem, fetchDocument, postItem, updateItem } from '../../urls';
+import { deleteItem, fetchDocument, postItem } from '../../urls';
 import {
-    ColumnActionButtons,
     ModalFooterButtons, PageActionButtons, calculateVolumesByField,
-    convertExcelDateToJSDate, convertExcelTimeToJSDate, excelDateToJSDate,
+    convertExcelDateToJSDate, convertExcelTimeToJSDate,
     extractDateFromTimestamp, extractTimeFromISOString, getDateFromDateString, groupByBatchNumber, roundOff,
-    timeFormat, timeStamp
+    timeFormat
 } from '../CommonComponents';
-import { Tabs } from 'antd';
-import { TableProps } from 'react-bootstrap';
-import { UploadChangeParam } from 'antd/es/upload';
-import { time } from 'console';
-import { UploadOutlined } from '@ant-design/icons';
 
 
 
@@ -31,11 +26,8 @@ const CycleDetailsTable = () => {
     const [searchText, setSearchText] = useState('')
     const [isFileUploaded, setIsFileUploaded] = useState(false) // to check if the file is uploaded
     const [isCheckDataModalOpen, setIsCheckDataModalOpen] = useState(false)  // to show the modal to check the data summaries from the uploaded file
-    const [isBatchDataCheckModalOpen, setIsBatchDataCheckModalOpen] = useState(false) // to show the modal to check the data summaries from batch data 
     const tenantId = localStorage.getItem('tenant')
     const [rowCount, setRowCount] = useState(0) // to hold the number of rows read from the uploaded file
-    const [batchRowsCount, setBatchRowsCount] = useState(0) // to hold the number of rows read from the batch data
-    const [savedCount, setSavedCount] = useState(0) // to hold the number of rows saved from the uploaded file
 
     const [loading, setLoading] = useState(false)
     const [uploading, setUploading] = useState(false)
@@ -43,8 +35,6 @@ const CycleDetailsTable = () => {
     const [tempData, setTempData] = useState<any>()
     const { register, reset, handleSubmit } = useForm()
     const queryClient = useQueryClient()
-    const [uploadColumns, setUploadColumns] = useState<any>([]) //to hold the table columns of the uploaded file
-    const [dataFromUpload, setDataFromUpload] = useState<any>([]) // to hold the data read from the uploaded file
     const { data: destinations } = useQuery('destinations', () => fetchDocument(`productionDestination/tenant/${tenantId}`), { cacheTime: 5000 })
     const { data: allHaulerUnits } = useQuery('hauler', () => fetchDocument(`ProHaulerUnit/tenant/${tenantId}`), { cacheTime: 5000 })
     const { data: allHaulerOperators } = useQuery('haulerOperator', () => fetchDocument(`HaulerOperator/tenant/${tenantId}`), { cacheTime: 5000 })
@@ -54,10 +44,6 @@ const CycleDetailsTable = () => {
     const { data: allMaterials } = useQuery('allMaterials', () => fetchDocument(`ProdRawMaterial/tenant/${tenantId}`), { cacheTime: 5000 })
     const { data: allShifts } = useQuery('shifts', () => fetchDocument(`ProductionShift/tenant/${tenantId}`), { cacheTime: 5000 })
 
-    let [batchVolumesByHauler, setBatchVolumesByHauler] = useState<any>([]) // to hold the volumes by hauler
-    let [batchVolumesByLoader, setBatchVolumesByLoader] = useState<any>([]) // to hold the volumes by loader
-    let [batchVolumesByOrigin, setBatchVolumesByOrigin] = useState<any>([]) // to hold the volumes by origin
-    let [batchVolumesByDestination, setBatchVolumesByDestination] = useState<any>([]) // to hold the volumes by destination
     const [fileList, setFileList] = useState([]);
     const [fileName, setFileName] = useState('') // to hold the name of the uploaded file
     const [isConfirmSaveModalOpen, setIsConfirmSaveModalOpen] = useState(false) // to show the modal to confirm the save
@@ -66,6 +52,7 @@ const CycleDetailsTable = () => {
     const [batchDataToSave, setBatchDataToSave]: any = useState<any[]>([]);
     const [uploadDataToSave, setUploadDataToSave]: any = useState<any[]>([]) // to hold the data to be saved from the uploaded file
     const [itemToUpdate, setItemToUpdate] = useState<any>(null) // to hold the item to be updated
+
     const handleChange = (event: any) => {
         event.preventDefault()
         setTempData({ ...tempData, [event.target.name]: event.target.value });
@@ -93,53 +80,6 @@ const CycleDetailsTable = () => {
         setFileList([]);
     };
 
-    // const populateBatchData = (values: any) => {
-    //     // group by hauler unit
-    //     const groupedByHauler: any = {};
-    //     values?.forEach((item: any) => {
-    //         if (!groupedByHauler[item.haulerUnit.equipmentId]) {
-    //             groupedByHauler[item.haulerUnit.equipmentId] = [];
-    //         }
-    //         groupedByHauler[item.haulerUnit.equipmentId].push(item);
-    //     });
-
-    //     const groupedByLoader: any = {};
-    //     values?.forEach((item: any) => {
-    //         if (!groupedByLoader[item.loaderUnit.equipmentId]) {
-    //             groupedByLoader[item.loaderUnit.equipmentId] = [];
-    //         }
-    //         groupedByLoader[item.loaderUnit.equipmentId].push(item);
-    //     });
-
-    //     const groupedByOrigin: any = {};
-    //     values?.forEach((item: any) => {
-    //         if (!groupedByOrigin[item.origin.name]) {
-    //             groupedByOrigin[item.origin.name] = [];
-    //         }
-    //         groupedByOrigin[item.origin.name].push(item);
-    //     });
-
-    //     const groupedByDestination: any = {};
-    //     values?.forEach((item: any) => {
-    //         if (!groupedByDestination[item.destination.name]) {
-    //             groupedByDestination[item.destination.name] = [];
-    //         }
-    //         groupedByDestination[item.destination.name].push(item);
-    //     });
-    //     setBatchRowsCount(values.length)
-
-    //     setBatchVolumesByDestination(calculateVolumesByField(groupedByDestination))
-    //     setBatchVolumesByOrigin(calculateVolumesByField(groupedByOrigin))
-    //     setBatchVolumesByLoader(calculateVolumesByField(groupedByLoader))
-    //     setBatchVolumesByHauler(calculateVolumesByField(groupedByHauler))
-    // }
-
-    const showBatchDataCheckModal = (values: any) => {
-        setIsBatchDataCheckModalOpen(true)
-        setIsCheckDataModalOpen(true)
-        console.log('batchValues: ', values)
-        // populateBatchData(values)
-    }
 
     const handleCancel = () => {
         reset()
@@ -162,11 +102,6 @@ const CycleDetailsTable = () => {
 
     const handleCheckDataCancel = () => {
         setIsCheckDataModalOpen(false)
-        setIsBatchDataCheckModalOpen(false)
-        setBatchVolumesByDestination([])
-        setBatchVolumesByOrigin([])
-        setBatchVolumesByLoader([])
-        setBatchVolumesByHauler([])
     }
 
     const handleConfirmSaveCancel = () => {
@@ -175,7 +110,7 @@ const CycleDetailsTable = () => {
 
     const handleSaveClicked = () => {
         setIsConfirmSaveModalOpen(true)
-        console.log('batchData: ', batchDataToSave)
+        console.log('batchDataToSave: ', batchDataToSave)
     }
 
     const { mutate: deleteData, isLoading: deleteLoading } = useMutation(deleteItem, {
@@ -321,56 +256,13 @@ const CycleDetailsTable = () => {
                     <a onClick={() => showUpdateModal(record)} className='btn btn-light-info btn-sm'>
                         Update
                     </a>
-                    <a onClick={() => isFileUploaded ? removeItemFromUploadBatchData(record) : removeItemFromBatchData(record)} className='btn btn-light-success btn-sm'>
+                    <a onClick={() => removeItemFromBatchData(record)} className='btn btn-light-success btn-sm'>
                         Delete
                     </a>
                 </Space>
             ),
 
         },
-    ]
-
-    const columns: any = [
-        {
-            title: 'Date',
-            dataIndex: 'date',
-        },
-        {
-            title: 'BatchNumber',
-            dataIndex: 'batchNumber',
-        },
-        {
-            title: 'Items',
-            dataIndex: 'itemsCount',
-            render: (text: any) => <Tag color="geekblue">{text} {text > 1 ? 'records' : 'record'} </Tag>
-        },
-        {
-            title: 'Action',
-            fixed: 'right',
-            width: 160,
-            render: (_: any, record: any) => (
-                <Space size='middle'>
-                    {
-                        record.itemsCount == 1 &&
-                        <Space size='small'>
-                            <a onClick={() => showUpdateModal(record?.records[0])} className='btn btn-light-warning btn-sm'>
-                                Update
-                            </a>
-                            <a onClick={() => handleDelete(record?.records[0])} className='btn btn-light-danger btn-sm'>
-                                Delete
-                            </a>
-                        </Space>
-                    }
-                    {
-                        record.itemsCount > 1 &&
-                        <a onClick={() => showBatchDataCheckModal(record?.records)} className='btn btn-light-success btn-sm'>
-                            Check Data
-                        </a>
-                    }
-                </Space>
-            ),
-        },
-
     ]
 
     const uploadProps: UploadProps = {
@@ -542,9 +434,43 @@ const CycleDetailsTable = () => {
                 console.log('uploadableData: ', uploadableData.slice(0, 20))
                 handleRemove()
                 // add each uploadable data to manual batch data
+                const ignoredRows: any[] = [];
                 uploadableData.map((item: any) => {
-                    setBatchDataToSave((prevBatchData: any) => [...prevBatchData, item])
+                    // Check if the item already exists in batchDataToSave
+                    const found =
+                        batchDataToSave.find((batchItem: any) =>
+                            batchItem.cycleDate === item.cycleDate &&
+                            batchItem.cycleTime === item.cycleTime &&
+                            batchItem.loaderUnitId === item.loaderUnitId &&
+                            batchItem.haulerUnitId === item.haulerUnitId &&
+                            batchItem.originId === item.originId &&
+                            batchItem.materialId === item.materialId &&
+                            batchItem.destinationId === item.destinationId &&
+                            batchItem.nominalWeight === item.nominalWeight &&
+                            batchItem.weight === item.weight &&
+                            batchItem.payloadWeight === item.payloadWeight &&
+                            batchItem.reportedWeight === item.reportedWeight &&
+                            batchItem.volumes === item.volumes &&
+                            batchItem.loads === item.loads &&
+                            batchItem.timeAtLoader === item.timeAtLoader &&
+                            batchItem.shiftId === item.shiftId &&
+                            batchItem.duration === item.duration
+                        );
+                    if (!found) {
+                        setBatchDataToSave((prevBatchData: any) => [...prevBatchData, item])
+                    } else {
+                        ignoredRows.push(item);
+                    }
                 })
+
+                const ignoredRowCount = ignoredRows.length;
+                if (ignoredRowCount > 0) {
+                    message.info(`${ignoredRowCount} row(s) were ignored because they already exist.`);
+                    setUploading(false)
+                    setIsUploadModalOpen(false)
+                    return
+                }
+
                 setUploading(false)
                 setIsUploadModalOpen(false)
                 message.success(`${uploadableData.length} rows uploaded from ${fileName}`)
@@ -567,7 +493,6 @@ const CycleDetailsTable = () => {
 
     // sum volumes per hauler
     const volumesByHauler = calculateVolumesByField(groupedByHauler, allHaulerUnits?.data, 'unitId');
-    console.log('volumesByHauler: ', volumesByHauler)
 
     // group by loader unit
     const groupedByLoader: any = {};
@@ -580,7 +505,6 @@ const CycleDetailsTable = () => {
 
     // sum volumes per loader
     const volumesByLoader = calculateVolumesByField(groupedByLoader, allLoaderUnits?.data, 'unitId');
-    console.log('volumesByLoader: ', volumesByLoader)
 
     // group by origin
     const groupedByOrigin: any = {};
@@ -593,7 +517,6 @@ const CycleDetailsTable = () => {
 
     // sum volumes per origin
     const volumesByOrigin = calculateVolumesByField(groupedByOrigin, allOrigins?.data, 'originId');
-    console.log('volumesByOrigin: ', volumesByOrigin)
 
     // group by destination
     const groupedByDestination: any = {};
@@ -606,7 +529,6 @@ const CycleDetailsTable = () => {
 
     // sum volumes per destination
     const volumesByDestination = calculateVolumesByField(groupedByDestination, destinations?.data, 'destinationId');
-    console.log('volumesByDestination: ', volumesByDestination)
     // get record name from title
     const recordNameForDynamicColoumn = (title: any, record: any, data: any) => {
         let name = ''
@@ -634,7 +556,7 @@ const CycleDetailsTable = () => {
         return columns;
     }
 
-    const summaryFooter = (data: any) => <Tag color="error">{data} rows </Tag>
+    const summaryFooter = (data: any) => <Tag color="error">{data === 1 ? `${data} row` : `${data} rows`}</Tag>
 
     // tab view for data summaries
     const tabItems: TabsProps['items'] = [
@@ -682,7 +604,6 @@ const CycleDetailsTable = () => {
         },
     ];
 
-
     //return count of rows per batch
     const countRowsPerBatch = (data: any) => {
         const groupedByBatchNumber = groupByBatchNumber(data);
@@ -700,14 +621,14 @@ const CycleDetailsTable = () => {
     };
 
     const loadData = async () => {
-        setLoading(true)
-        try {
-            setLoading(false)
-        } catch (error) {
-            setLoading(false)
-            console.log(error)
-            message.error(`${error}`)
-        }
+        // setLoading(true)
+        // try {
+        //     setLoading(false)
+        // } catch (error) {
+        //     setLoading(false)
+        //     console.log(error)
+        //     message.error(`${error}`)
+        // }
     }
 
     useEffect(() => {
@@ -728,13 +649,13 @@ const CycleDetailsTable = () => {
 
     const globalSearch = () => {
         // @ts-ignore
-        filteredData = dataWithVehicleNum.filter((value) => {
-            return (
-                value.fleetID.toLowerCase().includes(searchText.toLowerCase()) ||
-                value.modlName.toLowerCase().includes(searchText.toLowerCase())
-            )
-        })
-        setDataFromAddB(filteredData)
+        // filteredData = dataWithVehicleNum.filter((value) => {
+        //     return (
+        //         value.fleetID.toLowerCase().includes(searchText.toLowerCase()) ||
+        //         value.modlName.toLowerCase().includes(searchText.toLowerCase())
+        //     )
+        // })
+        // setDataFromAddB(filteredData)
     }
 
 
@@ -748,29 +669,16 @@ const CycleDetailsTable = () => {
 
 
     const updateItemInBatchData = () => {
-        isFileUploaded ?
-            setUploadDataToSave((prevBatchData: any[]) => {
-                const updatedBatchData: any = prevBatchData.map((item) =>
-                    item === tempData ? tempData : item
-                );
-                console.log('uploadUpdate: ', updatedBatchData)
-                setUploadDataToSave(updatedBatchData)
-                setRowCount(updatedBatchData.length)
-                handleCancel()
-                return updatedBatchData;
-            })
-            :
-            setBatchDataToSave((prevBatchData: any[]) => {
-                const updatedBatchData: any = prevBatchData.map((item) =>
-                    item === tempData ? tempData : item
-                );
-                console.log('manualUpdate: ', updatedBatchData)
-                setDataFromAddB(updatedBatchData)
-                setRowCount(updatedBatchData.length)
-                handleCancel()
-                return updatedBatchData;
-            })
-
+        setBatchDataToSave((prevBatchData: any[]) => {
+            const updatedBatchData: any = prevBatchData.map((item) =>
+                item === tempData ? tempData : item
+            );
+            console.log('manualUpdate: ', updatedBatchData)
+            setDataFromAddB(updatedBatchData)
+            setRowCount(updatedBatchData.length)
+            handleCancel()
+            return updatedBatchData;
+        })
     };
 
 
@@ -802,6 +710,7 @@ const CycleDetailsTable = () => {
             duration: parseInt(values.duration),
             tenantId: tenantId,
         }
+
         for (const [key, value] of Object.entries(data)) {
             if (value === null || value === '' || value === 'Select' || value === undefined) {
                 message.error(`Please fill in all fields`)
@@ -894,7 +803,7 @@ const CycleDetailsTable = () => {
         onError: (error) => {
             setLoading(false)
             setSubmitLoading(false)
-            console.log('post error: ', error)
+            console.log('batch post error: ', error)
             message.error(`${error}`)
         }
     })
@@ -904,35 +813,19 @@ const CycleDetailsTable = () => {
         <div className="card  border border-gray-400  card-custom card-flush" >
             <div className="card-header mt-7">
                 <Space style={{ marginBottom: 16 }}>
-                    {
-                        isFileUploaded ?
-                            <>
-                                <span className="fw-bold text-gray-800 d-block fs-3">Showing data read from {fileName}</span>
-                            </> :
-                            <>
-                                <Button onClick={showCheckDataModal}
-                                    type='primary' size='large'
-                                    style={{
-                                        display: 'flex',
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                    }}
-                                    className= {dataFromAddB.length <= 0 ? 'btn btn-secondary btn-sm' : 'btn btn-light-success btn-sm'}
-                                    disabled = { dataFromAddB.length <= 0}
-                                >
-                                    Check data
-                                </Button>
-                                {/* <Input
-                                    placeholder='Enter Search Text'
-                                    type='text'
-                                    allowClear size='large'
-                                />
-                                <Button type='primary' size='large'>
-                                    Search
-                                </Button>
-                            */}
-                             </>
-                    }
+
+                    <Button onClick={showCheckDataModal}
+                        type='primary' size='large'
+                        style={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                        }}
+                        className={dataFromAddB.length <= 0 ? 'btn btn-secondary btn-sm' : 'btn btn-light-success btn-sm'}
+                        disabled={dataFromAddB.length <= 0}
+                    >
+                        Check data
+                    </Button>
 
                 </Space>
                 <div className="card-toolbar">
@@ -1005,9 +898,7 @@ const CycleDetailsTable = () => {
                         }
                     >
                         <form onSubmit={isUpdateModalOpen ? updateItemInBatchData : handleAddItem}>
-                            <Divider orientation="left">
-                                Selectors
-                            </Divider>
+                            <Divider orientation="left" />
                             <div style={{ padding: "20px 20px 0 20px" }} className='row mb-0 '>
                                 <div className='col-4'>
                                     <label htmlFor="exampleFormControlInput1" className="required form-label text-gray-500">Date</label>
@@ -1224,7 +1115,7 @@ const CycleDetailsTable = () => {
 
                     {/* check data modal */}
                     <Modal
-                        title={isBatchDataCheckModalOpen ? 'Batch Summaries' : 'Data Summaries'}
+                        title={'Batch Summaries'}
                         open={isCheckDataModalOpen}
                         onCancel={handleCheckDataCancel}
                         width={800}
@@ -1244,7 +1135,7 @@ const CycleDetailsTable = () => {
                             onChange={onTabsChange}
                             tabBarExtraContent={
                                 <>
-                                    <Tag color="geekblue">{isBatchDataCheckModalOpen ? batchRowsCount : rowCount} records </Tag>
+                                    <Tag color="geekblue">{rowCount === 1 ? `${rowCount} record` : `${rowCount} records`}</Tag>
                                 </>
                             } />
                     </Modal>
@@ -1283,7 +1174,9 @@ const CycleDetailsTable = () => {
                         <div className='row'>
                             <div className='col-12'>
                                 <p className='fw-bold text-gray-800 d-block fs-3'>Are you sure you want to save?</p>
-                                <p className='fw-bold text-gray-800 d-block fs-3'>There are {rowCount} records to be saved.</p>
+                                <p className='fw-bold text-gray-800 d-block fs-3'>
+                                    {rowCount === 1 ? `About to save ${rowCount} record.` : ` There are ${rowCount} records to be saved.`}
+                                </p>
                             </div>
                         </div>
                     </Modal>
