@@ -19,7 +19,7 @@ import { ProductionHauler } from './components/setup/hauler/Hauler';
 import { ProductionLoader } from './components/setup/loader/Loader';
 import { ProductionLocations } from './components/setup/locations/Locations';
 import { ProductionMaterials } from './components/setup/materials/Materials';
-import { DrillEntry } from './components/entries/Drill';
+import { DrillEntry } from './components/entries/DrillEntry';
 
 const accountBreadCrumbs: Array<PageLink> = [
   {

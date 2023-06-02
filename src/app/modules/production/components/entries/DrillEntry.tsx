@@ -60,11 +60,6 @@ const DrillEntry = () => {
 
     const handleChange = (event: any) => {
         event.preventDefault()
-        // if (event.target.name === 'cycleDate') {
-        //     const selectedDate = new Date(event.target.value);
-        //     const isoDate = selectedDate.toISOString();
-        //     // Use the isoDate value as needed
-        //   }
         setTempData({ ...tempData, [event.target.name]: event.target.value });
     }
 
@@ -89,53 +84,10 @@ const DrillEntry = () => {
         setFileList([]);
     };
 
-    const populateBatchData = (values: any) => {
-        // group by hauler unit
-        const groupedByHauler: any = {};
-        values?.forEach((item: any) => {
-            if (!groupedByHauler[item.haulerUnit.equipmentId]) {
-                groupedByHauler[item.haulerUnit.equipmentId] = [];
-            }
-            groupedByHauler[item.haulerUnit.equipmentId].push(item);
-        });
-
-        const groupedByLoader: any = {};
-        values?.forEach((item: any) => {
-            if (!groupedByLoader[item.loaderUnit.equipmentId]) {
-                groupedByLoader[item.loaderUnit.equipmentId] = [];
-            }
-            groupedByLoader[item.loaderUnit.equipmentId].push(item);
-        });
-
-        const groupedByOrigin: any = {};
-        values?.forEach((item: any) => {
-            if (!groupedByOrigin[item.origin.name]) {
-                groupedByOrigin[item.origin.name] = [];
-            }
-            groupedByOrigin[item.origin.name].push(item);
-        });
-
-        const groupedByDestination: any = {};
-        values?.forEach((item: any) => {
-            if (!groupedByDestination[item.destination.name]) {
-                groupedByDestination[item.destination.name] = [];
-            }
-            groupedByDestination[item.destination.name].push(item);
-        });
-        setBatchRowsCount(values.length)
-
-        // setBatchVolumesByDestination(calculateVolumesByField(groupedByDestination))
-        // setBatchVolumesByOrigin(calculateVolumesByField(groupedByOrigin))
-        // setBatchVolumesByLoader(calculateVolumesByField(groupedByLoader))
-        // setBatchVolumesByHauler(calculateVolumesByField(groupedByHauler))
-        
-    }
-
     const showBatchDataCheckModal = (values: any) => {
         setIsBatchDataCheckModalOpen(true)
         setIsCheckDataModalOpen(true)
         console.log('batchValues: ', values)
-        populateBatchData(values)
     }
 
     const handleCancel = () => {
@@ -221,13 +173,16 @@ const DrillEntry = () => {
             dataIndex: 'date',
         },
         {
-            title: 'BatchNumber',
-            dataIndex: 'batchNumber',
+            title: 'Rig',
+            dataIndex: 'rigId',// from drill setup
         },
         {
-            title: 'Items',
-            dataIndex: 'itemsCount',
-            render: (text: any) => <Tag color="geekblue">{text} {text > 1 ? 'records' : 'record'} </Tag>
+            title: 'Shift',
+            dataIndex: 'shiftId',
+        },
+        {
+            title: 'Activity',
+            dataIndex: 'activityId', // from activity setup
         },
         {
             title: 'Action',
@@ -812,7 +767,7 @@ const DrillEntry = () => {
                     </div>
 
                     <Table
-                        columns={[]}
+                        columns={columns}
                         dataSource={[]}
                         scroll={isFileUploaded ? { x: 1300 } : {}}
                         loading={loading}

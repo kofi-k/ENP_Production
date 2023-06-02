@@ -163,13 +163,13 @@ const SetupComponent = ({ data, hasDescription, hasDuration }: any) => {
 
     const globalSearch = () => {
         // @ts-ignore
-        filteredData = dataWithVehicleNum.filter((value) => {
-            return (
-                value.fleetID.toLowerCase().includes(searchText.toLowerCase()) ||
-                value.modlName.toLowerCase().includes(searchText.toLowerCase())
-            )
-        })
-        setGridData(filteredData)
+        // filteredData = dataWithVehicleNum.filter((value) => {
+        //     return (
+        //         value.fleetID.toLowerCase().includes(searchText.toLowerCase()) ||
+        //         value.modlName.toLowerCase().includes(searchText.toLowerCase())
+        //     )
+        // })
+        // setGridData(filteredData)
     }
     const { isLoading: updateLoading, mutate: updateData } = useMutation(updateItem, {
         onSuccess: (dataU) => {
@@ -301,18 +301,18 @@ const SetupComponent = ({ data, hasDescription, hasDuration }: any) => {
                             <div style={{ padding: "20px 20px 0 20px" }} className='row mb-0 '>
                                 <div className=' mb-7'>
                                     <label htmlFor="exampleFormControlInput1" className="form-label text-gray-500">Name</label>
-                                    <input {...register("name")} name='name' defaultValue={!isUpdateModalOpen ? '' : tempData?.name} onChange={handleChange} className="form-control form-control-white" />
+                                    <input {...register("name")} name='name' defaultValue={!isUpdateModalOpen ? '' : tempData?.name} onChange={handleChange} className="form-control form-control-white form-control-solid border border-gray-300" />
                                 </div>
                                 {
                                     hasDescription && <div className=' mb-7'>
                                         <label htmlFor="exampleFormControlInput1" className="form-label text-gray-500">Description</label>
-                                        <input {...register("description")} name='description' defaultValue={!isUpdateModalOpen ? '' : tempData?.description} onChange={handleChange} className="form-control form-control-white" />
+                                        <input {...register("description")} name='description' defaultValue={!isUpdateModalOpen ? '' : tempData?.description} onChange={handleChange} className="form-control form-control-white form-control-solid border border-gray-300" />
                                     </div>
                                 }
                                 {
                                     hasDuration && <div className=' mb-7'>
                                         <label htmlFor="exampleFormControlInput1" className="form-label text-gray-500">Duration</label>
-                                        <input type="number" {...register("duration")} min={0} name='duration' defaultValue={!isUpdateModalOpen ? '' : tempData?.duration} onChange={handleChange} className="form-control form-control-white" />
+                                        <input type="number" {...register("duration")} min={0} name='duration' defaultValue={!isUpdateModalOpen ? '' : tempData?.duration} onChange={handleChange} className="form-control form-control-white form-control-solid border border-gray-300" />
                                     </div>
                                 }
                             </div>

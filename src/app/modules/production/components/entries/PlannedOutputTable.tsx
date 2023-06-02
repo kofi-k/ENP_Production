@@ -142,13 +142,13 @@ const PlannedOutputTable = () => {
   }
 
   const globalSearch = () => {
-    // @ts-ignore
-    filteredData = dataWithVehicleNum.filter((value) => {
-      return (
-        value.name.toLowerCase().includes(searchText.toLowerCase())
-      )
-    })
-    setGridData(filteredData)
+    // // @ts-ignore
+    // filteredData = dataWithVehicleNum.filter((value) => {
+    //   return (
+    //     value.name.toLowerCase().includes(searchText.toLowerCase())
+    //   )
+    // })
+    // setGridData(filteredData)
   }
 
   const { isLoading: updateLoading, mutate: updateData } = useMutation(updateItem, {
@@ -281,11 +281,11 @@ const PlannedOutputTable = () => {
               <div style={{ padding: "0px 20px 0 20px" }} className='row mb-0 '>
                 <div className='mb-0'>
                   <div className='mt-7 mb-7'>
-                    <label htmlFor="exampleFormControlInput1" className="required form-label text-gray-500">Activity</label>
+                    <label htmlFor="exampleFormControlInput1" className="required form-label text-gray-500 ">Activity</label>
                     <select
                       {...register("activityId")}
                       onChange={handleChange}
-                      className="form-select form-select-white" aria-label="Select example">
+                      className="form-select form-select-white form-control-solid border border-gray-300" aria-label="Select example">
                       {!isUpdateModalOpen && <option>Select</option>}
                       {
                         productionActivities?.data.map((item: any) => (
@@ -301,7 +301,7 @@ const PlannedOutputTable = () => {
                   <select
                     {...register("destinationId")}
                     onChange={handleChange}
-                    className="form-select form-select-white" aria-label="Select example">
+                    className="form-select form-select-white form-control-solid border border-gray-300" aria-label="Select example">
                     {!isUpdateModalOpen && <option>Select</option>}
                     {
                       destinations?.data.map((item: any) => (
@@ -317,7 +317,7 @@ const PlannedOutputTable = () => {
               <div style={{ padding: "20px 20px 0 20px" }} className='row mb-0 '>
                 <div className=' mb-7'>
                   <label htmlFor="exampleFormControlInput1" className="required form-label text-gray-500">Quantity</label>
-                  <input type="number" {...register("quantity")} min={0} step={1} name="quantity" defaultValue={!isUpdateModalOpen ? 0 : tempData?.quantity} onChange={handleChange} className="form-control form-control-white" />
+                  <input type="number" {...register("quantity")} min={0} step={1} name="quantity" defaultValue={!isUpdateModalOpen ? 0 : tempData?.quantity} onChange={handleChange} className="form-control form-control-white form-control-solid border border-gray-300" />
                 </div>
               </div>
             </form>

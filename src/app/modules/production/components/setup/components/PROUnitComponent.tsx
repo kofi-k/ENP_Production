@@ -218,13 +218,13 @@ const ProUnitComponent = (props: any) => {
 
     const globalSearch = () => {
         // @ts-ignore
-        filteredData = dataWithVehicleNum.filter((value) => {
-            return (
-                value.fleetID.toLowerCase().includes(searchText.toLowerCase()) ||
-                value.modlName.toLowerCase().includes(searchText.toLowerCase())
-            )
-        })
-        setGridData(filteredData)
+        // filteredData = dataWithVehicleNum.filter((value) => {
+        //     return (
+        //         value.fleetID.toLowerCase().includes(searchText.toLowerCase()) ||
+        //         value.modlName.toLowerCase().includes(searchText.toLowerCase())
+        //     )
+        // })
+        // setGridData(filteredData)
     }
     const { isLoading: updateLoading, mutate: updateData } = useMutation(updateItem, {
         onSuccess: (data) => {
@@ -358,7 +358,7 @@ const ProUnitComponent = (props: any) => {
                                     <select
                                         {...register("equipmentId")}
                                         onChange={handleEquipmentIdChange}
-                                        className="form-select form-select-white mb-7 " aria-label="Select example">
+                                        className="form-select form-select-white mb-7 form-control-solid border border-gray-300" aria-label="Select example">
                                         {!isUpdateModalOpen && <option>Select</option>}
                                         {
                                             equipments?.data.map((item: any) => (
@@ -371,11 +371,11 @@ const ProUnitComponent = (props: any) => {
                                 </div>
                                 <div className=' mb-7'>
                                     <label htmlFor="exampleFormControlInput1" className="form-label text-gray-500">Model name</label>
-                                    <input {...register("modelName")} disabled={true} name='modelName' defaultValue={tempData?.modelName} className="form-control form-control-white" />
+                                    <input {...register("modelName")} disabled={true} name='modelName' defaultValue={tempData?.modelName} className="form-control form-control-white form-control-solid border border-gray-300" />
                                 </div>
                                 <div className=' mb-7'>
                                     <label htmlFor="exampleFormControlInput1" className="form-label text-gray-500">Description</label>
-                                    <input {...register("description")} name='description' defaultValue={tempData?.description} onChange={handleChange} className="form-control form-control-white" />
+                                    <input {...register("description")} name='description' defaultValue={tempData?.description} onChange={handleChange} className="form-control form-control-white form-control-solid border border-gray-300" />
                                 </div>
                             </div>
                         </form>
