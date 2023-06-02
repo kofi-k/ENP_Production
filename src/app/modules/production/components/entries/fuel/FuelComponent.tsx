@@ -6,7 +6,7 @@ import { useMutation, useQuery, useQueryClient } from 'react-query';
 import * as XLSX from 'xlsx';
 import { KTCardBody } from '../../../../../../_metronic/helpers';
 import { deleteItem, fetchDocument, postItem, updateItem } from '../../../urls';
-import { ModalFooterButtons, PageActionButtons, calculateVolumesByField, convertExcelDateToJSDate, excelDateToJSDate, extractDateFromTimestamp, fuelIntakeData, getDateFromDateString, groupByBatchNumber, roundOff, timeStamp } from '../../CommonComponents';
+import { ModalFooterButtons, PageActionButtons, calculateQuantityByField, calculateVolumesByField, convertExcelDateToJSDate, excelDateToJSDate, extractDateFromTimestamp, fuelIntakeData, getDateFromDateString, groupByBatchNumber, roundOff, timeStamp } from '../../CommonComponents';
 import { Tabs } from 'antd';
 import { TableProps } from 'react-bootstrap';
 import { UploadChangeParam } from 'antd/es/upload';
@@ -60,8 +60,6 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
             setIsUpdateModalOpen(false)
         }
     }
-
-
 
     const clearBatchData = () => {
         setBatchDataToSave([])
@@ -181,6 +179,71 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
         setRowCount(batchDataToSave.length)
     }, [batchDataToSave]);
 
+    // group by pump
+    const groupbyPump: any = {}
+    dataFromAddB.forEach((item: any) => {
+        if (!groupbyPump[item.pumpId]) {
+            groupbyPump[item.pumpId] = []
+        }
+        groupbyPump[item.pumpId].push(item)
+    })
+    const quantityByPump = calculateQuantityByField(groupbyPump, pumps?.data, 'name')
+
+    // group by equipment
+    const groupbyEquipment: any = {}
+    dataFromAddB.forEach((item: any) => {
+        if (!groupbyEquipment[item.equipmentId]) {
+            groupbyEquipment[item.equipmentId] = []
+        }
+        groupbyEquipment[item.equipmentId].push(item)
+    })
+    const quantityByEquipment = calculateQuantityByField(groupbyEquipment, equipments?.data, 'objId')
+
+    const dynamicColumns = (title: any, data: any) => {
+        const columns = [
+            {
+                title: title, dataIndex: 'field',
+                render: (record: any) => <span style={{ color: '#3699FF' }}>
+                    {record}
+                </span>,
+            },
+
+            { title: 'Total Quantity', dataIndex: 'sum', render: (value: any) => <span>{roundOff(value).toLocaleString()}</span> },
+
+        ];
+        return columns;
+    }
+    const summaryFooter = (data: any) => <Tag color="error">{data === 1 ? `${data} row` : `${data} rows`}</Tag>
+
+    // tab view for data summaries
+    const tabItems: TabsProps['items'] = [
+        {
+            key: '1', label: `Pumps`,
+            children: (
+                <><Table dataSource={quantityByPump} columns={dynamicColumns('Pump', pumps)}
+                    pagination={{ pageSize: 20 }} scroll={{ y: 240 }}
+                    footer={() => summaryFooter(quantityByPump.length)}
+                    bordered
+                    size="middle"
+                /></>
+            ),
+        },
+        {
+            key: '2', label: `Equipments`,
+            children: (
+                <><Table dataSource={quantityByEquipment} columns={dynamicColumns('Equipment', equipments)}
+                    pagination={{ pageSize: 20 }} scroll={{ y: 240 }}
+                    footer={() => summaryFooter(quantityByEquipment.length)}
+                    bordered
+                    size="middle"
+                /></>
+            ),
+        },
+    ];
+
+    const onTabsChange = (key: string) => {
+        //console.log(key);
+    };
 
     const updateItemInBatchData = () => {
         setBatchDataToSave((prevBatchData: any[]) => {
@@ -212,7 +275,7 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
         const selectedDate = new Date(values.intakeDate);
         const data = {
             intakeDate: selectedDate.toISOString(),
-            quantity: values.quantity,
+            quantity: parseInt(values.quantity),
             pumpId: parseInt(values.pumpId),
             equipmentId: values.equipmentId,
             transactionType: title,
@@ -544,7 +607,6 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
                             <hr></hr>
                             {
                                 title == 'Fuel Issue' ?
-
                                     <>
                                         <div style={{ padding: "20px 20px 0 20px" }} className='row mb-0 '>
                                             <div className='col-6'>
@@ -654,6 +716,33 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
                                     icon={<UploadOutlined rev={''} />}>Click to Upload</Button>
                             </Upload>
                         </Space>
+                    </Modal>
+
+                    {/* check data modal */}
+                    <Modal
+                        title={'Batch Summaries'}
+                        open={isCheckDataModalOpen}
+                        onCancel={handleCheckDataCancel}
+                        width={800}
+                        closable={true}
+                        footer={
+                            <>
+                                <Button onClick={handleCheckDataCancel}
+                                    type='primary' size='large'
+                                    className='btn btn-light btn-sm w'>
+                                    Ok
+                                </Button>
+                            </>}
+                    >
+
+                        <Tabs defaultActiveKey="1"
+                            items={tabItems}
+                            onChange={onTabsChange}
+                            tabBarExtraContent={
+                                <>
+                                    <Tag color="geekblue">{rowCount === 1 ? `${rowCount} record` : `${rowCount} records`}</Tag>
+                                </>
+                            } />
                     </Modal>
 
                     {/* confirm save modal */}

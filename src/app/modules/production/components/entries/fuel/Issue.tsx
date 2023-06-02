@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from 'react-query';
 import * as XLSX from 'xlsx';
 import { fetchDocument } from '../../../urls';
@@ -530,6 +530,8 @@ import { FuelComponent } from './FuelComponent';
 
 const FuelIssue = () => {
     const [readRows, setReadRows] = useState([]);
+    const [readColumns, setReadColumns] = useState([]);
+    const [batchDataToSave, setBatchDataToSave] = useState([]);
 
     const tenantId = localStorage.getItem('tenant')
     const { data: pumps } = useQuery('pump', () => fetchDocument(`ProPump/tenant/${tenantId}`), { cacheTime: 5000 })
@@ -572,7 +574,7 @@ const FuelIssue = () => {
     }
 
     let timeStamp: any = dateStamp;
-    const dataToSave = readRows.map((item: any,) => {
+    const dataToSave: any = readRows.map((item: any,) => {
         const pumpId = pumps?.data.find((pump: any) => pump.name.trim() === item.pump.trim());
         const equipment = equipments?.data.find((equipment: any) => equipment.equipmentId.trim() === item.equipment.trim());
         return {
@@ -582,17 +584,22 @@ const FuelIssue = () => {
             equipmentId: equipment?.equipmentId,
             transactionType: 'Fuel Issue',
             tenantId: tenantId,
-            batchNumber: `${timeStamp}`,
         }
     });
     timeStamp = ''
+
+    useEffect(() => {
+        if(dataToSave.length > 0) {
+            setBatchDataToSave(dataToSave)
+        }
+    }, [dataToSave])
 
     return (
         <FuelComponent
             title='Fuel Issue'
             url='ProFuelIssue'
             readFromFile={dataToRead}
-            dataToUpload={dataToSave}
+            dataToUpload={batchDataToSave}
         />
     )
 
