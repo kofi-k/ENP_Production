@@ -1,23 +1,18 @@
-import { Button, Divider, Input, Modal, Space, Spin, Table, TableColumnsType, TabsProps, Tag, Upload, UploadFile, UploadProps, message } from 'antd';
+import { UploadOutlined } from '@ant-design/icons';
+import { Button, Divider, Modal, Space, Table, Tabs, TabsProps, Tag, Upload, UploadProps, message } from 'antd';
 import moment from 'moment';
-import { useEffect, useState } from "react";
-import { set, useForm } from 'react-hook-form';
-import { useMutation, useQuery, useQueryClient } from 'react-query';
 import * as XLSX from 'xlsx';
+import { useEffect, useState } from "react";
+import { useForm } from 'react-hook-form';
+import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { KTCardBody } from '../../../../../../_metronic/helpers';
-import { deleteItem, fetchDocument, postItem, updateItem } from '../../../urls';
-import { ModalFooterButtons, PageActionButtons, calculateQuantityByField, calculateVolumesByField, convertExcelDateToJSDate, excelDateToJSDate, extractDateFromTimestamp, fuelIntakeData, getDateFromDateString, groupByBatchNumber, roundOff, timeStamp } from '../../CommonComponents';
-import { Tabs } from 'antd';
-import { TableProps } from 'react-bootstrap';
-import { UploadChangeParam } from 'antd/es/upload';
-import { time } from 'console';
-import { MinusCircleOutlined, PlusCircleOutlined, UploadOutlined } from '@ant-design/icons';
-import { ColumnsType } from 'antd/es/table';
-import { NumberSchema } from 'yup';
+import { fetchDocument, postItem } from '../../../urls';
+import { ModalFooterButtons, PageActionButtons, calculateQuantityByField, convertExcelDateToJSDate, excelDateToJSDate, getDateFromDateString, roundOff } from '../../CommonComponents';
+import { setUploadFile } from '@devexpress/analytics-core/analytics-internal';
 
 
 
-const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
+const FuelComponent = ({url, title}: any) => {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [uploading, setUploading] = useState(false)
     const [uploadedFile, setUploadedFile] = useState<any>(null)
@@ -44,9 +39,9 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
         setTempData({ ...tempData, [event.target.name]: event.target.value });
     }
     const [dataFromAddB, setDataFromAddB] = useState([])
+    const [readFile, setReadFile] = useState<any>(null)
 
     // state to hold added items that will be batched and saved 
-    let [batchData, setBatchData] = useState<any>([])
 
     const handleCancel = () => {
         reset()
@@ -109,7 +104,7 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
     const onOkay = () => {
         setUploading(true)
         // check if no file is uploaded
-        if (!uploadedFile) {
+        if (fileList.length === 0) {
             setUploading(false)
             message.error('No file uploaded!');
             return
@@ -178,6 +173,7 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
         }
         setRowCount(batchDataToSave.length)
     }, [batchDataToSave]);
+
 
     // group by pump
     const groupbyPump: any = {}
@@ -461,26 +457,113 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
         return name
     }
 
+    useEffect(() => {
+        if (uploadedFile !== null) {
+            setReadFile(uploadedFile)
+        }
+    }, [uploadedFile])
+
+    const readFuelIssue = (data: any) => {
+        let stopReading = false;
+        return data
+            .map((item: any) => {
+
+                if (stopReading) {
+                    return null; // Skip processing the remaining rows
+                }
+                // check for blanks in the row
+                const isRowBblank = item['DATE'] === undefined && item['PUMP ID'] === undefined && item['EQUIPMENT'] === undefined && item['QTY'] === undefined;
+
+                if (isRowBblank) {
+                    stopReading = true;
+                    return null;
+                }
+
+                return {
+                    intakeDate: item['DATE'],
+                    pump: item['PUMP ID'],
+                    equipment: item['EQUIPMENT'],
+                    quantity: item['QTY'],
+                }
+            }).filter((item: any) => item !== null || item !== undefined);
+
+    }
+
+    const readFuelReceipt = (data: any) => {
+        let stopReading = false;
+        return data
+            .map((item: any) => {
+
+                if (stopReading) {
+                    return null; // Skip processing the remaining rows
+                }
+                // check for blanks in the row
+                const isRowBblank = item['DATE'] === undefined && item['PUMP ID'] === undefined && item['QTY'] === undefined;
+
+                if (isRowBblank) {
+                    stopReading = true;
+                    return null;
+                }
+
+                return {
+                    intakeDate: item['DATE'],
+                    pump: item['PUMP ID'],
+                    quantity: item['QTY'],
+                }
+            }).filter((item: any) => item !== null || item !== undefined);
+
+    }
 
     const handleUpload = () => {
 
         const reader = new FileReader()
-        const dateStamp = new Date().getTime()
         try {
             setUploading(true)
             reader.onload = (e: any) => {
-
                 const file = new Uint8Array(e.target.result)
+                // const dataRead = readFromFile(file)
+                const workBook = XLSX.read(file, { type: 'array' })
 
-                const dataRead = readFromFile(file)
-                console.log('readRows: ', dataRead.slice(0, 10))
-                console.log('saveData: ', dataToUpload.slice(0, 10))
-                handleRemove()
+                const targetSheetName = title === 'Fuel Issue' ? `LV'S - RAW DATA` : ``
+                const workSheet: any = workBook.Sheets[targetSheetName]
+
+                const range = title === 'Fuel Issue' ? "A3:F2300" : ''
+
+                const rawData = XLSX.utils.sheet_to_json(workSheet, { header: 0, range: range, blankrows: false, defval: null })
+
+                // what to read from the file
+                const filteredData: any = title === 'Fuel Issue' ? readFuelIssue(rawData) : readFuelReceipt(rawData)
+
+                // valiate the data to uploadable format
+                const uploadableData = filteredData.map((item: any) => {
+                    const pumpId = pumps?.data.find((pump: any) => pump.name.trim() === item.pump.trim());
+                    const equipment = equipments?.data.find((equipment: any) => equipment.equipmentId.trim() === item.equipment.trim());
+
+                    return {
+                        intakeDate: convertExcelDateToJSDate(item.intakeDate).toISOString(),
+                        pumpId: parseInt(pumpId?.id),
+                        quantity: parseInt(item.quantity),
+                        equipmentId: equipment?.equipmentId,
+                        transactionType: title,
+                        tenantId: tenantId,
+                    }
+                })
 
                 const ignoredRows: any[] = [];
-                dataToUpload.map((item: any) => {
+                uploadableData.map((item: any) => {
                     // Check if the item already exists in batchDataToSave
-                    const found = batchDataToSave.find((data: any) => data.intakeDate === item.intakeDate && data.pumpId === item.pumpId);
+                    const found = title === 'Fuel Issue' ?
+                        batchDataToSave.find((data: any) =>
+                            data.intakeDate === item.intakeDate &&
+                            data.pumpId === item.pumpId &&
+                            data.equipmentId === item.equipmentId &&
+                            data.quantity === item.quantity
+                        )
+                        : batchDataToSave.find((data: any) =>
+                            data.intakeDate === item.intakeDate &&
+                            data.pumpId === item.pumpId &&
+                            data.quantity === item.quantity
+                        );
 
                     // Add the item to batchDataToSave only if it doesn't already exist
                     if (!found) {
@@ -489,6 +572,7 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
                         ignoredRows.push(item);
                     }
                 });
+
                 const ignoredRowCount = ignoredRows.length;
                 if (ignoredRowCount > 0) {
                     message.info(`${ignoredRowCount} row(s) were ignored because they already exist.`);
@@ -498,13 +582,13 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
                 }
                 setUploading(false)
                 setIsUploadModalOpen(false)
-                message.success(`${dataToUpload.length} rows uploaded from ${fileName}`)
-
+                message.success(`${uploadableData.length} rows uploaded from ${fileName}`)
+                handleRemove()
             }
         } catch (error) {
             setIsUploadModalOpen(false)
         }
-        reader.readAsArrayBuffer(uploadedFile)
+        reader.readAsArrayBuffer(readFile)
     }
 
     // const handleBatchSave1 = () => {
@@ -625,7 +709,7 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
                                                 <select
                                                     {...register("equipmentId")}
                                                     onChange={handleChange}
-                                                    className="form-select form-select-white form-control-solid border border-gray-300" aria-label="Select example">
+                                                    className="form-select form-select-solid form-control-solid border border-gray-300" aria-label="Select example">
                                                     {!isUpdateModalOpen && <option>Select</option>}
                                                     {
                                                         equipments?.data.map((item: any) => (
@@ -642,7 +726,7 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
                                                 <select
                                                     {...register("pumpId")}
                                                     onChange={handleChange}
-                                                    className="form-select form-select-white form-control-solid border border-gray-300" aria-label="Select example">
+                                                    className="form-select form-select-solid border border-gray-300" aria-label="Select example">
                                                     {!isUpdateModalOpen && <option>Select</option>}
                                                     {
                                                         pumps?.data.map((item: any) => (
@@ -661,7 +745,7 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
                                             <div className=' mb-7 '>
                                                 <label htmlFor="exampleFormControlInput1" className="form-label text-gray-500">Date</label>
                                                 <input type="date" {...register("intakeDate")} name="intakeDate" defaultValue={!isUpdateModalOpen ? '' : getDateFromDateString(tempData?.intakeDate)} onChange={handleChange}
-                                                    className="form-control form-control-white form-control-solid border border-gray-300" />
+                                                    className="form-control form-control-solid border border-gray-300" />
                                             </div>
 
                                             <div className=' mb-7 '>
@@ -669,7 +753,7 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
                                                 <select
                                                     {...register("pumpId")}
                                                     onChange={handleChange}
-                                                    className="form-select form-control-solid border border-gray-300" aria-label="Select example">
+                                                    className="form-select form-select-solid border border-gray-300" aria-label="Select example">
                                                     {!isUpdateModalOpen && <option>Select</option>}
                                                     {
                                                         pumps?.data.map((item: any) => (
@@ -684,7 +768,7 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
                                             <div className=' mb-7 '>
                                                 <label htmlFor="exampleFormControlInput1" className="form-label text-gray-500">Quantity</label>
                                                 <input type="number" {...register("quantity")} min={0} name='quantity' defaultValue={!isUpdateModalOpen ? 0 : tempData?.quantity} onChange={handleChange}
-                                                    className="form-control form-control-white form-control-solid border border-gray-300" />
+                                                    className="form-control form-control-solid border border-gray-300" />
                                             </div>
                                         </div>
                                     </>
@@ -736,7 +820,7 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
                     >
 
                         <Tabs defaultActiveKey="1"
-                            items={tabItems}
+                            items={title === 'Fuel Issue' ? tabItems: tabItems.slice(0,1)}
                             onChange={onTabsChange}
                             tabBarExtraContent={
                                 <>
@@ -792,4 +876,4 @@ const FuelComponent = ({ dataToUpload, url, title, readFromFile }: any) => {
     )
 };
 
-export { FuelComponent }
+export { FuelComponent };

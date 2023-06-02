@@ -573,7 +573,6 @@ const FuelIssue = () => {
         return readRows;
     }
 
-    let timeStamp: any = dateStamp;
     const dataToSave: any = readRows.map((item: any,) => {
         const pumpId = pumps?.data.find((pump: any) => pump.name.trim() === item.pump.trim());
         const equipment = equipments?.data.find((equipment: any) => equipment.equipmentId.trim() === item.equipment.trim());
@@ -586,7 +585,6 @@ const FuelIssue = () => {
             tenantId: tenantId,
         }
     });
-    timeStamp = ''
 
     useEffect(() => {
         if(dataToSave.length > 0) {
@@ -598,8 +596,6 @@ const FuelIssue = () => {
         <FuelComponent
             title='Fuel Issue'
             url='ProFuelIssue'
-            readFromFile={dataToRead}
-            dataToUpload={batchDataToSave}
         />
     )
 

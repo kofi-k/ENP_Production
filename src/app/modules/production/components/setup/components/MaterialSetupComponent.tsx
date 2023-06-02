@@ -259,7 +259,8 @@ const MatComponet = (props: any) => {
               <div style={{ padding: "20px 20px 0 20px" }} className='row mb-0 '>
                 <div className=' mb-7'>
                   <label htmlFor="exampleFormControlInput1" className="form-label text-gray-500">Name</label>
-                  <input {...register("name")} name='name' defaultValue={!isUpdateModalOpen ? '' : tempData?.name} onChange={handleChange} className="form-control form-control-white form-control-solid border border-gray-300" />
+                  <input {...register("name")} name='name' defaultValue={!isUpdateModalOpen ? '' : tempData?.name} onChange={handleChange} 
+                  className="form-control form-control-white form-control-solid border border-gray-300" />
                 </div>
               </div>
             </form>
