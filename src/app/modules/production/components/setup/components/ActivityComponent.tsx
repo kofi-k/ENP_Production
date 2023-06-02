@@ -359,7 +359,7 @@ const ActivityComponent = ({ data, hasActivityType }: any) => {
                                         <select
                                             {...register("activityType")}
                                             onChange={handleChange}
-                                            className="form-select form-select-white form-control-solid border border-gray-300" aria-label="Select example">
+                                            className="form-select form-select-solid border border-gray-300" aria-label="Select example">
                                             {!isUpdateModalOpen && <option>Select</option>}
                                             {
                                                 activityTypes.map((item: any) => (

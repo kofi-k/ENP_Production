@@ -352,7 +352,8 @@ const CycleDetailsTable = () => {
                 const range = "A13:ZZ1200";
 
                 const rawExcelData: any = XLSX.utils.sheet_to_json(workSheet, { header: 0, range: range, blankrows: false })
-
+                
+                // what to read from the file
                 let stopReading = false;
                 const filteredData: any = rawExcelData
                     .map((item: any) => {
@@ -392,8 +393,7 @@ const CycleDetailsTable = () => {
                         }
                     }).filter((item: any) => item !== null);
 
-                console.log('filteredData: ', filteredData.slice(0, 20))
-
+                // valiate the data to uploadable format
                 const uploadableData = filteredData.slice(1).map((item: any,) => {
 
                     const destinationId = destinations?.data.find((dest: any) => dest.name.trim() === item.destination.trim());
@@ -404,10 +404,6 @@ const CycleDetailsTable = () => {
                     const originId = allOrigins?.data.find((ori: any) => ori.name.trim() === item.origin.trim());
                     const materialId = allMaterials?.data.find((mat: any) => mat.name === item.material);
                     const shiftId = allShifts?.data.find((s: any) => s.name === item.shift);
-
-                    if (!hauler) {
-
-                    }
 
                     return {
                         cycleDate: convertExcelDateToJSDate(item.cycleDate).toISOString(),
@@ -431,6 +427,7 @@ const CycleDetailsTable = () => {
                         tenantId: tenantId,
                     }
                 });
+
                 console.log('uploadableData: ', uploadableData.slice(0, 20))
                 handleRemove()
                 // add each uploadable data to manual batch data
@@ -902,16 +899,16 @@ const CycleDetailsTable = () => {
                             <div style={{ padding: "20px 20px 0 20px" }} className='row mb-0 '>
                                 <div className='col-4'>
                                     <label htmlFor="exampleFormControlInput1" className="required form-label text-gray-500">Date</label>
-                                    <input type="date" {...register("cycleDate")} name="cycleDate" defaultValue={!isUpdateModalOpen ? '' : getDateFromDateString(tempData?.cycleDate)} onChange={handleChange} className="form-control form-control-white" />
+                                    <input type="date" {...register("cycleDate")} name="cycleDate" defaultValue={!isUpdateModalOpen ? '' : getDateFromDateString(tempData?.cycleDate)} onChange={handleChange} className="form-control form-control-solid border border-gray-300" />
                                 </div>
                                 <div className='col-4'>
                                     <label htmlFor="exampleFormControlInput1" className="required form-label text-gray-500">Time</label>
-                                    <input type="time" {...register("cycleTime")} name="cycleTime" defaultValue={!isUpdateModalOpen ? '' : extractTimeFromISOString(tempData?.cycleTime)} onChange={handleChange} className="form-control form-control-white" />
+                                    <input type="time" {...register("cycleTime")} name="cycleTime" defaultValue={!isUpdateModalOpen ? '' : extractTimeFromISOString(tempData?.cycleTime)} onChange={handleChange} className="form-control form-control-solid border border-gray-300" />
                                 </div>
 
                                 <div className='col-4'>
                                     <label htmlFor="exampleFormControlInput1" className="required form-label text-gray-500">Time at Loader</label>
-                                    <input type="time" {...register("timeAtLoader")} name="timeAtLoader" defaultValue={!isUpdateModalOpen ? '' : extractTimeFromISOString(tempData?.timeAtLoader)} onChange={handleChange} className="form-control form-control-white" />
+                                    <input type="time" {...register("timeAtLoader")} name="timeAtLoader" defaultValue={!isUpdateModalOpen ? '' : extractTimeFromISOString(tempData?.timeAtLoader)} onChange={handleChange} className="form-control form-control-solid border border-gray-300" />
                                 </div>
                             </div>
                             <div style={{ padding: "0 20px 0 20px" }} className='row mb-0 '>
@@ -920,7 +917,8 @@ const CycleDetailsTable = () => {
                                     <select
                                         {...register("loader")}
                                         onChange={handleChange}
-                                        className="form-select form-select-white" aria-label="Select example">
+                                        className="form-select form-select-solid border border-gray-300"
+                                        aria-label="Select example">
                                         {!isUpdateModalOpen && <option>Select</option>}
                                         {
                                             allLoaderOperators?.data.map((item: any) => (
@@ -936,7 +934,8 @@ const CycleDetailsTable = () => {
                                     <select
                                         {...register("hauler")}
                                         onChange={handleChange}
-                                        className="form-select form-select-white" aria-label="Select example">
+                                        className="form-select form-select-solid border border-gray-300"
+                                        aria-label="Select example">
                                         {!isUpdateModalOpen && <option>Select</option>}
                                         {
                                             allHaulerOperators?.data.map((item: any) => (
@@ -952,7 +951,8 @@ const CycleDetailsTable = () => {
                                     <select
                                         {...register("originId")}
                                         onChange={handleChange}
-                                        className="form-select form-select-white" aria-label="Select example">
+                                        className="form-select form-select-solid border border-gray-300"
+                                        aria-label="Select example">
                                         {!isUpdateModalOpen && <option>Select</option>}
                                         {
                                             allOrigins?.data.map((item: any) => (
@@ -969,7 +969,8 @@ const CycleDetailsTable = () => {
                                     <select
                                         {...register("haulerUnitId")}
                                         onChange={handleChange}
-                                        className="form-select form-select-white" aria-label="Select example">
+                                        className="form-select form-select-solid border border-gray-300"
+                                        aria-label="Select example">
                                         {!isUpdateModalOpen && <option>Select</option>}
                                         {
                                             allHaulerUnits?.data.map((item: any) => (
@@ -985,7 +986,8 @@ const CycleDetailsTable = () => {
                                     <select
                                         {...register("loaderUnitId")}
                                         onChange={handleChange}
-                                        className="form-select form-select-white" aria-label="Select example">
+                                        className="form-select form-select-solid border border-gray-300"
+                                        aria-label="Select example">
                                         {!isUpdateModalOpen && <option>Select</option>}
                                         {
                                             allLoaderUnits?.data.map((item: any) => (
@@ -1002,7 +1004,8 @@ const CycleDetailsTable = () => {
                                     <select
                                         {...register("materialId")}
                                         onChange={handleChange}
-                                        className="form-select form-select-white" aria-label="Select example">
+                                        className="form-select form-select-solid border border-gray-300"
+                                        aria-label="Select example">
                                         {!isUpdateModalOpen && <option>Select</option>}
                                         {
                                             allMaterials?.data.map((item: any) => (
@@ -1021,7 +1024,8 @@ const CycleDetailsTable = () => {
                                     <select
                                         {...register("destinationId")}
                                         onChange={handleChange}
-                                        className="form-select form-select-white" aria-label="Select example">
+                                        className="form-select form-select-solid border border-gray-300"
+                                        aria-label="Select example">
                                         {!isUpdateModalOpen && <option>Select</option>}
                                         {
                                             destinations?.data.map((item: any) => (
@@ -1037,7 +1041,8 @@ const CycleDetailsTable = () => {
                                     <select
                                         {...register("shiftId")}
                                         onChange={handleChange}
-                                        className="form-select form-select-white" aria-label="Select example">
+                                        className="form-select form-select-solid border border-gray-300"
+                                        aria-label="Select example">
                                         {!isUpdateModalOpen && <option>Select</option>}
                                         {
                                             allShifts?.data.map((item: any) => (
@@ -1053,36 +1058,43 @@ const CycleDetailsTable = () => {
                             <div style={{ padding: "0 20px 0 20px" }} className='row mb-0 '>
                                 <div className='col-4 mt-3'>
                                     <label htmlFor="exampleFormControlInput1" className="required form-label text-gray-500">Nominal Weight</label>
-                                    <input type="number" {...register("nominalWeight")} name="nominalWeight" min={0} defaultValue={!isUpdateModalOpen ? 0 : tempData?.nominalWeight} onChange={handleChange} className="form-control form-control-white" />
+                                    <input type="number" {...register("nominalWeight")} name="nominalWeight" min={0} defaultValue={!isUpdateModalOpen ? 0 : tempData?.nominalWeight} onChange={handleChange}
+                                        className="form-control form-control-solid border border-gray-300" />
                                 </div>
                                 <div className='col-4 mt-3'>
                                     <label htmlFor="exampleFormControlInput1" className="required form-label text-gray-500">Weight</label>
-                                    <input type="number" {...register("weight")} name="weight" min={0} defaultValue={!isUpdateModalOpen ? 0 : tempData?.weight} onChange={handleChange} className="form-control form-control-white" />
+                                    <input type="number" {...register("weight")} name="weight" min={0} defaultValue={!isUpdateModalOpen ? 0 : tempData?.weight} onChange={handleChange}
+                                        className="form-control form-control-solid border border-gray-300" />
                                 </div>
                                 <div className='col-4 mt-3'>
                                     <label htmlFor="exampleFormControlInput1" className="required form-label text-gray-500">Payload Weight</label>
-                                    <input type="number" {...register("payloadWeight")} name="payloadWeight" min={0} defaultValue={!isUpdateModalOpen ? 0 : tempData?.payloadWeight} onChange={handleChange} className="form-control form-control-white" />
+                                    <input type="number" {...register("payloadWeight")} name="payloadWeight" min={0} defaultValue={!isUpdateModalOpen ? 0 : tempData?.payloadWeight} onChange={handleChange}
+                                        className="form-control form-control-solid border border-gray-300" />
                                 </div>
                             </div>
                             <div style={{ padding: "0 20px 0 20px" }} className='row mb-0 '>
                                 <div className='col-4 mt-3'>
                                     <label htmlFor="exampleFormControlInput1" className="required form-label text-gray-500">Reported Weight</label>
-                                    <input type="number" {...register("reportedWeight")} name="reportedWeight" min={0} defaultValue={!isUpdateModalOpen ? 0 : tempData?.reportedWeight} onChange={handleChange} className="form-control form-control-white" />
+                                    <input type="number" {...register("reportedWeight")} name="reportedWeight" min={0} defaultValue={!isUpdateModalOpen ? 0 : tempData?.reportedWeight} onChange={handleChange}
+                                        className="form-control form-control-solid border border-gray-300" />
                                 </div>
                                 <div className='col-4 mt-3'>
                                     <label htmlFor="exampleFormControlInput1" className="required form-label text-gray-500">Volume</label>
-                                    <input type="number" {...register("volumes")} name="volumes" min={0} defaultValue={!isUpdateModalOpen ? 0 : tempData?.volumes} onChange={handleChange} className="form-control form-control-white" />
+                                    <input type="number" {...register("volumes")} name="volumes" min={0} defaultValue={!isUpdateModalOpen ? 0 : tempData?.volumes} onChange={handleChange}
+                                        className="form-control form-control-solid border border-gray-300" />
                                 </div>
                                 <div className='col-4 mt-3'>
                                     <label htmlFor="exampleFormControlInput1" className="required form-label text-gray-500">Loads</label>
-                                    <input type="number" {...register("loads")} name="loads" min={0} defaultValue={!isUpdateModalOpen ? 0 : tempData?.loads} onChange={handleChange} className="form-control form-control-white" />
+                                    <input type="number" {...register("loads")} name="loads" min={0} defaultValue={!isUpdateModalOpen ? 0 : tempData?.loads} onChange={handleChange}
+                                        className="form-control form-control-solid border border-gray-300" />
                                 </div>
                             </div>
                             <div style={{ padding: "0 20px 0 20px" }} className='row mb-0 '>
 
                                 <div className='col-4 mt-3'>
                                     <label htmlFor="exampleFormControlInput1" className="required form-label text-gray-500">Duration</label>
-                                    <input type="number" {...register("duration")} name="duration" min={0} defaultValue={!isUpdateModalOpen ? 0 : tempData?.duration} onChange={handleChange} className="form-control form-control-white" />
+                                    <input type="number" {...register("duration")} name="duration" min={0} defaultValue={!isUpdateModalOpen ? 0 : tempData?.duration} onChange={handleChange}
+                                        className="form-control form-control-solid border border-gray-300" />
                                 </div>
                             </div>
                         </form>

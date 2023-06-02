@@ -358,7 +358,7 @@ const ProUnitComponent = (props: any) => {
                                     <select
                                         {...register("equipmentId")}
                                         onChange={handleEquipmentIdChange}
-                                        className="form-select form-select-white mb-7 form-control-solid border border-gray-300" aria-label="Select example">
+                                        className="form-select form-select-solid border border-gray-300 mb-7" aria-label="Select example">
                                         {!isUpdateModalOpen && <option>Select</option>}
                                         {
                                             equipments?.data.map((item: any) => (

@@ -196,7 +196,7 @@ const PlannedOutputTable = () => {
       url: 'plannedOutput'
     }
     //make sure field are not empty
-    if (item.data.destinationId === 'Select' || item.data.activityId === 'Select' ) {
+    if (item.data.destinationId === 'Select' || item.data.activityId === 'Select') {
       message.error('All fields are required', 3)
       setSubmitLoading(false)
       return
@@ -224,7 +224,7 @@ const PlannedOutputTable = () => {
       // check if error is 400
       if (error.response.status === 400) {
         message.error(`Select all required fields`, 3)
-        return 
+        return
       }
       message.error(`${error}`)
     }
@@ -301,7 +301,7 @@ const PlannedOutputTable = () => {
                   <select
                     {...register("destinationId")}
                     onChange={handleChange}
-                    className="form-select form-select-white form-control-solid border border-gray-300" aria-label="Select example">
+                    className="form-select form-select-solid border border-gray-300" aria-label="Select example">
                     {!isUpdateModalOpen && <option>Select</option>}
                     {
                       destinations?.data.map((item: any) => (
