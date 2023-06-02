@@ -749,9 +749,9 @@ const DrillEntry = () => {
                                 </Space>
                                 :
                                 <PageActionButtons
-                                    onAddClick={showModal}
-                                    onExportClicked={() => { console.log('export clicked') }}
-                                    onUploadClicked={showUploadModal}
+                                    onAddClick={()=>{}}
+                                    onExportClicked={() => {}}
+                                    onUploadClicked={()=>{}}
                                     hasAddButton={true}
                                     hasExportButton={true}
                                     hasUploadButton={true}

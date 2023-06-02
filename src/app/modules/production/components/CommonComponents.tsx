@@ -191,6 +191,18 @@ function calculateVolumesByField(groupedByField: any, queryData: any, objProp: a
     return volumesByField;
 }
 
+function calculateQuantityByField(groupedByField: any, queryData: any, objProp: any ) {
+    const quantityByField = [];
+    for (const field in groupedByField) {
+        const quantities = groupedByField[field].map((item: any) => item.quantity);
+        const sum = quantities.reduce((accumulator: any, currentValue: any) => accumulator + currentValue);
+        const fieldName = objProp === 'objId' ? `${field}` :  getFieldDisplayName(queryData, field)
+        quantityByField.push({ field: fieldName, sum });
+    }
+
+    return quantityByField;
+}
+
 const getFieldDisplayName = (data: any, field: any ) => {
    const itemName =  data.find((obj: any) => obj.id === parseInt(field));
    return itemName?.name;
@@ -330,5 +342,5 @@ export {
     extractDateFromTimestamp, batchVolumesThirtyDaysRolling,
     groupByBatchNumber, fuelIntakeData, convertExcelDateToJSDate,
     convertExcelTimeToJSDate, timeFormat, getDateFromDateString, extractTimeFromISOString,
-    ColumnActionButtons, getRecordName
+    ColumnActionButtons, getRecordName, calculateQuantityByField
 }
