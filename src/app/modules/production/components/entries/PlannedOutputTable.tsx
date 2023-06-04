@@ -277,7 +277,6 @@ const PlannedOutputTable = () => {
 
               <hr></hr>
 
-
               <div style={{ padding: "0px 20px 0 20px" }} className='row mb-0 '>
                 <div className='mb-0'>
                   <div className='mt-7 mb-7'>

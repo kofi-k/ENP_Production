@@ -337,79 +337,184 @@ const CycleDetailsTable = () => {
         }
     }
 
-    const handleUpload = () => {
-        const reader = new FileReader()
-        try {
-            setUploading(true)
-            reader.onload = (e: any) => {
+    // const handleUpload = () => {
+    //     const reader = new FileReader()
+    //     try {
+    //         setUploading(true)
+    //         reader.onload = (e: any) => {
 
-                const file = new Uint8Array(e.target.result)
-                const workBook = XLSX.read(file, { type: 'array' })
-                const workSheetName = workBook.SheetNames[0]
-                const workSheet: any = workBook.Sheets[workSheetName]
+    //             const file = new Uint8Array(e.target.result)
+    //             const workBook = XLSX.read(file, { type: 'array' })
+    //             const workSheetName = workBook.SheetNames[0]
+    //             const workSheet: any = workBook.Sheets[workSheetName]
+
+    //             // sets the range to be read from the excel file
+    //             const range = "A13:ZZ1200";
+
+    //             const rawExcelData: any = XLSX.utils.sheet_to_json(workSheet, { header: 0, range: range, blankrows: false })
+
+    //             // what to read from the file
+    //             let stopReading = false;
+    //             const filteredData: any = rawExcelData
+    //                 .map((item: any) => {
+
+    //                     if (stopReading) {
+    //                         return null; // Skip processing the remaining rows
+    //                     }
+
+    //                     const isTotalRow = item['Shift'] === 'Total' || item['Date'] === 'Total' ||
+    //                         item['Time Start'] === 'Total';
+
+    //                     if (isTotalRow) {
+    //                         stopReading = true;
+    //                         return null;
+    //                     }
+
+    //                     return {
+    //                         cycleDate: `${item.Date}`,
+    //                         shift: item['Shift'],
+    //                         // cycleTime: moment(excelDateToJSDate(item['Arrived']), 'HH:mm:ss').format('HH:mm'),
+    //                         cycleTime: item['Arrived'],
+    //                         loaderUnit: item['Loading Unit'],
+    //                         loader: item['Loader Operator'],
+    //                         hauler: item['Hauler Operator'],
+    //                         haulerUnit: item['Truck'],
+    //                         origin: item['Origin'],
+    //                         material: item['Material'],
+    //                         destination: item['Destination'],
+    //                         nominalWeight: item['Nominal Weight'],
+    //                         payloadWeight: item['Payload Weight'],
+    //                         reportedWeight: item['Reported Weight'],
+    //                         volumes: roundOff(item.Volume),
+    //                         loads: item['Loads'],
+    //                         timeAtLoader: item['Time Start'],
+    //                         // timeAtLoader: moment(excelDateToJSDate(item['Time Start']), 'HH:mm:ss').format('HH:mm'),
+    //                         duration: item['Travel Empty Duration'],
+    //                     }
+    //                 }).filter((item: any) => item !== null);
+
+    //             // valiate the data to uploadable format
+    //             const uploadableData = filteredData.slice(1).map((item: any,) => {
+
+    //                 const destinationId = destinations?.data.find((dest: any) => dest.name.trim() === item.destination.trim());
+    //                 const haulerUnitId = allHaulerUnits?.data.find((unit: any) => unit.equipmentId.trim() === item.haulerUnit.trim());
+    //                 const hauler = allHaulerOperators?.data.find((op: any) => op.empName.trim() === item.hauler.trim());
+    //                 const loaderUnitId = allLoaderUnits?.data.find((unit: any) => unit.equipmentId.trim() === item.loaderUnit.trim());
+    //                 const loader = allLoaderOperators?.data.find((op: any) => op.empName.trim() === item.loader.trim());
+    //                 const originId = allOrigins?.data.find((ori: any) => ori.name.trim() === item.origin.trim());
+    //                 const materialId = allMaterials?.data.find((mat: any) => mat.name === item.material);
+    //                 const shiftId = allShifts?.data.find((s: any) => s.name === item.shift);
+
+    //                 return {
+    //                     cycleDate: convertExcelDateToJSDate(item.cycleDate).toISOString(),
+    //                     cycleTime: convertExcelTimeToJSDate(item.cycleTime).toISOString(),
+    //                     loader: loader?.empCode === undefined ? 'UN123' : loader?.empCode,
+    //                     hauler: hauler?.empCode === undefined ? 'UN100' : hauler?.empCode,
+    //                     loaderUnitId: parseInt(loaderUnitId?.id),
+    //                     haulerUnitId: parseInt(haulerUnitId?.id),
+    //                     originId: parseInt(originId?.id),
+    //                     materialId: parseInt(materialId?.id),
+    //                     destinationId: parseInt(destinationId?.id),
+    //                     nominalWeight: parseInt(item.nominalWeight),
+    //                     weight: parseInt(item.nominalWeight),
+    //                     payloadWeight: parseInt(item.payloadWeight),
+    //                     reportedWeight: parseInt(item.reportedWeight),
+    //                     volumes: parseInt(item.volumes),
+    //                     loads: parseInt(item.loads),
+    //                     timeAtLoader: convertExcelTimeToJSDate(item.timeAtLoader).toISOString(),
+    //                     shiftId: parseInt(shiftId?.id),
+    //                     duration: parseInt(item.duration),
+    //                     tenantId: tenantId,
+    //                 }
+    //             });
+
+    //             console.log('uploadableData: ', uploadableData.slice(0, 20))
+    //             handleRemove()
+    //             // add each uploadable data to manual batch data
+    //             const ignoredRows: any[] = [];
+    //             uploadableData.map((item: any) => {
+    //                 // Check if the item already exists in batchDataToSave
+    //                 const found =
+    //                     batchDataToSave.find((batchItem: any) =>
+    //                         batchItem.cycleDate === item.cycleDate &&
+    //                         batchItem.cycleTime === item.cycleTime &&
+    //                         batchItem.loaderUnitId === item.loaderUnitId &&
+    //                         batchItem.haulerUnitId === item.haulerUnitId &&
+    //                         batchItem.originId === item.originId &&
+    //                         batchItem.materialId === item.materialId &&
+    //                         batchItem.destinationId === item.destinationId &&
+    //                         batchItem.nominalWeight === item.nominalWeight &&
+    //                         batchItem.weight === item.weight &&
+    //                         batchItem.payloadWeight === item.payloadWeight &&
+    //                         batchItem.reportedWeight === item.reportedWeight &&
+    //                         batchItem.volumes === item.volumes &&
+    //                         batchItem.loads === item.loads &&
+    //                         batchItem.timeAtLoader === item.timeAtLoader &&
+    //                         batchItem.shiftId === item.shiftId &&
+    //                         batchItem.duration === item.duration
+    //                     );
+    //                 if (!found) {
+    //                     setBatchDataToSave((prevBatchData: any) => [...prevBatchData, item])
+    //                 } else {
+    //                     ignoredRows.push(item);
+    //                 }
+    //             })
+
+    //             const ignoredRowCount = ignoredRows.length;
+    //             if (ignoredRowCount > 0) {
+    //                 message.info(`${ignoredRowCount} row(s) were ignored because they already exist.`);
+    //                 setUploading(false)
+    //                 setIsUploadModalOpen(false)
+    //                 return
+    //             }
+
+    //             setUploading(false)
+    //             setIsUploadModalOpen(false)
+    //             message.success(`${uploadableData.length} rows uploaded from ${fileName}`)
+    //         }
+
+    //     } catch (error) {
+    //         setIsUploadModalOpen(false)
+    //     }
+    //     reader.readAsArrayBuffer(uploadedFile)
+    // }
+
+    // group by hauler unit
+
+    const handleUpload = () => {
+        const reader = new FileReader();
+        try {
+            setUploading(true);
+            reader.onload = (e: any) => {
+                const file = new Uint8Array(e.target.result);
+                const workBook = XLSX.read(file, { type: 'array' });
+                const workSheetName = workBook.SheetNames[0];
+                const workSheet = workBook.Sheets[workSheetName];
 
                 // sets the range to be read from the excel file
                 const range = "A13:ZZ1200";
+                const rawExcelData = XLSX.utils.sheet_to_json(workSheet, {
+                    header: 0,
+                    range: range,
+                    blankrows: false
+                });
 
-                const rawExcelData: any = XLSX.utils.sheet_to_json(workSheet, { header: 0, range: range, blankrows: false })
-                
-                // what to read from the file
-                let stopReading = false;
-                const filteredData: any = rawExcelData
-                    .map((item: any) => {
-
-                        if (stopReading) {
-                            return null; // Skip processing the remaining rows
-                        }
-
-                        const isTotalRow = item['Shift'] === 'Total' || item['Date'] === 'Total' ||
-                            item['Time Start'] === 'Total';
-
-                        if (isTotalRow) {
-                            stopReading = true;
-                            return null;
-                        }
-
-                        return {
-                            cycleDate: `${item.Date}`,
-                            shift: item['Shift'],
-                            // cycleTime: moment(excelDateToJSDate(item['Arrived']), 'HH:mm:ss').format('HH:mm'),
-                            cycleTime: item['Arrived'],
-                            loaderUnit: item['Loading Unit'],
-                            loader: item['Loader Operator'],
-                            hauler: item['Hauler Operator'],
-                            haulerUnit: item['Truck'],
-                            origin: item['Origin'],
-                            material: item['Material'],
-                            destination: item['Destination'],
-                            nominalWeight: item['Nominal Weight'],
-                            payloadWeight: item['Payload Weight'],
-                            reportedWeight: item['Reported Weight'],
-                            volumes: roundOff(item.Volume),
-                            loads: item['Loads'],
-                            timeAtLoader: item['Time Start'],
-                            // timeAtLoader: moment(excelDateToJSDate(item['Time Start']), 'HH:mm:ss').format('HH:mm'),
-                            duration: item['Travel Empty Duration'],
-                        }
-                    }).filter((item: any) => item !== null);
-
-                // valiate the data to uploadable format
-                const uploadableData = filteredData.slice(1).map((item: any,) => {
-
-                    const destinationId = destinations?.data.find((dest: any) => dest.name.trim() === item.destination.trim());
-                    const haulerUnitId = allHaulerUnits?.data.find((unit: any) => unit.equipmentId.trim() === item.haulerUnit.trim());
-                    const hauler = allHaulerOperators?.data.find((op: any) => op.empName.trim() === item.hauler.trim());
-                    const loaderUnitId = allLoaderUnits?.data.find((unit: any) => unit.equipmentId.trim() === item.loaderUnit.trim());
-                    const loader = allLoaderOperators?.data.find((op: any) => op.empName.trim() === item.loader.trim());
-                    const originId = allOrigins?.data.find((ori: any) => ori.name.trim() === item.origin.trim());
-                    const materialId = allMaterials?.data.find((mat: any) => mat.name === item.material);
-                    const shiftId = allShifts?.data.find((s: any) => s.name === item.shift);
+                // validate the data to uploadable format
+                const uploadableData = rawExcelData.slice(1).map((item: any) => {
+                    const destinationId = findId(destinations?.data, item.destination);
+                    const haulerUnitId = findUnitId(allHaulerUnits?.data, item.haulerUnit);
+                    const hauler = findOperator(allHaulerOperators?.data, item.hauler);
+                    const loaderUnitId = findUnitId(allLoaderUnits?.data, item.loaderUnit);
+                    const loader = findOperator(allLoaderOperators?.data, item.loader);
+                    const originId = findId(allOrigins?.data, item.origin);
+                    const materialId = findId(allMaterials?.data, item.material);
+                    const shiftId = findId(allShifts?.data, item.shift);
 
                     return {
                         cycleDate: convertExcelDateToJSDate(item.cycleDate).toISOString(),
                         cycleTime: convertExcelTimeToJSDate(item.cycleTime).toISOString(),
-                        loader: loader?.empCode === undefined ? 'UN123' : loader?.empCode,
-                        hauler: hauler?.empCode === undefined ? 'UN100' : hauler?.empCode,
+                        loader: loader ? loader.empCode : 'UN123',
+                        hauler: hauler ? hauler.empCode : 'UN100',
                         loaderUnitId: parseInt(loaderUnitId?.id),
                         haulerUnitId: parseInt(haulerUnitId?.id),
                         originId: parseInt(originId?.id),
@@ -425,61 +530,78 @@ const CycleDetailsTable = () => {
                         shiftId: parseInt(shiftId?.id),
                         duration: parseInt(item.duration),
                         tenantId: tenantId,
-                    }
+                    };
                 });
 
-                console.log('uploadableData: ', uploadableData.slice(0, 20))
-                handleRemove()
+                console.log('uploadableData: ', uploadableData.slice(0, 20));
+                handleRemove();
                 // add each uploadable data to manual batch data
-                const ignoredRows: any[] = [];
-                uploadableData.map((item: any) => {
-                    // Check if the item already exists in batchDataToSave
-                    const found =
-                        batchDataToSave.find((batchItem: any) =>
-                            batchItem.cycleDate === item.cycleDate &&
-                            batchItem.cycleTime === item.cycleTime &&
-                            batchItem.loaderUnitId === item.loaderUnitId &&
-                            batchItem.haulerUnitId === item.haulerUnitId &&
-                            batchItem.originId === item.originId &&
-                            batchItem.materialId === item.materialId &&
-                            batchItem.destinationId === item.destinationId &&
-                            batchItem.nominalWeight === item.nominalWeight &&
-                            batchItem.weight === item.weight &&
-                            batchItem.payloadWeight === item.payloadWeight &&
-                            batchItem.reportedWeight === item.reportedWeight &&
-                            batchItem.volumes === item.volumes &&
-                            batchItem.loads === item.loads &&
-                            batchItem.timeAtLoader === item.timeAtLoader &&
-                            batchItem.shiftId === item.shiftId &&
-                            batchItem.duration === item.duration
-                        );
+                const ignoredRows = [];
+                uploadableData.forEach((item) => {
+                    const found = batchDataToSave.some((batchItem: any) =>
+                        isEqual(batchItem, item)
+                    );
                     if (!found) {
-                        setBatchDataToSave((prevBatchData: any) => [...prevBatchData, item])
+                        setBatchDataToSave((prevBatchData: any) => [...prevBatchData, item]);
                     } else {
                         ignoredRows.push(item);
                     }
-                })
+                });
 
                 const ignoredRowCount = ignoredRows.length;
                 if (ignoredRowCount > 0) {
                     message.info(`${ignoredRowCount} row(s) were ignored because they already exist.`);
-                    setUploading(false)
-                    setIsUploadModalOpen(false)
-                    return
+                    setUploading(false);
+                    setIsUploadModalOpen(false);
+                    return;
                 }
 
-                setUploading(false)
-                setIsUploadModalOpen(false)
-                message.success(`${uploadableData.length} rows uploaded from ${fileName}`)
-            }
+                setUploading(false);
+                setIsUploadModalOpen(false);
+                message.success(`${uploadableData.length} rows uploaded from ${fileName}`);
+            };
 
+            reader.readAsArrayBuffer(uploadedFile);
         } catch (error) {
-            setIsUploadModalOpen(false)
+            setIsUploadModalOpen(false);
         }
-        reader.readAsArrayBuffer(uploadedFile)
+    };
+
+    function isEqual(obj1: any, obj2: any) {
+        // Get the keys of the two objects
+        const keys1 = Object.keys(obj1);
+        const keys2 = Object.keys(obj2);
+
+        // If the number of keys is different, the objects are not equal
+        if (keys1.length !== keys2.length) {
+            return false;
+        }
+
+        // Iterate over the keys and compare the values
+        for (let key of keys1) {
+            if (!obj2.hasOwnProperty(key) || obj1[key] !== obj2[key]) {
+                return false;
+            }
+        }
+
+        // All keys and values are equal, the objects are equal
+        return true;
     }
 
-    // group by hauler unit
+
+    const findId = (data: any, name: any) => {
+        return data.find((dest: any) => dest?.name.trim() === name.trim());
+    };
+
+    const findUnitId = (data: any, unit: any) => {
+        return data.find((u: any) => u?.equipmentId.trim() === unit.trim());
+    };
+
+    const findOperator = (data: any, operator: any) => {
+        return data.find((op: any) => op?.empName.trim() === operator.trim());
+    };
+
+
     const groupedByHauler: any = {};
     dataFromAddB.forEach((item: any) => {
         if (!groupedByHauler[item.haulerUnitId]) {

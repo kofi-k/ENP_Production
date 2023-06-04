@@ -514,82 +514,89 @@ const FuelComponent = ({url, title}: any) => {
 
     }
 
-    const handleUpload = () => {
+    // const handleUpload = () => {
 
-        const reader = new FileReader()
-        try {
-            setUploading(true)
-            reader.onload = (e: any) => {
-                const file = new Uint8Array(e.target.result)
-                // const dataRead = readFromFile(file)
-                const workBook = XLSX.read(file, { type: 'array' })
+    //     const reader = new FileReader()
+    //     try {
+    //         setUploading(true)
+    //         reader.onload = (e: any) => {
+    //             const file = new Uint8Array(e.target.result)
+    //             // const dataRead = readFromFile(file)
+    //             const workBook = XLSX.read(file, { type: 'array' })
 
-                const targetSheetName = title === 'Fuel Issue' ? `LV'S - RAW DATA` : ``
-                const workSheet: any = workBook.Sheets[targetSheetName]
+    //             const targetSheetName = title === 'Fuel Issue' ? `LV'S - RAW DATA` : ``
+    //             const workSheet: any = workBook.Sheets[targetSheetName]
 
-                const range = title === 'Fuel Issue' ? "A3:F2300" : ''
+    //             const range = title === 'Fuel Issue' ? "A3:F2300" : ''
 
-                const rawData = XLSX.utils.sheet_to_json(workSheet, { header: 0, range: range, blankrows: false, defval: null })
+    //             const rawData = XLSX.utils.sheet_to_json(workSheet, { header: 0, range: range, blankrows: false, defval: null })
 
-                // what to read from the file
-                const filteredData: any = title === 'Fuel Issue' ? readFuelIssue(rawData) : readFuelReceipt(rawData)
+    //             // what to read from the file
+    //             const filteredData: any = title === 'Fuel Issue' ? readFuelIssue(rawData) : readFuelReceipt(rawData)
 
-                // valiate the data to uploadable format
-                const uploadableData = filteredData.map((item: any) => {
-                    const pumpId = pumps?.data.find((pump: any) => pump.name.trim() === item.pump.trim());
-                    const equipment = equipments?.data.find((equipment: any) => equipment.equipmentId.trim() === item.equipment.trim());
+    //             const batchSize = 100; // Number of rows to process at a time                
 
-                    return {
-                        intakeDate: convertExcelDateToJSDate(item.intakeDate).toISOString(),
-                        pumpId: parseInt(pumpId?.id),
-                        quantity: parseInt(item.quantity),
-                        equipmentId: equipment?.equipmentId,
-                        transactionType: title,
-                        tenantId: tenantId,
-                    }
-                })
+    //             // valiate the data to uploadable format
+    //             const uploadableData = filteredData.map((item: any) => {
+    //                 const pumpId = pumps?.data.find((pump: any) => pump.name.trim() === item.pump.trim());
+    //                 const equipment = equipments?.data.find((equipment: any) => equipment.equipmentId.trim() === item.equipment.trim());
 
-                const ignoredRows: any[] = [];
-                uploadableData.map((item: any) => {
-                    // Check if the item already exists in batchDataToSave
-                    const found = title === 'Fuel Issue' ?
-                        batchDataToSave.find((data: any) =>
-                            data.intakeDate === item.intakeDate &&
-                            data.pumpId === item.pumpId &&
-                            data.equipmentId === item.equipmentId &&
-                            data.quantity === item.quantity
-                        )
-                        : batchDataToSave.find((data: any) =>
-                            data.intakeDate === item.intakeDate &&
-                            data.pumpId === item.pumpId &&
-                            data.quantity === item.quantity
-                        );
+    //                 return {
+    //                     intakeDate: convertExcelDateToJSDate(item.intakeDate).toISOString(),
+    //                     pumpId: parseInt(pumpId?.id),
+    //                     quantity: parseInt(item.quantity),
+    //                     equipmentId: equipment?.equipmentId,
+    //                     transactionType: title,
+    //                     tenantId: tenantId,
+    //                 }
+    //             })
 
-                    // Add the item to batchDataToSave only if it doesn't already exist
-                    if (!found) {
-                        setBatchDataToSave((prevBatchData: any) => [...prevBatchData, item]);
-                    } else {
-                        ignoredRows.push(item);
-                    }
-                });
+    //             const uploadableDataLength = uploadableData.length;
 
-                const ignoredRowCount = ignoredRows.length;
-                if (ignoredRowCount > 0) {
-                    message.info(`${ignoredRowCount} row(s) were ignored because they already exist.`);
-                    setUploading(false)
-                    setIsUploadModalOpen(false)
-                    return
-                }
-                setUploading(false)
-                setIsUploadModalOpen(false)
-                message.success(`${uploadableData.length} rows uploaded from ${fileName}`)
-                handleRemove()
-            }
-        } catch (error) {
-            setIsUploadModalOpen(false)
-        }
-        reader.readAsArrayBuffer(readFile)
-    }
+
+    //             const ignoredRows: any[] = [];
+    //             uploadableData.map((item: any) => {
+    //                 // Check if the item already exists in batchDataToSave
+    //                 const found = title === 'Fuel Issue' ?
+    //                     batchDataToSave.find((data: any) =>
+    //                         data.intakeDate === item.intakeDate &&
+    //                         data.pumpId === item.pumpId &&
+    //                         data.equipmentId === item.equipmentId &&
+    //                         data.quantity === item.quantity
+    //                     )
+    //                     : batchDataToSave.find((data: any) =>
+    //                         data.intakeDate === item.intakeDate &&
+    //                         data.pumpId === item.pumpId &&
+    //                         data.quantity === item.quantity
+    //                     );
+
+    //                 // Add the item to batchDataToSave only if it doesn't already exist
+    //                 if (!found) {
+    //                     setBatchDataToSave((prevBatchData: any) => [...prevBatchData, item]);
+    //                 } else {
+    //                     ignoredRows.push(item);
+    //                 }
+    //             });
+
+    //             const ignoredRowCount = ignoredRows.length;
+    //             if (ignoredRowCount > 0) {
+    //                 message.info(`${ignoredRowCount} row(s) were ignored because they already exist.`);
+    //                 setUploading(false)
+    //                 setIsUploadModalOpen(false)
+    //                 return
+    //             }
+    //             setUploading(false)
+    //             setIsUploadModalOpen(false)
+    //             message.success(`${uploadableData.length} rows uploaded from ${fileName}`)
+    //             handleRemove()
+    //         }
+    //     } catch (error) {
+    //         setIsUploadModalOpen(false)
+    //     }
+    //     reader.readAsArrayBuffer(readFile)
+    // }
+
+
 
     // const handleBatchSave1 = () => {
     //     try {
@@ -613,6 +620,85 @@ const FuelComponent = ({url, title}: any) => {
     //         setLoading(false)
     //     }
     // }
+
+    const handleUpload = () => {
+        const reader = new FileReader();
+        try {
+          setUploading(true);
+          reader.onload = (e: any) => {
+            const file = new Uint8Array(e.target.result);
+            const workBook = XLSX.read(file, { type: 'array' });
+      
+            const targetSheetName = title === 'Fuel Issue' ? `LV'S - RAW DATA` : '';
+            const workSheet: any = workBook.Sheets[targetSheetName];
+      
+            const range = title === 'Fuel Issue' ? 'A3:F2300' : '';
+      
+            const rawData = XLSX.utils.sheet_to_json(workSheet, { header: 0, range: range, blankrows: false, defval: null });
+      
+            const filteredData: any = title === 'Fuel Issue' ? readFuelIssue(rawData) : readFuelReceipt(rawData);
+      
+            const uploadableData = filteredData.map((item: any) => {
+              const pumpId = pumps?.data.find((pump: any) => pump.name.trim() === item.pump.trim());
+              const equipment = equipments?.data.find((equipment: any) => equipment.equipmentId.trim() === item.equipment.trim());
+      
+              return {
+                intakeDate: convertExcelDateToJSDate(item.intakeDate).toISOString(),
+                pumpId: parseInt(pumpId?.id),
+                quantity: parseInt(item.quantity),
+                equipmentId: equipment?.equipmentId,
+                transactionType: title,
+                tenantId: tenantId,
+              };
+            });
+      
+            const batchSize = 100; // Set an appropriate batch size
+            const ignoredRows: any[] = [];
+      
+            for (let i = 0; i < uploadableData.length; i += batchSize) {
+              const batchItems = uploadableData.slice(i, i + batchSize);
+      
+              const existingItemsSet = new Set(
+                batchDataToSave.map((data: any) =>
+                  title === 'Fuel Issue'
+                    ? `${data.intakeDate}-${data.pumpId}-${data.equipmentId}-${data.quantity}`
+                    : `${data.intakeDate}-${data.pumpId}-${data.quantity}`
+                )
+              );
+      
+              const existingItems = batchItems.filter((item: any) =>
+                existingItemsSet.has(
+                  title === 'Fuel Issue'
+                    ? `${item.intakeDate}-${item.pumpId}-${item.equipmentId}-${item.quantity}`
+                    : `${item.intakeDate}-${item.pumpId}-${item.quantity}`
+                )
+              );
+      
+              const newBatchItems = batchItems.filter((item: any) => !existingItems.includes(item));
+              setBatchDataToSave((prevBatchData: any) => [...prevBatchData, ...newBatchItems]);
+      
+              ignoredRows.push(...existingItems);
+            }
+      
+            const ignoredRowCount = ignoredRows.length;
+            if (ignoredRowCount > 0) {
+              message.info(`${ignoredRowCount} row(s) were ignored because they already exist.`);
+              setUploading(false);
+              setIsUploadModalOpen(false);
+              return;
+            }
+      
+            setUploading(false);
+            setIsUploadModalOpen(false);
+            message.success(`${uploadableData.length} rows uploaded from ${fileName}`);
+            handleRemove();
+          };
+        } catch (error) {
+          setIsUploadModalOpen(false);
+        }
+        reader.readAsArrayBuffer(readFile);
+      };
+      
 
     return (
         <div className="card-custom card-flush">
