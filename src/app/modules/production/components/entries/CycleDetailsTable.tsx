@@ -55,7 +55,11 @@ const CycleDetailsTable = () => {
 
     const handleChange = (event: any) => {
         event.preventDefault()
-        setTempData({ ...tempData, [event.target.name]: event.target.value });
+        const { name, value } = event.target;
+        setTempData((prevTempData: any) => ({
+            ...prevTempData,
+            [name]: value,
+        }));
     }
 
 
@@ -437,14 +441,16 @@ const CycleDetailsTable = () => {
                     const existingItemsSet = new Set(batchDataToSave.map((item: any) => {
                         return `${item.cycleDate}-${item.cycleTime}-${item.loaderUnitId}-
                         ${item.haulerUnitId}-${item.originId}-${item.materialId}-${item.destinationId}-
-                        ${item.nominalWeight}-${item.weight}-${item.payloadWeight}-${item.reportedWeight}-${item.volumes}-${item.loads}-${item.timeAtLoader}-${item.duration}`;
+                        ${item.nominalWeight}-${item.weight}-${item.payloadWeight}-${item.reportedWeight}-
+                        ${item.volumes}-${item.loads}-${item.timeAtLoader}-${item.duration}`;
                     }
                     ));
 
                     const existingItems = batchItems.filter((item: any) => {
                         return existingItemsSet.has(`${item.cycleDate}-${item.cycleTime}-${item.loaderUnitId}-
                         ${item.haulerUnitId}-${item.originId}-${item.materialId}-${item.destinationId}-
-                        ${item.nominalWeight}-${item.weight}-${item.payloadWeight}-${item.reportedWeight}-${item.volumes}-${item.loads}-${item.timeAtLoader}-${item.duration}`);
+                        ${item.nominalWeight}-${item.weight}-${item.payloadWeight}-${item.reportedWeight}-
+                        ${item.volumes}-${item.loads}-${item.timeAtLoader}-${item.duration}`);
                     }
                     );
 
@@ -557,12 +563,7 @@ const CycleDetailsTable = () => {
 
     // sum volumes per destination
     const volumesByDestination = calculateVolumesByField(groupedByDestination, destinations?.data, 'destinationId');
-    // get record name from title
-    const recordNameForDynamicColoumn = (title: any, record: any, data: any) => {
-        let name = ''
-        title === 'Hauler' || 'Loader' ? name = getUnitRecordName(record, data?.data) : name = getRecordName(record, data?.data)
-        return name
-    }
+
     // columns for checking data summary
     const dynamicColumns = (title: any, data: any) => {
         const columns = [
@@ -632,21 +633,6 @@ const CycleDetailsTable = () => {
         },
     ];
 
-    //return count of rows per batch
-    const countRowsPerBatch = (data: any) => {
-        const groupedByBatchNumber = groupByBatchNumber(data);
-        const batchNumbers = Object.keys(groupedByBatchNumber);
-        const batchCount = batchNumbers.map((batchNumber: any) => {
-            const records = groupedByBatchNumber[batchNumber]; // Get all records in the batch
-            return {
-                batchNumber: batchNumber,
-                itemsCount: records.length,
-                date: extractDateFromTimestamp(parseInt(batchNumber)),
-                records: records // Include all records in the batch
-            };
-        });
-        return batchCount;
-    };
 
     const loadData = async () => {
         // setLoading(true)
@@ -792,12 +778,70 @@ const CycleDetailsTable = () => {
     })
 
     const handleUpdateItem = handleSubmit(async (values) => {
-        // if date is not selected then show error message
-        if (!values.cycleDate || !values.cycleTime || !values.timeAtLoader) {
-            message.error('Please select date and time')
-            return
+        // Retrieve the index of the item to be updated
+        const itemIndex = batchDataToSave.findIndex((item: any) => {
+            // Compare the properties that determine uniqueness
+            return (
+                item.cycleDate === values.cycleDate &&
+                item.cycleTime === values.cycleTime &&
+                item.timeAtLoader === values.timeAtLoader &&
+                item.shiftId === parseInt(values.shiftId) &&
+                item.loader === values.loader &&
+                item.hauler === values.hauler &&
+                item.haulerUnitId === parseInt(values.haulerUnitId) &&
+                item.loaderUnitId === parseInt(values.loaderUnitId) &&
+                item.originId === parseInt(values.originId) &&
+                item.materialId === parseInt(values.materialId) &&
+                item.destinationId === parseInt(values.destinationId) &&
+                item.nominalWeight === parseInt(values.nominalWeight) &&
+                item.weight === parseInt(values.weight) &&
+                item.payloadWeight === parseInt(values.payloadWeight) &&
+                item.reportedWeight === parseInt(values.reportedWeight) &&
+                item.volumes === parseInt(values.volumes) &&
+                item.loads === parseInt(values.loads) &&
+                item.duration === parseInt(values.duration)
+            );
+        });
+
+        // If the item is found, update it
+        if (itemIndex !== -1) {
+            const updatedItem = {
+                cycleDate: new Date(values.cycleDate).toISOString(),
+                cycleTime: timeFormat(values.cycleTime).toISOString(),
+                timeAtLoader: timeFormat(values.timeAtLoader).toISOString(),
+                shiftId: parseInt(values.shiftId),
+                loader: values.loader,
+                hauler: values.hauler,
+                haulerUnitId: parseInt(values.haulerUnitId),
+                loaderUnitId: parseInt(values.loaderUnitId),
+                originId: parseInt(values.originId),
+                materialId: parseInt(values.materialId),
+                destinationId: parseInt(values.destinationId),
+                nominalWeight: parseInt(values.nominalWeight),
+                weight: parseInt(values.weight),
+                payloadWeight: parseInt(values.payloadWeight),
+                reportedWeight: parseInt(values.reportedWeight),
+                volumes: parseInt(values.volumes),
+                loads: parseInt(values.loads),
+                duration: parseInt(values.duration),
+                tenantId: tenantId,
+            };
+
+            // Update the item in the batchDataToSave array
+            setBatchDataToSave((prevBatchData: any) => {
+                const updatedBatchData = [...prevBatchData];
+                updatedBatchData[itemIndex] = updatedItem;
+                return updatedBatchData;
+            });
+
+            message.success('Item updated.');
+            reset();
+            console.log('batchDataToSave', batchDataToSave);
+        } else {
+            message.error('Item not found.');
         }
-    })
+    });
+
 
     useEffect(() => {
         console.log('batch', batchDataToSave);

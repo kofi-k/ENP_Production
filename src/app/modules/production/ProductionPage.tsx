@@ -20,6 +20,7 @@ import { ProductionLoader } from './components/setup/loader/Loader';
 import { ProductionLocations } from './components/setup/locations/Locations';
 import { ProductionMaterials } from './components/setup/materials/Materials';
 import { DrillEntry } from './components/entries/DrillEntry';
+import { ActivityDetails2 } from './components/setup/activity/ActivityDetails2';
 
 const accountBreadCrumbs: Array<PageLink> = [
   {
@@ -169,7 +170,7 @@ const ProductionPage: React.FC = () => {
             element={
               <SuspensedView>
                 <PageTitle>Activity Details</PageTitle>
-                <ActivityDetails />
+                <ActivityDetails2 />
               </SuspensedView>
             }
           />

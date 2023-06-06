@@ -48,10 +48,10 @@ const FuelComponent = ({url, title}: any) => {
         if (isUpdateModalOpen && isFileUploaded) {
             setIsModalOpen(false)
             setIsUpdateModalOpen(false)
-            setTempData(null)
+            // setTempData(null)
         } else {
             setIsModalOpen(false)
-            setTempData(null)
+            // setTempData(null)
             setIsUpdateModalOpen(false)
         }
     }
@@ -64,6 +64,7 @@ const FuelComponent = ({url, title}: any) => {
     }
 
     const showModal = () => {
+        setTempData({})
         setIsModalOpen(true)
     }
 

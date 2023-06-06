@@ -4,8 +4,8 @@ import axios from 'axios';
  */
 // export const ENP_URL = 'http://localhost:3001'
 // export const ENP_URL = 'https://cors-anywhere.herokuapp.com/http://208.117.44.15/SmWebApi/api'
-export const ENP_URL = 'http://208.117.44.15/SmWebApi/api'
-// export const ENP_URL = 'https://localhost:7144/api'
+// export const ENP_URL = 'http://208.117.44.15/SmWebApi/api'
+export const ENP_URL = 'https://localhost:7144/api'
 export const UsersEndpoint = "http://208.117.44.15/userapi/api";
 
 
@@ -48,6 +48,11 @@ export function updateItem(item: any) {
 //dynamic delete function
 export function deleteItem(item: any) {
     return axios.delete(`${ENP_URL}/${item.url}/${item.data.id}`)
+}
+
+//dynamic delete function
+export function deleteOperatorItem(item: any) {
+    return axios.delete(`${ENP_URL}/${item.url}/${item.data.empCode}`)
 }
 
 //dynamic post function

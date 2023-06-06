@@ -1,17 +1,12 @@
-import { UploadOutlined } from '@ant-design/icons';
-import { Button, Divider, Input, Modal, Space, Table, Tabs, TabsProps, Tag, Upload, UploadProps, message } from 'antd';
-import moment from 'moment';
+import { Button, Input, Modal, Space, Table, UploadProps, message } from 'antd';
 import { useEffect, useState } from "react";
 import { useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
-import * as XLSX from 'xlsx';
 import { KTCardBody } from '../../../../../_metronic/helpers';
 import { deleteItem, fetchDocument, postItem, updateItem } from '../../urls';
 import {
-    ModalFooterButtons, PageActionButtons, calculateVolumesByField,
-    convertExcelDateToJSDate, convertExcelTimeToJSDate, excelDateToJSDate,
-    extractDateFromTimestamp, getDateFromDateString, groupByBatchNumber, roundOff,
-    timeFormat
+    ModalFooterButtons, PageActionButtons,
+    getDateFromDateString
 } from '../CommonComponents';
 
 
@@ -384,7 +379,7 @@ const DrillEntry = () => {
                             onUploadClicked={() => { }}
                             hasAddButton={true}
                             hasExportButton={true}
-                            hasUploadButton={true}
+                            hasUploadButton={false}
                         />
                     </Space>
                 </div>
