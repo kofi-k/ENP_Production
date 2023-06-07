@@ -4,7 +4,7 @@ import TopBarProgress from 'react-topbar-progress-indicator';
 import { getCSSVariableValue } from '../../../_metronic/assets/ts/_utils';
 import { WithChildren } from '../../../_metronic/helpers';
 import { PageLink, PageTitle } from '../../../_metronic/layout/core';
-import { CycleDetailsTable } from "./components/entries/CycleDetailsTable";
+import { CycleDetailsTable } from "./components/entries/cycleDetails/CycleDetailsTable";
 import { PlannedOutputTable } from "./components/entries/PlannedOutputTable";
 import { EquipmentFuelTable } from './components/entries/fuel/EquipmentFuelTable';
 import { ActivityStatsReport } from './components/report/ActivityStatsReport';
@@ -21,6 +21,7 @@ import { ProductionLocations } from './components/setup/locations/Locations';
 import { ProductionMaterials } from './components/setup/materials/Materials';
 import { DrillEntry } from './components/entries/DrillEntry';
 import { ActivityDetails2 } from './components/setup/activity/ActivityDetails2';
+import { CycleDetails } from './components/entries/cycleDetails/CycleDetails';
 
 const accountBreadCrumbs: Array<PageLink> = [
   {
@@ -56,7 +57,7 @@ const ProductionPage: React.FC = () => {
             <>
               <PageTitle>Cycle Details</PageTitle>
               {/*<Overview />*/}
-              <CycleDetailsTable />
+              <CycleDetails />
             </>
           }
         />
