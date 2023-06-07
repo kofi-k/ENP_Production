@@ -3,39 +3,60 @@ import '../../../../node_modules/@devexpress/analytics-core/dist/css/dx-analytic
 import '../../../../node_modules/@devexpress/analytics-core/dist/css/dx-analytics.light.css'
 import '../../../../node_modules/@devexpress/analytics-core/dist/css/dx-querybuilder.css'
 import '../../../../node_modules/devexpress-dashboard/dist/css/dx-dashboard.light.css'
-import {DashboardControl} from 'devexpress-dashboard-react'
+import { DashboardControl } from 'devexpress-dashboard-react'
 
 
 const Devexpres = () => {
     return (
-        <div style={{width: '100%', height: '80vh'}}>
+        <div style={{ width: '100%', height: '80vh' }}>
             <DashboardControl
                 id='web-dashboard'
-                style={{height: '100%'}}
+                style={{ height: '100%' }}
                 // endpoint='https://demos.devexpress.com/services/dashboard/api'
                 // endpoint='https ://208.117.44.15/dashboards/dashboardcontrol'
                 endpoint='http://208.117.44.15/dashboards/dashboardcontrol'
                 workingMode='ViewerOnly'
                 dashboardId='pro_cycleDetails'
             ></DashboardControl>
-        </div>  
+        </div>
     )
 }
 
 const Devexpres2 = () => {
     return (
-        <div style={{width: '100%', height: '80vh'}}>
+        <div style={{ width: '100%', height: '80vh' }}>
             <DashboardControl
                 id='web-dashboard'
-                style={{height: '100%'}}
+                style={{ height: '100%' }}
                 // endpoint='https://demos.devexpress.com/services/dashboard/api'
                 // endpoint='https ://208.117.44.15/dashboards/dashboardcontrol'
                 endpoint='http://208.117.44.15/dashboards/dashboardcontrol'
                 workingMode='ViewerOnly'
                 dashboardId='pro_fuelIntake'
             ></DashboardControl>
-        </div>  
+        </div>
     )
 }
 
-export { Devexpres, Devexpres2 }
+const CycleDetailsAnalysis = () => {
+
+    return (
+        // <div className='col-xl-12 border border-gray-400'>
+        <div style={{ width: '100%', height: '80vh' }}>
+            <DashboardControl
+                id='web-dashboard'
+                style={{ height: '100%' }}
+                // endpoint='https://demos.devexpress.com/services/dashboard/api'
+                // endpoint='https ://208.117.44.15/dashboards/dashboardcontrol'
+                endpoint='http://208.117.44.15/dashboards/dashboardcontrol'
+                workingMode='ViewerOnly'
+                dashboardId='pro_cycleDetailsAnalysis'
+            ></DashboardControl>
+        </div>
+        // </div>
+    )
+}
+
+
+
+export { Devexpres, Devexpres2, CycleDetailsAnalysis }

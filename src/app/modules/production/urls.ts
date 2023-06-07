@@ -50,6 +50,11 @@ export function deleteItem(item: any) {
     return axios.delete(`${ENP_URL}/${item.url}/${item.data.id}`)
 }
 
+//dynamic delete function
+export function deleteOperatorItem(item: any) {
+    return axios.delete(`${ENP_URL}/${item.url}/${item.data.empCode}`)
+}
+
 //dynamic post function
 export function postItem(item: any) {
     return axios.post(`${ENP_URL}/${item.url}`, item.data)

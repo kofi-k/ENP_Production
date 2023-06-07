@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from 'react-query'
 import { KTCardBody } from '../../../../../../_metronic/helpers'
-import { deleteItem, fetchDocument, updateItem, postItem } from '../../../urls'
+import { deleteItem, fetchDocument, updateItem, postItem, deleteOperatorItem } from '../../../urls'
 import { PageActionButtons, ModalFooterButtons } from '../../CommonComponents'
 
 const OperatorComponent = (props: any) => {
@@ -43,7 +43,7 @@ const OperatorComponent = (props: any) => {
         setIsUpdateModalOpen(false)
     }
 
-    const { mutate: deleteData, isLoading: deleteLoading } = useMutation(deleteItem, {
+    const { mutate: deleteData, isLoading: deleteLoading } = useMutation(deleteOperatorItem, {
         onSuccess: (data) => {
             queryClient.setQueryData([props.data.url, tempData], data);
             loadData()
