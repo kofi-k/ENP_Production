@@ -171,7 +171,7 @@ const ProductionPage: React.FC = () => {
             element={
               <SuspensedView>
                 <PageTitle>Activity Details</PageTitle>
-                <ActivityDetails2 />
+                <ActivityDetails />
               </SuspensedView>
             }
           />

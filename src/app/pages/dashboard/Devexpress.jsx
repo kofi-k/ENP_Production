@@ -35,13 +35,12 @@ const Devexpres2 = () => {
                 dashboardId='pro_fuelIntake'
             ></DashboardControl>
         </div>
-    )
+    ) 
 }
 
 const CycleDetailsAnalysis = () => {
 
     return (
-        // <div className='col-xl-12 border border-gray-400'>
         <div style={{ width: '100%', height: '80vh' }}>
             <DashboardControl
                 id='web-dashboard'
@@ -53,7 +52,6 @@ const CycleDetailsAnalysis = () => {
                 dashboardId='pro_cycleDetailsAnalysis'
             ></DashboardControl>
         </div>
-        // </div>
     )
 }
 

@@ -141,6 +141,7 @@ const ActivityComponent = ({ data, hasActivityType }: any) => {
 
     // show columns if based on props of hasDescription and hasDuration
     if (!hasActivityType) {
+        delete columns[0]
         delete columns[2]
     }
 
@@ -344,10 +345,13 @@ const ActivityComponent = ({ data, hasActivityType }: any) => {
                         <form onSubmit={isUpdateModalOpen ? handleUpdate : OnSubmit}>
                             <hr></hr>
                             <div style={{ padding: "20px 20px 0 20px" }} className='row mb-0 '>
-                                <div className=' mb-7'>
-                                    <label htmlFor="exampleFormControlInput1" className="form-label text-gray-500">Code</label>
-                                    <input {...register("code")} name='code' defaultValue={!isUpdateModalOpen ? '' : tempData?.code} onChange={handleChange} className="form-control form-control-white form-control-solid border border-gray-300" />
-                                </div>
+                                {
+                                    hasActivityType &&
+                                    <div className=' mb-7'>
+                                        <label htmlFor="exampleFormControlInput1" className="form-label text-gray-500">Code</label>
+                                        <input {...register("code")} name='code' defaultValue={!isUpdateModalOpen ? '' : tempData?.code} onChange={handleChange} className="form-control form-control-white form-control-solid border border-gray-300" />
+                                    </div>
+                                }
                                 <div className=' mb-7'>
                                     <label htmlFor="exampleFormControlInput1" className="form-label text-gray-500">Name</label>
                                     <input {...register("name")} name='name' defaultValue={!isUpdateModalOpen ? '' : tempData?.name} onChange={handleChange} className="form-control form-control-white form-control-solid border border-gray-300" />
