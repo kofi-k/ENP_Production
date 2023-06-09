@@ -19,9 +19,10 @@ import { ProductionHauler } from './components/setup/hauler/Hauler';
 import { ProductionLoader } from './components/setup/loader/Loader';
 import { ProductionLocations } from './components/setup/locations/Locations';
 import { ProductionMaterials } from './components/setup/materials/Materials';
-import { DrillEntry } from './components/entries/DrillEntry';
+import { DrillEntry } from './components/entries/Drill/DrillEntry';
 import { ActivityDetails2 } from './components/setup/activity/ActivityDetails2';
 import { CycleDetails } from './components/entries/cycleDetails/CycleDetails';
+import { DrillEntryTable } from './components/entries/Drill/DrillEntryTable';
 
 const accountBreadCrumbs: Array<PageLink> = [
   {
@@ -84,7 +85,7 @@ const ProductionPage: React.FC = () => {
           element={
             <>
               <PageTitle>Drill Entry</PageTitle>
-             <DrillEntry />
+             <DrillEntryTable />
             </>
           }
         />

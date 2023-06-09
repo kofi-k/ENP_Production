@@ -2,6 +2,7 @@ import { Space, Tabs, TabsProps, Tag } from "antd";
 import { Link } from "react-router-dom";
 import { FuelReceipt } from "./Receipt";
 import { FuelIssue } from "./Issue";
+import { FuelAnalysis } from "../../../../../pages/dashboard/Devexpress";
 
 
 const EquipmentFuelTable = () => {
@@ -26,6 +27,14 @@ const EquipmentFuelTable = () => {
                 </>
             ),
         },
+        {
+            key: '3', label: `Analysis`,
+            children: (
+                <>
+                    <FuelAnalysis />
+                </>
+            ),
+        }
     ]
 
     return (

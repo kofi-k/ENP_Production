@@ -1,28 +1,27 @@
 import { Tabs, TabsProps } from "antd";
-import { LoaderOperator } from "./LoaderOperator";
-import { LoaderUnit } from "./LoaderUnit";
+import { DrillEntry } from "./DrillEntry";
+import { DrillEntryAnalysis } from "../../../../../pages/dashboard/Devexpress";
 
 
-
-const ProductionLoader = () => {
+const DrillEntryTable = () => {
 
     const onTabsChange = (key: string) => {
         console.log(key);
     };
     const tabItems: TabsProps['items'] = [
         {
-            key: '1', label: `Unit`,
+            key: '1', label: `Drill Enry`,
             children: (
                 <>
-                   <LoaderUnit />
+                    <DrillEntry />
                 </>
             ),
         },
         {
-            key: '2', label: `Operator`,
+            key: '2', label: `Analysis`,
             children: (
                 <>
-                    <LoaderOperator />
+                    <DrillEntryAnalysis />
                 </>
             ),
         },
@@ -46,5 +45,4 @@ const ProductionLoader = () => {
     )
 };
 
-export { ProductionLoader };
-
+export { DrillEntryTable };

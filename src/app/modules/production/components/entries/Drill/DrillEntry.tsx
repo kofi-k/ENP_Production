@@ -3,12 +3,13 @@ import moment from 'moment';
 import { useEffect, useState } from "react";
 import { set, useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
-import { KTCardBody } from '../../../../../_metronic/helpers';
-import { deleteItem, fetchDocument, postItem, updateItem } from '../../urls';
+import { KTCardBody } from '../../../../../../_metronic/helpers';
+import { deleteItem, fetchDocument, postItem, updateItem } from '../../../urls';
 import {
     ModalFooterButtons, PageActionButtons,
     getDateFromDateString
-} from '../CommonComponents';
+} from '../../CommonComponents';
+import { text } from '@devexpress/analytics-core/analytics-diagram';
 
 
 
@@ -293,8 +294,8 @@ const DrillEntry = () => {
 
 
     return (
-        <div className="card  border border-gray-400  card-custom card-flush" >
-            <div className="card-header mt-7">
+        <div className="card-custom card-flush" >
+            <div className="card-header mt-7"  style={{ borderBottom: 'none' }}>
                 <Space style={{ marginBottom: 16 }}>
                     <Input
                         placeholder='Enter Search Text'
@@ -357,14 +358,15 @@ const DrillEntry = () => {
                                     <label htmlFor="exampleFormControlInput1" className="required form-label text-gray-500 ">Rig</label>
                                     <select
                                         {...register("rigId")}
+                                        value ={isUpdateModalOpen == true ? tempData.drillId : null}
                                         onChange={handleChange}
                                         className="form-select form-select-solid form-control-solid border border-gray-300"
                                         aria-label="Select example">
-                                        {!isUpdateModalOpen && <option>Select</option>}
+                                        {isUpdateModalOpen == false ? <option>Select</option>: null}
                                         {
                                             allRigs?.data.map((item: any) => (
                                                 <option
-                                                    selected={isUpdateModalOpen && item.id === tempData.drillId}
+                                                    // selected={isUpdateModalOpen && item.id === tempData.drillId}
                                                     value={item.equipmentId}>{item.equipmentId}</option>
                                             ))
                                         }
@@ -383,7 +385,7 @@ const DrillEntry = () => {
                                         {
                                             allShifts?.data.map((item: any) => (
                                                 <option
-                                                    selected={isUpdateModalOpen && item.id === tempData.shiftId}
+                                                    selected={isUpdateModalOpen && item.id === tempData.shiftId }
                                                     value={item.id}>{item.name}</option>
                                             ))
                                         }

@@ -55,6 +55,39 @@ const CycleDetailsAnalysis = () => {
     )
 }
 
+const FuelAnalysis = () => {
+
+    return (
+        <div style={{ width: '100%', height: '80vh' }}>
+            <DashboardControl
+                id='web-dashboard'
+                style={{ height: '100%' }}
+                // endpoint='https://demos.devexpress.com/services/dashboard/api'
+                // endpoint='https ://208.117.44.15/dashboards/dashboardcontrol'
+                endpoint='http://208.117.44.15/dashboards/dashboardcontrol'
+                workingMode='ViewerOnly'
+                dashboardId='pro_fuelAnalysis'
+            ></DashboardControl>
+        </div>
+    )
+}
+const DrillEntryAnalysis = () => {
+
+    return (
+        <div style={{ width: '100%', height: '80vh' }}>
+            <DashboardControl
+                id='web-dashboard'
+                style={{ height: '100%' }}
+                // endpoint='https://demos.devexpress.com/services/dashboard/api'
+                // endpoint='https ://208.117.44.15/dashboards/dashboardcontrol'
+                endpoint='http://208.117.44.15/dashboards/dashboardcontrol'
+                workingMode='ViewerOnly'
+                dashboardId='pro_drillEntryAnalysis'
+            ></DashboardControl>
+        </div>
+    )
+}
 
 
-export { Devexpres, Devexpres2, CycleDetailsAnalysis }
+
+export { Devexpres, Devexpres2, CycleDetailsAnalysis, FuelAnalysis, DrillEntryAnalysis }
