@@ -42,7 +42,7 @@ const DrillEntry = () => {
         //check if selected value is activityMappingId
         if (event.target.name === 'activityMappingId') {
             const [activityId, activityDetailId] = event.target.value.split('-');
-            console.log('activityId: ', activityId, 'activityDetailId: ', activityDetailId  )
+            // console.log('activityId: ', activityId, 'activityDetailId: ', activityDetailId  )
             setTempData({ ...tempData, activityId:  parseInt(activityId), activityDetailId: parseInt(activityDetailId) });
         }
         if (event.target.name === 'drillDate') {
@@ -86,7 +86,7 @@ const DrillEntry = () => {
             loadData()
         },
         onError: (error) => {
-            console.log('delete error: ', error)
+            // console.log('delete error: ', error)
         }
     })
 
@@ -167,7 +167,7 @@ const DrillEntry = () => {
             setLoading(false)
         } catch (error) {
             setLoading(false)
-            console.log(error)
+            // console.log(error)
         }
     }
 
@@ -210,7 +210,7 @@ const DrillEntry = () => {
         },
         onError: (error) => {
             setLoading(false)
-            console.log('error: ', error)
+            // console.log('error: ', error)
             message.error(`${error}`)
         }
     })
@@ -222,14 +222,14 @@ const DrillEntry = () => {
             data: tempData
         }
         updateData(item)
-        console.log('update: ', item.data)
+        // console.log('update: ', item.data)
     }
 
     const showUpdateModal = (values: any) => {
         showModal()
         setIsUpdateModalOpen(true)
         setTempData(values);
-        console.log(values)
+        // console.log(values)
     }
 
     const OnSubmit = handleSubmit(async (values) => {
@@ -266,7 +266,7 @@ const DrillEntry = () => {
             setSubmitLoading(false)
             return
         }
-        console.log('drill entry:', item.data)
+        // console.log('drill entry:', item.data)
         postData(item)
     })
 

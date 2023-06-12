@@ -3,10 +3,11 @@ import { Link } from "react-router-dom";
 import { FuelReceipt } from "./Receipt";
 import { FuelIssue } from "./Issue";
 import { FuelAnalysis } from "../../../../../pages/dashboard/Devexpress";
+import { useAuth } from "../../../../auth";
 
 
 const EquipmentFuelTable = () => {
-
+    
     const onTabsChange = (key: string) => {
         console.log(key);
     };

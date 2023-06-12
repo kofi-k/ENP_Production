@@ -114,7 +114,7 @@ const CycleDetailsTable = () => {
 
     const handleSaveClicked = () => {
         setIsConfirmSaveModalOpen(true)
-        console.log('batchDataToSave: ', batchDataToSave)
+        // console.log('batchDataToSave: ', batchDataToSave)
     }
 
     const { mutate: deleteData, isLoading: deleteLoading } = useMutation(deleteItem, {
@@ -123,7 +123,7 @@ const CycleDetailsTable = () => {
             loadData()
         },
         onError: (error) => {
-            console.log('delete error: ', error)
+            // console.log('delete error: ', error)
         }
     })
 
@@ -320,13 +320,13 @@ const CycleDetailsTable = () => {
             message.success(
                 `Saving ${dataToSaveWithDateStamp.length} ${dataToSaveWithDateStamp.length > 1 ? 'records' : 'record'} of batch data`, 6
             )
-            console.log('batchDataWithDateStamp', dataToSaveWithDateStamp.slice(0, 10))
+            // console.log('batchDataWithDateStamp', dataToSaveWithDateStamp.slice(0, 10))
             handleConfirmSaveCancel()
             setIsConfirmSaveModalOpen(false)
             setLoading(false)
             clearBatchData()
         } catch (err) {
-            console.log('fileSaveError: ', err)
+            // console.log('fileSaveError: ', err)
             setLoading(false)
         }
     }
@@ -396,7 +396,7 @@ const CycleDetailsTable = () => {
                         }
                     }).filter((item: any) => item !== null);
 
-                console.log('filteredData: ', filteredData.slice(0, 20))
+                // console.log('filteredData: ', filteredData.slice(0, 20))
 
                 const uploadableData = filteredData.slice(1).map((item: any,) => {
 
@@ -465,36 +465,6 @@ const CycleDetailsTable = () => {
                     ignoredRows.push(...existingItems);
                 }
 
-                // console.log('uploadableData: ', uploadableData.slice(0, 20))
-                // handleRemove()
-                // // add each uploadable data to manual batch data
-                // uploadableData.map((item: any) => {
-                //     // Check if the item already exists in batchDataToSave
-                //     const found =
-                //         batchDataToSave.find((batchItem: any) =>
-                //             batchItem.cycleDate === item.cycleDate &&
-                //             batchItem.cycleTime === item.cycleTime &&
-                //             batchItem.loaderUnitId === item.loaderUnitId &&
-                //             batchItem.haulerUnitId === item.haulerUnitId &&
-                //             batchItem.originId === item.originId &&
-                //             batchItem.materialId === item.materialId &&
-                //             batchItem.destinationId === item.destinationId &&
-                //             batchItem.nominalWeight === item.nominalWeight &&
-                //             batchItem.weight === item.weight &&
-                //             batchItem.payloadWeight === item.payloadWeight &&
-                //             batchItem.reportedWeight === item.reportedWeight &&
-                //             batchItem.volumes === item.volumes &&
-                //             batchItem.loads === item.loads &&
-                //             batchItem.timeAtLoader === item.timeAtLoader &&
-                //             batchItem.shiftId === item.shiftId &&
-                //             batchItem.duration === item.duration
-                //         );
-                //     if (!found) {
-                //         setBatchDataToSave((prevBatchData: any) => [...prevBatchData, item])
-                //     } else {
-                //         ignoredRows.push(item);
-                //     }
-                // })
 
                 const ignoredRowCount = ignoredRows.length;
                 if (ignoredRowCount > 0) {
@@ -635,14 +605,6 @@ const CycleDetailsTable = () => {
 
 
     const loadData = async () => {
-        // setLoading(true)
-        // try {
-        //     setLoading(false)
-        // } catch (error) {
-        //     setLoading(false)
-        //     console.log(error)
-        //     message.error(`${error}`)
-        // }
     }
 
     useEffect(() => {
@@ -677,7 +639,7 @@ const CycleDetailsTable = () => {
         showModal()
         setIsUpdateModalOpen(true)
         setTempData(values);
-        console.log(values)
+        // console.log(values)
         setItemToUpdate(values)
     }
 
@@ -687,7 +649,7 @@ const CycleDetailsTable = () => {
             const updatedBatchData: any = prevBatchData.map((item) =>
                 item === tempData ? tempData : item
             );
-            console.log('manualUpdate: ', updatedBatchData)
+            // console.log('manualUpdate: ', updatedBatchData)
             setDataFromAddB(updatedBatchData)
             setRowCount(updatedBatchData.length)
             handleCancel()
@@ -774,7 +736,7 @@ const CycleDetailsTable = () => {
         setIsModalOpen(false)
         message.success('Item added to batch.')
         reset()
-        console.log('batchDataToSave', batchDataToSave)
+        // console.log('batchDataToSave', batchDataToSave)
     })
 
     const handleUpdateItem = handleSubmit(async (values) => {
@@ -836,7 +798,7 @@ const CycleDetailsTable = () => {
 
             message.success('Item updated.');
             reset();
-            console.log('batchDataToSave', batchDataToSave);
+            // console.log('batchDataToSave', batchDataToSave);
         } else {
             message.error('Item not found.');
         }
@@ -844,7 +806,7 @@ const CycleDetailsTable = () => {
 
 
     useEffect(() => {
-        console.log('batch', batchDataToSave);
+        // console.log('batch', batchDataToSave);
         if (batchDataToSave.length > 0) {
             setDataFromAddB(batchDataToSave)
         }
@@ -875,7 +837,7 @@ const CycleDetailsTable = () => {
         onError: (error) => {
             setLoading(false)
             setSubmitLoading(false)
-            console.log('batch post error: ', error)
+            // console.log('batch post error: ', error)
             message.error(`${error}`)
         }
     })

@@ -5,7 +5,6 @@ import { CycleDetailsAnalysis } from "../../../../../pages/dashboard/Devexpress"
 
 const CycleDetails = () => {
     const onTabsChange = (key: string) => {
-        console.log(key);
     };
     const tabItems: TabsProps['items'] = [
         {

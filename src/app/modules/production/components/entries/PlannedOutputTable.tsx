@@ -53,7 +53,7 @@ const PlannedOutputTable = () => {
       loadData()
     },
     onError: (error) => {
-      console.log('delete error: ', error)
+      // console.log('delete error: ', error)
       message.error(`${error}`)
     }
   })
@@ -121,7 +121,7 @@ const PlannedOutputTable = () => {
       setLoading(false)
     } catch (error) {
       setLoading(false)
-      console.log(error)
+      // console.log(error)
     }
   }
 
@@ -161,7 +161,7 @@ const PlannedOutputTable = () => {
       setIsModalOpen(false)
     },
     onError: (error) => {
-      console.log('error: ', error)
+      // console.log('error: ', error)
       message.error(`${error}`)
     }
   })
@@ -173,14 +173,14 @@ const PlannedOutputTable = () => {
       data: tempData
     }
     updateData(item)
-    console.log('update: ', item.data)
+    // console.log('update: ', item.data)
   }
 
   const showUpdateModal = (values: any) => {
     showModal()
     setIsUpdateModalOpen(true)
     setTempData(values);
-    console.log(values)
+    // console.log(values)
   }
 
 
@@ -205,7 +205,7 @@ const PlannedOutputTable = () => {
       setSubmitLoading(false)
       return
     }
-    console.log(item.data)
+    // console.log(item.data)
     postData(item)
   })
 
@@ -220,7 +220,7 @@ const PlannedOutputTable = () => {
     },
     onError: (error: any) => {
       setSubmitLoading(false)
-      console.log('post error: ', error)
+      // console.log('post error: ', error)
       // check if error is 400
       if (error.response.status === 400) {
         message.error(`Select all required fields`, 3)

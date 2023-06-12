@@ -78,7 +78,7 @@ const FuelComponent = ({url, title}: any) => {
 
     const handleSaveClicked = () => {
         setIsConfirmSaveModalOpen(true)
-        console.log('batchDataToSave: ', batchDataToSave)
+        // console.log('batchDataToSave: ', batchDataToSave)
     }
     const showCheckDataModal = (values: any) => {
         setIsCheckDataModalOpen(true)
@@ -123,7 +123,7 @@ const FuelComponent = ({url, title}: any) => {
         showModal()
         setIsUpdateModalOpen(true)
         setTempData(values);
-        console.log(values)
+        // console.log(values)
     }
 
 
@@ -168,7 +168,7 @@ const FuelComponent = ({url, title}: any) => {
     }
 
     useEffect(() => {
-        console.log('batch', batchDataToSave);
+        // console.log('batch', batchDataToSave);
         if (batchDataToSave.length > 0) {
             setDataFromAddB(batchDataToSave)
         }
@@ -247,7 +247,7 @@ const FuelComponent = ({url, title}: any) => {
             const updatedBatchData: any = prevBatchData.map((item) =>
                 item === tempData ? tempData : item
             );
-            console.log('manualUpdate: ', updatedBatchData)
+            // console.log('manualUpdate: ', updatedBatchData)
             setDataFromAddB(updatedBatchData)
             setRowCount(updatedBatchData.length)
             handleCancel()
@@ -321,7 +321,7 @@ const FuelComponent = ({url, title}: any) => {
         setIsModalOpen(false)
         message.success('Item added to batch.')
         reset()
-        console.log('batchDataToSave', batchDataToSave)
+        // console.log('batchDataToSave', batchDataToSave)
     })
 
     const handleBatchSave = () => {
@@ -338,7 +338,7 @@ const FuelComponent = ({url, title}: any) => {
                     };
                 });
 
-            console.log('batchData', batchDataToSave.slice(0, 10))
+            // console.log('batchData', batchDataToSave.slice(0, 10))
             // const filteredSavedData = dataToSave.filter((data: any) => data !== null && data !== undefined)
             const item = {
                 data: dataToSaveWithDateStamp,
@@ -348,13 +348,13 @@ const FuelComponent = ({url, title}: any) => {
             message.success(
                 `Saving ${dataToSaveWithDateStamp.length} ${dataToSaveWithDateStamp.length > 1 ? 'records' : 'record'} of batch data`, 6
             )
-            console.log('batchDataWithDateStamp', dataToSaveWithDateStamp.slice(0, 10))
+            // console.log('batchDataWithDateStamp', dataToSaveWithDateStamp.slice(0, 10))
             handleConfirmSaveCancel()
             setIsConfirmSaveModalOpen(false)
             setLoading(false)
             clearBatchData()
         } catch (err) {
-            console.log('fileSaveError: ', err)
+            // console.log('fileSaveError: ', err)
             setLoading(false)
         }
     }
@@ -369,7 +369,7 @@ const FuelComponent = ({url, title}: any) => {
             setIsModalOpen(false)
         },
         onError: (error: any) => {
-            console.log('batch post error: ', error)
+            // console.log('batch post error: ', error)
             message.error(`${error}`)
         }
     })
