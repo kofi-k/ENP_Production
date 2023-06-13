@@ -23,8 +23,8 @@ const AppRoutes: FC = () => {
   const {currentUser} = useAuth()
   const exp:any = currentUser?.exp
   const expFormatted: any = new Date(exp*1000)
-
-
+  
+const test = 1
   return (
     <BrowserRouter basename={PUBLIC_URL}>
       <Routes>

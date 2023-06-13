@@ -1,15 +1,13 @@
-import { Space, Tabs, TabsProps, Tag } from "antd";
-import { Link } from "react-router-dom";
-import { FuelReceipt } from "./Receipt";
-import { FuelIssue } from "./Issue";
+import { Tabs, TabsProps } from "antd";
 import { FuelAnalysis } from "../../../../../pages/dashboard/Devexpress";
-import { useAuth } from "../../../../auth";
+import { FuelIssue } from "./Issue";
+import { FuelReceipt } from "./Receipt";
 
 
 const EquipmentFuelTable = () => {
     
     const onTabsChange = (key: string) => {
-        console.log(key);
+        // console.log(key);
     };
     const tabItems: TabsProps['items'] = [
         {
@@ -56,4 +54,4 @@ const EquipmentFuelTable = () => {
     )
 };
 
-export { EquipmentFuelTable }
+export { EquipmentFuelTable };

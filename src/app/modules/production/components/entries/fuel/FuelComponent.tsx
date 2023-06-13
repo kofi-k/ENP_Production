@@ -12,7 +12,7 @@ import { setUploadFile } from '@devexpress/analytics-core/analytics-internal';
 
 
 
-const FuelComponent = ({url, title}: any) => {
+const FuelComponent = ({ url, title }: any) => {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [uploading, setUploading] = useState(false)
     const [uploadedFile, setUploadedFile] = useState<any>(null)
@@ -473,7 +473,10 @@ const FuelComponent = ({url, title}: any) => {
                     return null; // Skip processing the remaining rows
                 }
                 // check for blanks in the row
-                const isRowBblank = item['DATE'] === undefined && item['PUMP ID'] === undefined && item['EQUIPMENT'] === undefined && item['QTY'] === undefined;
+                const isRowBblank = item['DATE'] === undefined &&
+                    item['PUMP ID'] === undefined &&
+                    item['EQUIPMENT'] === undefined &&
+                    item['QTY'] === undefined;
 
                 if (isRowBblank) {
                     stopReading = true;
@@ -487,7 +490,6 @@ const FuelComponent = ({url, title}: any) => {
                     quantity: item['QTY'],
                 }
             }).filter((item: any) => item !== null || item !== undefined);
-
     }
 
     const readFuelReceipt = (data: any) => {
@@ -499,7 +501,9 @@ const FuelComponent = ({url, title}: any) => {
                     return null; // Skip processing the remaining rows
                 }
                 // check for blanks in the row
-                const isRowBblank = item['DATE'] === undefined && item['PUMP ID'] === undefined && item['QTY'] === undefined;
+                const isRowBblank = item['DATE'] === undefined &&
+                    item['PUMP ID'] === undefined &&
+                    item['QTY'] === undefined;
 
                 if (isRowBblank) {
                     stopReading = true;
@@ -512,194 +516,138 @@ const FuelComponent = ({url, title}: any) => {
                     quantity: item['QTY'],
                 }
             }).filter((item: any) => item !== null || item !== undefined);
-
     }
 
-    // const handleUpload = () => {
-
-    //     const reader = new FileReader()
-    //     try {
-    //         setUploading(true)
-    //         reader.onload = (e: any) => {
-    //             const file = new Uint8Array(e.target.result)
-    //             // const dataRead = readFromFile(file)
-    //             const workBook = XLSX.read(file, { type: 'array' })
-
-    //             const targetSheetName = title === 'Fuel Issue' ? `LV'S - RAW DATA` : ``
-    //             const workSheet: any = workBook.Sheets[targetSheetName]
-
-    //             const range = title === 'Fuel Issue' ? "A3:F2300" : ''
-
-    //             const rawData = XLSX.utils.sheet_to_json(workSheet, { header: 0, range: range, blankrows: false, defval: null })
-
-    //             // what to read from the file
-    //             const filteredData: any = title === 'Fuel Issue' ? readFuelIssue(rawData) : readFuelReceipt(rawData)
-
-    //             const batchSize = 100; // Number of rows to process at a time                
-
-    //             // valiate the data to uploadable format
-    //             const uploadableData = filteredData.map((item: any) => {
-    //                 const pumpId = pumps?.data.find((pump: any) => pump.name.trim() === item.pump.trim());
-    //                 const equipment = equipments?.data.find((equipment: any) => equipment.equipmentId.trim() === item.equipment.trim());
-
-    //                 return {
-    //                     intakeDate: convertExcelDateToJSDate(item.intakeDate).toISOString(),
-    //                     pumpId: parseInt(pumpId?.id),
-    //                     quantity: parseInt(item.quantity),
-    //                     equipmentId: equipment?.equipmentId,
-    //                     transactionType: title,
-    //                     tenantId: tenantId,
-    //                 }
-    //             })
-
-    //             const uploadableDataLength = uploadableData.length;
-
-
-    //             const ignoredRows: any[] = [];
-    //             uploadableData.map((item: any) => {
-    //                 // Check if the item already exists in batchDataToSave
-    //                 const found = title === 'Fuel Issue' ?
-    //                     batchDataToSave.find((data: any) =>
-    //                         data.intakeDate === item.intakeDate &&
-    //                         data.pumpId === item.pumpId &&
-    //                         data.equipmentId === item.equipmentId &&
-    //                         data.quantity === item.quantity
-    //                     )
-    //                     : batchDataToSave.find((data: any) =>
-    //                         data.intakeDate === item.intakeDate &&
-    //                         data.pumpId === item.pumpId &&
-    //                         data.quantity === item.quantity
-    //                     );
-
-    //                 // Add the item to batchDataToSave only if it doesn't already exist
-    //                 if (!found) {
-    //                     setBatchDataToSave((prevBatchData: any) => [...prevBatchData, item]);
-    //                 } else {
-    //                     ignoredRows.push(item);
-    //                 }
-    //             });
-
-    //             const ignoredRowCount = ignoredRows.length;
-    //             if (ignoredRowCount > 0) {
-    //                 message.info(`${ignoredRowCount} row(s) were ignored because they already exist.`);
-    //                 setUploading(false)
-    //                 setIsUploadModalOpen(false)
-    //                 return
-    //             }
-    //             setUploading(false)
-    //             setIsUploadModalOpen(false)
-    //             message.success(`${uploadableData.length} rows uploaded from ${fileName}`)
-    //             handleRemove()
-    //         }
-    //     } catch (error) {
-    //         setIsUploadModalOpen(false)
-    //     }
-    //     reader.readAsArrayBuffer(readFile)
-    // }
-
-
-
-    // const handleBatchSave1 = () => {
-    //     try {
-    //         setLoading(true)
-    //         const filteredSavedData = dataToSave.filter((data: any) => data !== null && data !== undefined)
-    //         const item = {
-    //             data: filteredSavedData,
-    //             url: url,
-    //         }
-    //         postData(item)
-    //         setLoading(true)
-    //         message.success(`Saving ${filteredSavedData.length}  of ${dataToSave.length} ${filteredSavedData.length > 1 ? 'records' : 'record'} of uploaded data`, 6)
-    //         loadData()
-    //         setIsFileUploaded(false)
-    //         setIsConfirmSaveModalOpen(false)
-    //         setUploadedFile(null)
-    //         setUploadData([])
-    //         setDataToSave([])
-    //     } catch (err) {
-    //         console.log('fileSaveError: ', err)
-    //         setLoading(false)
-    //     }
-    // }
 
     const handleUpload = () => {
         const reader = new FileReader();
         try {
-          setUploading(true);
-          reader.onload = (e: any) => {
-            const file = new Uint8Array(e.target.result);
-            const workBook = XLSX.read(file, { type: 'array' });
-      
-            const targetSheetName = title === 'Fuel Issue' ? `LV'S - RAW DATA` : '';
-            const workSheet: any = workBook.Sheets[targetSheetName];
-      
-            const range = title === 'Fuel Issue' ? 'A3:F2300' : '';
-      
-            const rawData = XLSX.utils.sheet_to_json(workSheet, { header: 0, range: range, blankrows: false, defval: null });
-      
-            const filteredData: any = title === 'Fuel Issue' ? readFuelIssue(rawData) : readFuelReceipt(rawData);
-      
-            const uploadableData = filteredData.map((item: any) => {
-              const pumpId = pumps?.data.find((pump: any) => pump.name.trim() === item.pump.trim());
-              const equipment = equipments?.data.find((equipment: any) => equipment.equipmentId.trim() === item.equipment.trim());
-      
-              return {
-                intakeDate: convertExcelDateToJSDate(item.intakeDate).toISOString(),
-                pumpId: parseInt(pumpId?.id),
-                quantity: parseInt(item.quantity),
-                equipmentId: equipment?.equipmentId,
-                transactionType: title,
-                tenantId: tenantId,
-              };
-            });
-      
-            const batchSize = 100; // Set an appropriate batch size
-            const ignoredRows: any[] = [];
-      
-            for (let i = 0; i < uploadableData.length; i += batchSize) {
-              const batchItems = uploadableData.slice(i, i + batchSize);
-      
-              const existingItemsSet = new Set(
-                batchDataToSave.map((data: any) =>
-                  title === 'Fuel Issue'
-                    ? `${data.intakeDate}-${data.pumpId}-${data.equipmentId}-${data.quantity}`
-                    : `${data.intakeDate}-${data.pumpId}-${data.quantity}`
-                )
-              );
-      
-              const existingItems = batchItems.filter((item: any) =>
-                existingItemsSet.has(
-                  title === 'Fuel Issue'
-                    ? `${item.intakeDate}-${item.pumpId}-${item.equipmentId}-${item.quantity}`
-                    : `${item.intakeDate}-${item.pumpId}-${item.quantity}`
-                )
-              );
-      
-              const newBatchItems = batchItems.filter((item: any) => !existingItems.includes(item));
-              setBatchDataToSave((prevBatchData: any) => [...prevBatchData, ...newBatchItems]);
-      
-              ignoredRows.push(...existingItems);
-            }
-      
-            const ignoredRowCount = ignoredRows.length;
-            if (ignoredRowCount > 0) {
-              message.info(`${ignoredRowCount} row(s) were ignored because they already exist.`);
-              setUploading(false);
-              setIsUploadModalOpen(false);
-              return;
-            }
-      
-            setUploading(false);
-            setIsUploadModalOpen(false);
-            message.success(`${uploadableData.length} rows uploaded from ${fileName}`);
-            handleRemove();
-          };
+            setUploading(true);
+            reader.onload = (e: any) => {
+                const file = new Uint8Array(e.target.result);
+                const workBook = XLSX.read(file, { type: 'array' });
+
+                const targetSheetName = title === 'Fuel Issue' ? `LV'S - RAW DATA` : 'ST BULK RECEIVED';
+                const workSheet: any = workBook.Sheets[targetSheetName];
+
+                const range = title === 'Fuel Issue' ? 'A3:F2300' : 'B2:AL36';
+
+                let receiptData = []
+                const headerRow = 1; // First row of headers
+                const subHeaderRow = 2; // Second row of headers
+
+                // Define the top headers and the sub-header names to read
+                const topHeaders = ['FT007', 'FT010', 'ST42', 'FT013'];
+                const subHeaderNames = ['FUEL RECEIVED'];
+                const headerIndexes = [];
+                if (title === 'Fuel Receipt') {
+
+                    for (let colNum = XLSX.utils.decode_range(range).s.c; colNum <= XLSX.utils.decode_range(range).e.c; colNum++) {
+                        const col = XLSX.utils.encode_col(colNum);
+                        const cell = workSheet[`${topHeaders[0]}${col}`];
+                        if (cell && topHeaders.includes(cell.v)) {
+                            headerIndexes.push(colNum);
+                        }
+                    }
+
+                    // Loop through the rows in the specified range
+                    for (let rowNum = XLSX.utils.decode_range(range).s.r; rowNum <= XLSX.utils.decode_range(range).e.r; rowNum++) {
+                        const row = XLSX.utils.encode_row(rowNum);
+
+                        // Read the date column value from the sub-header row
+                        const intakeDate = workSheet[`${row}F`]?.b; 
+
+                        // Read the sub-column values for each top header
+                        for (const headerIndex of headerIndexes) {
+                            const headerCol = XLSX.utils.encode_col(headerIndex);
+                            for (const subHeaderName of subHeaderNames) {
+                                const subColumnIndex = headerIndex + subHeaderNames.indexOf(subHeaderName) + 1;
+                                const subCol = XLSX.utils.encode_col(subColumnIndex);
+                                const cell = workSheet[`${row}${subCol}`];
+                                const quantity = cell ? cell.v : null;
+
+                                // Add the relevant data to the rawData array
+                                receiptData.push({
+                                    intakeDate,
+                                    pump: topHeaders[headerIndex - headerIndexes[0]],
+                                    quantity: quantity,
+                                });
+                            }
+                        }
+                    }
+                    console.log('receiptData', receiptData)
+                }
+
+
+                const rawData: any = title === 'Fuel Issue' ?
+                    XLSX.utils.sheet_to_json(workSheet, { header: 0, range: range, blankrows: false, defval: null })
+                    : receiptData
+
+                const filteredData: any = title === 'Fuel Issue' ? readFuelIssue(rawData) : rawData;
+                receiptData = []
+
+
+                const uploadableData = filteredData.map((item: any) => {
+                    const pumpId = pumps?.data.find((pump: any) => pump.name.trim() === item.pump.trim());
+                    const equipment = equipments?.data.find((equipment: any) => equipment.equipmentId.trim() === item.equipment.trim());
+
+                    return {
+                        intakeDate: convertExcelDateToJSDate(item.intakeDate).toISOString(),
+                        pumpId: parseInt(pumpId?.id),
+                        quantity: parseInt(item.quantity),
+                        equipmentId: equipment?.equipmentId,
+                        transactionType: title,
+                        tenantId: tenantId,
+                    };
+                });
+
+                const batchSize = 100; // Set an appropriate batch size
+                const ignoredRows: any[] = [];
+
+                for (let i = 0; i < uploadableData.length; i += batchSize) {
+                    const batchItems = uploadableData.slice(i, i + batchSize);
+
+                    const existingItemsSet = new Set(
+                        batchDataToSave.map((data: any) =>
+                            title === 'Fuel Issue'
+                                ? `${data.intakeDate}-${data.pumpId}-${data.equipmentId}-${data.quantity}`
+                                : `${data.intakeDate}-${data.pumpId}-${data.quantity}`
+                        )
+                    );
+
+                    const existingItems = batchItems.filter((item: any) =>
+                        existingItemsSet.has(
+                            title === 'Fuel Issue'
+                                ? `${item.intakeDate}-${item.pumpId}-${item.equipmentId}-${item.quantity}`
+                                : `${item.intakeDate}-${item.pumpId}-${item.quantity}`
+                        )
+                    );
+
+                    const newBatchItems = batchItems.filter((item: any) => !existingItems.includes(item));
+                    setBatchDataToSave((prevBatchData: any) => [...prevBatchData, ...newBatchItems]);
+
+                    ignoredRows.push(...existingItems);
+                }
+
+                const ignoredRowCount = ignoredRows.length;
+                if (ignoredRowCount > 0) {
+                    message.info(`${ignoredRowCount} row(s) were ignored because they already exist.`);
+                    setUploading(false);
+                    setIsUploadModalOpen(false);
+                    return;
+                }
+
+                setUploading(false);
+                setIsUploadModalOpen(false);
+                message.success(`${uploadableData.length} rows uploaded from ${fileName}`);
+                handleRemove();
+            };
         } catch (error) {
-          setIsUploadModalOpen(false);
+            setIsUploadModalOpen(false);
         }
         reader.readAsArrayBuffer(readFile);
-      };
-      
+    };
+
 
     return (
         <div className="card-custom card-flush">
@@ -907,7 +855,7 @@ const FuelComponent = ({url, title}: any) => {
                     >
 
                         <Tabs defaultActiveKey="1"
-                            items={title === 'Fuel Issue' ? tabItems: tabItems.slice(0,1)}
+                            items={title === 'Fuel Issue' ? tabItems : tabItems.slice(0, 1)}
                             onChange={onTabsChange}
                             tabBarExtraContent={
                                 <>
