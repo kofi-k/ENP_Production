@@ -31,12 +31,14 @@ const FuelComponent = ({ url, title }: any) => {
     const [isConfirmSaveModalOpen, setIsConfirmSaveModalOpen] = useState(false) // to show the modal to confirm the save
     const [isCheckDataModalOpen, setIsCheckDataModalOpen] = useState(false)  // to show the modal to check the data summaries from the uploaded file
 
+    const [dataToUpdate, setDataToUpdate] = useState<any[]>([]) // to hold the data to be updated
     const [batchDataToSave, setBatchDataToSave]: any = useState<any[]>([]);
 
     const [rowCount, setRowCount] = useState(0) // to hold the number of rows read from the uploaded file
     const handleChange = (event: any) => {
         event.preventDefault()
         setTempData({ ...tempData, [event.target.name]: event.target.value });
+
     }
     const [dataFromAddB, setDataFromAddB] = useState([])
     const [readFile, setReadFile] = useState<any>(null)
@@ -123,6 +125,7 @@ const FuelComponent = ({ url, title }: any) => {
         showModal()
         setIsUpdateModalOpen(true)
         setTempData(values);
+        setDataToUpdate(values)
         // console.log(values)
     }
 
@@ -243,16 +246,17 @@ const FuelComponent = ({ url, title }: any) => {
     };
 
     const updateItemInBatchData = () => {
-        setBatchDataToSave((prevBatchData: any[]) => {
-            const updatedBatchData: any = prevBatchData.map((item) =>
-                item === tempData ? tempData : item
+        setBatchDataToSave((prevBatchData: any) => {
+            const updatedBatchData = prevBatchData.map((item: any) =>
+                item === tempData ? dataToUpdate : item
             );
-            // console.log('manualUpdate: ', updatedBatchData)
-            setDataFromAddB(updatedBatchData)
-            setRowCount(updatedBatchData.length)
-            handleCancel()
+
+            setDataFromAddB(updatedBatchData);
+            setRowCount(updatedBatchData.length);
+            handleCancel();
+
             return updatedBatchData;
-        })
+        });
     };
 
     const removeItemFromBatchData = (itemToRemove: any) => {
@@ -493,29 +497,19 @@ const FuelComponent = ({ url, title }: any) => {
     }
 
     const readFuelReceipt = (data: any) => {
-        let stopReading = false;
-        return data
-            .map((item: any) => {
-
-                if (stopReading) {
-                    return null; // Skip processing the remaining rows
-                }
-                // check for blanks in the row
-                const isRowBblank = item['DATE'] === undefined &&
-                    item['PUMP ID'] === undefined &&
-                    item['QTY'] === undefined;
-
-                if (isRowBblank) {
-                    stopReading = true;
-                    return null;
-                }
-
+        return data.map((item: any) => {
+            const intakeDate = item['DATE'];
+            const pumps = ['FT007', 'FT010', 'ST42', 'FT013'];
+            const filteredData = pumps.map((pump) => {
+                const fuelReceived = item[pump]?.['FUEL RECEIVED'] || null;
                 return {
-                    intakeDate: item['DATE'],
-                    pump: item['PUMP ID'],
-                    quantity: item['QTY'],
-                }
-            }).filter((item: any) => item !== null || item !== undefined);
+                    Date: intakeDate,
+                    pump,
+                    Quantity: fuelReceived,
+                };
+            });
+            return filteredData;
+        }).flat();
     }
 
 
@@ -532,60 +526,12 @@ const FuelComponent = ({ url, title }: any) => {
 
                 const range = title === 'Fuel Issue' ? 'A3:F2300' : 'B2:AL36';
 
-                let receiptData = []
-                const headerRow = 1; // First row of headers
-                const subHeaderRow = 2; // Second row of headers
 
-                // Define the top headers and the sub-header names to read
-                const topHeaders = ['FT007', 'FT010', 'ST42', 'FT013'];
-                const subHeaderNames = ['FUEL RECEIVED'];
-                const headerIndexes = [];
-                if (title === 'Fuel Receipt') {
-
-                    for (let colNum = XLSX.utils.decode_range(range).s.c; colNum <= XLSX.utils.decode_range(range).e.c; colNum++) {
-                        const col = XLSX.utils.encode_col(colNum);
-                        const cell = workSheet[`${topHeaders[0]}${col}`];
-                        if (cell && topHeaders.includes(cell.v)) {
-                            headerIndexes.push(colNum);
-                        }
-                    }
-
-                    // Loop through the rows in the specified range
-                    for (let rowNum = XLSX.utils.decode_range(range).s.r; rowNum <= XLSX.utils.decode_range(range).e.r; rowNum++) {
-                        const row = XLSX.utils.encode_row(rowNum);
-
-                        // Read the date column value from the sub-header row
-                        const intakeDate = workSheet[`${row}F`]?.b; 
-
-                        // Read the sub-column values for each top header
-                        for (const headerIndex of headerIndexes) {
-                            const headerCol = XLSX.utils.encode_col(headerIndex);
-                            for (const subHeaderName of subHeaderNames) {
-                                const subColumnIndex = headerIndex + subHeaderNames.indexOf(subHeaderName) + 1;
-                                const subCol = XLSX.utils.encode_col(subColumnIndex);
-                                const cell = workSheet[`${row}${subCol}`];
-                                const quantity = cell ? cell.v : null;
-
-                                // Add the relevant data to the rawData array
-                                receiptData.push({
-                                    intakeDate,
-                                    pump: topHeaders[headerIndex - headerIndexes[0]],
-                                    quantity: quantity,
-                                });
-                            }
-                        }
-                    }
-                    console.log('receiptData', receiptData)
-                }
+                const rawData: any = XLSX.utils.sheet_to_json(workSheet, { header: 0, range: range, blankrows: false, defval: null })
 
 
-                const rawData: any = title === 'Fuel Issue' ?
-                    XLSX.utils.sheet_to_json(workSheet, { header: 0, range: range, blankrows: false, defval: null })
-                    : receiptData
-
-                const filteredData: any = title === 'Fuel Issue' ? readFuelIssue(rawData) : rawData;
-                receiptData = []
-
+                const filteredData: any = title === 'Fuel Issue' ? readFuelIssue(rawData) : readFuelReceipt(rawData);
+                console.log('rawData: ', rawData);
 
                 const uploadableData = filteredData.map((item: any) => {
                     const pumpId = pumps?.data.find((pump: any) => pump.name.trim() === item.pump.trim());

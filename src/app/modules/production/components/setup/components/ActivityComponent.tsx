@@ -153,13 +153,13 @@ const ActivityComponent = ({ data, hasActivityType }: any) => {
                 const getActivity = activities?.data.find((item: any) => item.id.toString() === param.id)
                 const detName = getActivity?.name
                 setDetailName(detName)
-                console.log('detName: ', detName)
+                // console.log('detName: ', detName)
             }
             setGridData(response.data)
             setLoading(false)
         } catch (error) {
             setLoading(false)
-            console.log(error)
+            // console.log(error)
             message.error(`${error}`)
         }
     }
@@ -169,7 +169,7 @@ const ActivityComponent = ({ data, hasActivityType }: any) => {
     }, [])
 
     const dataByActivityDetails = gridData.filter((item: any) => item.activityId?.toString() === param.id)
-    console.log('dataByActivityDetails: ', dataByActivityDetails)
+    // console.log('dataByActivityDetails: ', dataByActivityDetails)
 
 
 
@@ -195,6 +195,7 @@ const ActivityComponent = ({ data, hasActivityType }: any) => {
         // })
         //setGridData(filteredData)
     }
+    
     const { isLoading: updateLoading, mutate: updateData } = useMutation(updateItem, {
         onSuccess: (dataU) => {
             queryClient.setQueryData([data.url, tempData], dataU);
