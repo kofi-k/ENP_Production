@@ -173,7 +173,12 @@ const FuelComponent = ({ url, title }: any) => {
     useEffect(() => {
         // console.log('batch', batchDataToSave);
         if (batchDataToSave.length > 0) {
-            setDataFromAddB(batchDataToSave)
+            const data = batchDataToSave.map((item: any, index: number) => {
+                return { ...item, key: index }
+            }
+            )
+            setDataFromAddB(data)
+            setBatchDataToSave(data)
         }
         setRowCount(batchDataToSave.length)
     }, [batchDataToSave]);
@@ -248,7 +253,7 @@ const FuelComponent = ({ url, title }: any) => {
     const updateItemInBatchData = () => {
         setBatchDataToSave((prevBatchData: any) => {
             const updatedBatchData = prevBatchData.map((item: any) =>
-                item === tempData ? dataToUpdate : item
+                item.key === tempData.key ? tempData : item
             );
 
             setDataFromAddB(updatedBatchData);
