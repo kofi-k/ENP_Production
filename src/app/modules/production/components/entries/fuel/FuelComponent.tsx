@@ -694,13 +694,14 @@ const FuelComponent = ({ url, title }: any) => {
                                                 <label htmlFor="exampleFormControlInput1" className="form-label text-gray-500">Equipment</label>
                                                 <select
                                                     {...register("equipmentId")}
+                                                    value={isUpdateModalOpen === true ? tempData?.equipmentId : null}
                                                     onChange={handleChange}
                                                     className="form-select form-select-solid form-control-solid border border-gray-300" aria-label="Select example">
                                                     {!isUpdateModalOpen && <option>Select</option>}
                                                     {
                                                         equipments?.data.map((item: any) => (
                                                             <option
-                                                                selected={isUpdateModalOpen && tempData.equipmentId === item.equipmentId}
+                                                                // selected={isUpdateModalOpen && tempData.equipmentId === item.equipmentId}
                                                                 value={item.equipmentId}>{item.equipmentId}</option>
                                                         ))
                                                     }
@@ -711,13 +712,14 @@ const FuelComponent = ({ url, title }: any) => {
                                                 <label htmlFor="exampleFormControlInput1" className="form-label text-gray-500">Pump</label>
                                                 <select
                                                     {...register("pumpId")}
+                                                    value={isUpdateModalOpen === true ? tempData?.pumpId : null}
                                                     onChange={handleChange}
                                                     className="form-select form-select-solid border border-gray-300" aria-label="Select example">
                                                     {!isUpdateModalOpen && <option>Select</option>}
                                                     {
                                                         pumps?.data.map((item: any) => (
                                                             <option
-                                                                selected={isUpdateModalOpen && tempData.pumpId === item.id}
+                                                                // selected={isUpdateModalOpen && tempData.pumpId === item.id}
                                                                 value={item.id}>{item.name}</option>
                                                         ))
                                                     }
@@ -738,13 +740,14 @@ const FuelComponent = ({ url, title }: any) => {
                                                 <label htmlFor="exampleFormControlInput1" className="form-label text-gray-500">Pump</label>
                                                 <select
                                                     {...register("pumpId")}
+                                                    value={isUpdateModalOpen === true ? tempData?.pumpId : null}
                                                     onChange={handleChange}
                                                     className="form-select form-select-solid border border-gray-300" aria-label="Select example">
                                                     {!isUpdateModalOpen && <option>Select</option>}
                                                     {
                                                         pumps?.data.map((item: any) => (
                                                             <option
-                                                                selected={isUpdateModalOpen && tempData.pumpId === item.id}
+                                                                // selected={isUpdateModalOpen && tempData.pumpId === item.id}
                                                                 value={item.id}>{item.name}</option>
                                                         ))
                                                     }

@@ -357,13 +357,14 @@ const ProUnitComponent = (props: any) => {
 
                                     <select
                                         {...register("equipmentId")}
+                                        value={isUpdateModalOpen === true ? tempData?.equipmentId : null}
                                         onChange={handleEquipmentIdChange}
                                         className="form-select form-select-solid border border-gray-300 mb-7" aria-label="Select example">
                                         {!isUpdateModalOpen && <option>Select</option>}
                                         {
                                             equipments?.data.map((item: any) => (
                                                 <option
-                                                    selected={isUpdateModalOpen && item.equipmentId === tempData.equipmentId}
+                                                    // selected={isUpdateModalOpen && item.equipmentId === tempData.equipmentId}
                                                     value={item.equipmentId}>{item.equipmentId}</option>
                                             ))
                                         }

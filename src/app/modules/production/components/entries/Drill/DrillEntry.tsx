@@ -358,7 +358,7 @@ const DrillEntry = () => {
                                     <label htmlFor="exampleFormControlInput1" className="required form-label text-gray-500 ">Rig</label>
                                     <select
                                         {...register("rigId")}
-                                        value ={isUpdateModalOpen == true ? tempData.drillId : null}
+                                        value ={isUpdateModalOpen == true ? tempData.rigId : null}
                                         onChange={handleChange}
                                         className="form-select form-select-solid form-control-solid border border-gray-300"
                                         aria-label="Select example">
@@ -366,7 +366,6 @@ const DrillEntry = () => {
                                         {
                                             allRigs?.data.map((item: any) => (
                                                 <option
-                                                    // selected={isUpdateModalOpen && item.id === tempData.drillId}
                                                     value={item.equipmentId}>{item.equipmentId}</option>
                                             ))
                                         }
@@ -379,13 +378,13 @@ const DrillEntry = () => {
                                     <label htmlFor="exampleFormControlInput1" className="required form-label text-gray-500 ">Shift</label>
                                     <select
                                         {...register("shiftId")}
+                                        value={isUpdateModalOpen === true ? tempData?.shiftId : null}
                                         onChange={handleChange}
                                         className="form-select form-select-solid form-control-solid border border-gray-300" aria-label="Select example">
                                         {!isUpdateModalOpen && <option>Select</option>}
                                         {
                                             allShifts?.data.map((item: any) => (
                                                 <option
-                                                    selected={isUpdateModalOpen && item.id === tempData.shiftId }
                                                     value={item.id}>{item.name}</option>
                                             ))
                                         }

@@ -283,13 +283,14 @@ const PlannedOutputTable = () => {
                     <label htmlFor="exampleFormControlInput1" className="required form-label text-gray-500 ">Activity</label>
                     <select
                       {...register("activityId")}
+                      value={isUpdateModalOpen === true ? tempData?.activityId : null}
                       onChange={handleChange}
                       className="form-select form-select-white form-control-solid border border-gray-300" aria-label="Select example">
                       {!isUpdateModalOpen && <option>Select</option>}
                       {
                         productionActivities?.data.map((item: any) => (
                           <option
-                            selected={isUpdateModalOpen && item.id === tempData.activityId}
+                            // selected={isUpdateModalOpen && item.id === tempData.activityId}
                             value={item.id}>{item.name}</option>
                         ))
                       }
@@ -299,13 +300,15 @@ const PlannedOutputTable = () => {
                   <label htmlFor="exampleFormControlInput1" className="required form-label text-gray-500">Destination</label>
                   <select
                     {...register("destinationId")}
+                    value={isUpdateModalOpen === true ? tempData?.destinationId : null}
                     onChange={handleChange}
+
                     className="form-select form-select-solid border border-gray-300" aria-label="Select example">
                     {!isUpdateModalOpen && <option>Select</option>}
                     {
                       destinations?.data.map((item: any) => (
                         <option
-                          selected={isUpdateModalOpen && item.id === tempData.destinationId}
+                          // selected={isUpdateModalOpen && item.id === tempData.destinationId}
                           value={item.id}>{item.name}</option>
                       ))
                     }

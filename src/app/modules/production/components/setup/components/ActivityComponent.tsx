@@ -363,16 +363,17 @@ const ActivityComponent = ({ data, hasActivityType }: any) => {
                                         <label htmlFor="exampleFormControlInput1" className="form-label text-gray-500">Activity Type</label>
                                         <select
                                             {...register("activityType")}
+                                            value={isUpdateModalOpen === true ? tempData?.activityType : null}
                                             onChange={handleChange}
                                             className="form-select form-select-solid border border-gray-300" aria-label="Select example">
-                                            {!isUpdateModalOpen && <option>Select</option>}
+                                            {isUpdateModalOpen === false ? <option value="Select service">Select Activity Type</option> : null}
                                             {
                                                 activityTypes.map((item: any) => (
                                                     <option
-                                                        selected={isUpdateModalOpen && tempData.activityType === item}
+                                                        // selected={isUpdateModalOpen && tempData.activityType === item}
                                                         value={item}>{item}
                                                     </option>
-                                                ))
+                                                    ))
                                             }
                                         </select>
                                     </div>
