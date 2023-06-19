@@ -44,6 +44,7 @@ const CycleDetailsTable = () => {
     const { data: allMaterials } = useQuery('allMaterials', () => fetchDocument(`ProdRawMaterial/tenant/${tenantId}`), { cacheTime: 5000 })
     const { data: allShifts } = useQuery('shifts', () => fetchDocument(`ProductionShift/tenant/${tenantId}`), { cacheTime: 5000 })
 
+    const [dataToUpdate, setDataToUpdate] = useState<any[]>([]) // to hold the data to be updated
     const [fileList, setFileList] = useState([]);
     const [fileName, setFileName] = useState('') // to hold the name of the uploaded file
     const [isConfirmSaveModalOpen, setIsConfirmSaveModalOpen] = useState(false) // to show the modal to confirm the save
@@ -60,6 +61,19 @@ const CycleDetailsTable = () => {
             ...prevTempData,
             [name]: value,
         }));
+
+        // if event is shiftId or haulerUnitId or loaderUnitId or originId or destinationId or materialId, 
+        // or nominalWeight or payloadWeight or weight, or volumes or loads or duration or reportedWeight 
+        // parse the value to int
+        if (name === 'shiftId' || name === 'haulerUnitId' || name === 'loaderUnitId'
+            || name === 'originId' || name === 'destinationId' || name === 'materialId'
+            || name === 'nominalWeight' || name === 'payloadWeight' || name === 'weight'
+            || name === 'volumes' || name === 'loads' || name === 'duration' || name === 'reportedWeight') {
+            setTempData((prevTempData: any) => ({
+                ...prevTempData,
+                [name]: parseInt(value),
+            }));
+        }
     }
 
 
@@ -87,10 +101,12 @@ const CycleDetailsTable = () => {
 
     const handleCancel = () => {
         reset()
+        setDataToUpdate([])
         if (isUpdateModalOpen && isFileUploaded) {
             setIsModalOpen(false)
             setIsUpdateModalOpen(false)
             setTempData(null)
+
         } else {
             setIsModalOpen(false)
             setTempData(null)
@@ -142,17 +158,18 @@ const CycleDetailsTable = () => {
             setRowCount(dataFromAddB.length)
             return updatedBatchData;
         });
-    };
-
-    const removeItemFromUploadBatchData = (itemToRemove: any) => {
-        setUploadDataToSave((prevBatchData: any[]) => {
-            const updatedBatchData: any = prevBatchData.filter((item) => item !== itemToRemove);
-            setDataFromAddB(updatedBatchData)
-            setRowCount(uploadDataToSave.length)
-            return updatedBatchData;
-        });
         message.success('Item removed from batch.')
     };
+
+    // const removeItemFromUploadBatchData = (itemToRemove: any) => {
+    //     setUploadDataToSave((prevBatchData: any[]) => {
+    //         const updatedBatchData: any = prevBatchData.filter((item) => item !== itemToRemove);
+    //         setDataFromAddB(updatedBatchData)
+    //         setRowCount(uploadDataToSave.length)
+    //         return updatedBatchData;
+    //     });
+    //     message.success('Item removed from batch.')
+    // };
 
     const getRecordName = (id: any, data: any) => {
         let name = ''
@@ -639,15 +656,15 @@ const CycleDetailsTable = () => {
         showModal()
         setIsUpdateModalOpen(true)
         setTempData(values);
-        // console.log(values)
         setItemToUpdate(values)
+        setDataToUpdate(values)
     }
 
 
     const updateItemInBatchData = () => {
         setBatchDataToSave((prevBatchData: any[]) => {
             const updatedBatchData: any = prevBatchData.map((item) =>
-                item === tempData ? tempData : item
+                item === dataToUpdate ? tempData : item
             );
             // console.log('manualUpdate: ', updatedBatchData)
             setDataFromAddB(updatedBatchData)
@@ -845,7 +862,7 @@ const CycleDetailsTable = () => {
 
     return (
         <div className="card-custom card-flush">
-            <div className="card-header mt-0"  style={{ borderBottom: 'none' }}>
+            <div className="card-header mt-0" style={{ borderBottom: 'none' }}>
                 <Space style={{ marginBottom: 16 }}>
 
                     <Button onClick={showCheckDataModal}
@@ -953,13 +970,13 @@ const CycleDetailsTable = () => {
                                     <label htmlFor="exampleFormControlInput1" className="required form-label text-gray-500">Loader</label>
                                     <select
                                         {...register("loader")}
+                                        value={isUpdateModalOpen === true ? tempData?.loader : null}
                                         onChange={handleChange}
                                         className="form-select form-select-solid border border-gray-300" aria-label="Select example">
-                                        {!isUpdateModalOpen && <option>Select</option>}
+                                        {isUpdateModalOpen === false ? <option value="Select">Select</option> : null}
                                         {
                                             allLoaderOperators?.data.map((item: any) => (
                                                 <option
-                                                    selected={isUpdateModalOpen && tempData.loader === item.empCode}
                                                     key={item.id} value={item.empCode}>{item.empName}</option>
                                             ))
                                         }
@@ -969,13 +986,13 @@ const CycleDetailsTable = () => {
                                     <label htmlFor="exampleFormControlInput1" className="required form-label text-gray-500">Hauler</label>
                                     <select
                                         {...register("hauler")}
+                                        value={isUpdateModalOpen === true ? tempData?.hauler : null}
                                         onChange={handleChange}
                                         className="form-select form-select-solid border border-gray-300" aria-label="Select example">
-                                        {!isUpdateModalOpen && <option>Select</option>}
+                                        {isUpdateModalOpen === false ? <option value="Select">Select</option> : null}
                                         {
                                             allHaulerOperators?.data.map((item: any) => (
                                                 <option key={item.id}
-                                                    selected={isUpdateModalOpen && tempData.hauler === item.empCode}
                                                     value={item.empCode}>{item.empName}</option>
                                             ))
                                         }
@@ -985,12 +1002,14 @@ const CycleDetailsTable = () => {
                                     <label htmlFor="exampleFormControlInput1" className="required form-label text-gray-500">Origin</label>
                                     <select
                                         {...register("originId")}
+                                        value={isUpdateModalOpen === true ? tempData?.originId : null}
                                         onChange={handleChange}
                                         className="form-select form-select-solid border border-gray-300" aria-label="Select example">
-                                        {!isUpdateModalOpen && <option>Select</option>}
+                                        {isUpdateModalOpen === false ? <option value="Select">Select</option> : null}
                                         {
                                             allOrigins?.data.map((item: any) => (
-                                                <option selected={isUpdateModalOpen && item.id === tempData.originId} key={item.id} value={item.id}>{item.name}</option>
+                                                <option
+                                                    key={item.id} value={item.id}>{item.name}</option>
                                             ))
                                         }
                                     </select>
@@ -1002,13 +1021,13 @@ const CycleDetailsTable = () => {
                                     <label htmlFor="exampleFormControlInput1" className="required form-label text-gray-500">Hauler Unit</label>
                                     <select
                                         {...register("haulerUnitId")}
+                                        value={isUpdateModalOpen === true ? tempData?.haulerUnitId : null}
                                         onChange={handleChange}
                                         className="form-select form-select-solid border border-gray-300" aria-label="Select example">
-                                        {!isUpdateModalOpen && <option>Select</option>}
+                                        {isUpdateModalOpen === false ? <option value="Select">Select</option> : null}
                                         {
                                             allHaulerUnits?.data.map((item: any) => (
                                                 <option key={item.id}
-                                                    selected={isUpdateModalOpen && tempData.haulerUnitId === item.id}
                                                     value={item.id}>{item.equipmentId}</option>
                                             ))
                                         }
@@ -1018,13 +1037,13 @@ const CycleDetailsTable = () => {
                                     <label htmlFor="exampleFormControlInput1" className="required form-label text-gray-500">Loader Unit</label>
                                     <select
                                         {...register("loaderUnitId")}
+                                        value={isUpdateModalOpen === true ? tempData?.loaderUnitId : null}
                                         onChange={handleChange}
                                         className="form-select form-select-solid border border-gray-300" aria-label="Select example">
-                                        {!isUpdateModalOpen && <option>Select</option>}
+                                        {isUpdateModalOpen === false ? <option value="Select">Select</option> : null}
                                         {
                                             allLoaderUnits?.data.map((item: any) => (
                                                 <option key={item.id}
-                                                    selected={isUpdateModalOpen && tempData.loaderUnitId === item.id}
                                                     value={item.id}>{item.equipmentId}</option>
                                             ))
                                         }
@@ -1035,13 +1054,13 @@ const CycleDetailsTable = () => {
                                     <label htmlFor="exampleFormControlInput1" className="required form-label text-gray-500">Material</label>
                                     <select
                                         {...register("materialId")}
+                                        value={isUpdateModalOpen === true ? tempData?.materialId : null}
                                         onChange={handleChange}
                                         className="form-select form-select-solid border border-gray-300" aria-label="Select example">
-                                        {!isUpdateModalOpen && <option>Select</option>}
+                                        {isUpdateModalOpen === false ? <option value="Select">Select</option> : null}
                                         {
                                             allMaterials?.data.map((item: any) => (
                                                 <option key={item.id}
-                                                    selected={isUpdateModalOpen && tempData.materialId === item.id}
                                                     value={item.id}>{item.name}</option>
                                             ))
                                         }
@@ -1054,13 +1073,13 @@ const CycleDetailsTable = () => {
                                     <label htmlFor="exampleFormControlInput1" className="required form-label text-gray-500">Destination</label>
                                     <select
                                         {...register("destinationId")}
+                                        value={isUpdateModalOpen === true ? tempData?.destinationId : null}
                                         onChange={handleChange}
                                         className="form-select form-select-solid border border-gray-300" aria-label="Select example">
-                                        {!isUpdateModalOpen && <option>Select</option>}
+                                        {isUpdateModalOpen === false ? <option value="Select">Select</option> : null}
                                         {
                                             destinations?.data.map((item: any) => (
                                                 <option key={item.id}
-                                                    selected={isUpdateModalOpen && tempData.destinationId === item.id}
                                                     value={item.id}>{item.name}</option>
                                             ))
                                         }
@@ -1070,13 +1089,13 @@ const CycleDetailsTable = () => {
                                     <label htmlFor="exampleFormControlInput1" className="required form-label text-gray-500">Shift</label>
                                     <select
                                         {...register("shiftId")}
+                                        value={isUpdateModalOpen === true ? tempData?.shiftId : null}
                                         onChange={handleChange}
                                         className="form-select form-select-solid border border-gray-300" aria-label="Select example">
-                                        {!isUpdateModalOpen && <option>Select</option>}
+                                        {isUpdateModalOpen === false ? <option value="Select">Select</option> : null}
                                         {
                                             allShifts?.data.map((item: any) => (
                                                 <option key={item.id}
-                                                    selected={isUpdateModalOpen && tempData.shiftId === item.id}
                                                     value={item.id}>{item.name}</option>
                                             ))
                                         }

@@ -255,15 +255,12 @@ const FuelComponent = ({ url, title }: any) => {
 
     const updateItemInBatchData = () => {
         setBatchDataToSave((prevBatchData: any) => {
-
-
             const updatedBatchData = prevBatchData.map((item: any) =>
                 item === dataToUpdate ? tempData : item
             );
 
             setDataFromAddB(updatedBatchData);
             setRowCount(updatedBatchData.length);
-            console.log('updated', tempData);
             handleCancel();
             return updatedBatchData;
         });
@@ -702,7 +699,7 @@ const FuelComponent = ({ url, title }: any) => {
                                                     value={isUpdateModalOpen === true ? tempData?.equipmentId : null}
                                                     onChange={handleChange}
                                                     className="form-select form-select-solid form-control-solid border border-gray-300" aria-label="Select example">
-                                                    {!isUpdateModalOpen && <option>Select</option>}
+                                                    {isUpdateModalOpen === false ? <option value="Select">Select</option> : null}
                                                     {
                                                         equipments?.data.map((item: any) => (
                                                             <option
@@ -720,7 +717,7 @@ const FuelComponent = ({ url, title }: any) => {
                                                     value={isUpdateModalOpen === true ? tempData?.pumpId : null}
                                                     onChange={handleChange}
                                                     className="form-select form-select-solid border border-gray-300" aria-label="Select example">
-                                                    {!isUpdateModalOpen && <option>Select</option>}
+                                                    {isUpdateModalOpen === false ? <option value="Select">Select</option> : null}
                                                     {
                                                         pumps?.data.map((item: any) => (
                                                             <option
@@ -748,7 +745,7 @@ const FuelComponent = ({ url, title }: any) => {
                                                     value={isUpdateModalOpen === true ? tempData?.pumpId : null}
                                                     onChange={handleChange}
                                                     className="form-select form-select-solid border border-gray-300" aria-label="Select example">
-                                                    {!isUpdateModalOpen && <option>Select</option>}
+                                                    {isUpdateModalOpen === false ? <option value="Select">Select</option> : null}
                                                     {
                                                         pumps?.data.map((item: any) => (
                                                             <option

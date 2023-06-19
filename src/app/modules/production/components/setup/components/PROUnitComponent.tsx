@@ -59,7 +59,7 @@ const ProUnitComponent = (props: any) => {
         console.log('equipmentId: ', equipmentId)
     }
 
-    const handleEquipmentIdChange = (event:any) => {
+    const handleEquipmentIdChange = (event: any) => {
         const modelName = getModelName(event.target.value);
         const selectedDescription = getEquipmentDes(event.target.value);
 
@@ -67,7 +67,7 @@ const ProUnitComponent = (props: any) => {
         setValue('description', selectedDescription);
         setTempData((prevTempData: any) => ({
             ...prevTempData,
-            equipmentId: event.target.value ,
+            equipmentId: event.target.value,
             modelName: modelName || '',
             description: selectedDescription || '',
         }));
@@ -276,7 +276,7 @@ const ProUnitComponent = (props: any) => {
             url: props.data.url
         }
         for (const [key, value] of Object.entries(item.data)) {
-          if (key === 'equipmentId' && value === 'Select') {
+            if (key === 'equipmentId' && value === 'Select') {
                 message.error(`Please select a valid Equipment`)
                 setSubmitLoading(false)
                 return
@@ -360,7 +360,7 @@ const ProUnitComponent = (props: any) => {
                                         value={isUpdateModalOpen === true ? tempData?.equipmentId : null}
                                         onChange={handleEquipmentIdChange}
                                         className="form-select form-select-solid border border-gray-300 mb-7" aria-label="Select example">
-                                        {!isUpdateModalOpen && <option>Select</option>}
+                                        {isUpdateModalOpen === false ? <option value="Select">Select</option> : null}
                                         {
                                             equipments?.data.map((item: any) => (
                                                 <option

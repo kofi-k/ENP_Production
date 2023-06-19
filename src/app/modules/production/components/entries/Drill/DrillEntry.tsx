@@ -43,7 +43,7 @@ const DrillEntry = () => {
         if (event.target.name === 'activityMappingId') {
             const [activityId, activityDetailId] = event.target.value.split('-');
             // console.log('activityId: ', activityId, 'activityDetailId: ', activityDetailId  )
-            setTempData({ ...tempData, activityId:  parseInt(activityId), activityDetailId: parseInt(activityDetailId) });
+            setTempData({ ...tempData, activityId: parseInt(activityId), activityDetailId: parseInt(activityDetailId) });
         }
         if (event.target.name === 'drillDate') {
             const selectedDate = new Date(event.target.value);
@@ -295,7 +295,7 @@ const DrillEntry = () => {
 
     return (
         <div className="card-custom card-flush" >
-            <div className="card-header mt-7"  style={{ borderBottom: 'none' }}>
+            <div className="card-header mt-7" style={{ borderBottom: 'none' }}>
                 <Space style={{ marginBottom: 16 }}>
                     <Input
                         placeholder='Enter Search Text'
@@ -358,11 +358,11 @@ const DrillEntry = () => {
                                     <label htmlFor="exampleFormControlInput1" className="required form-label text-gray-500 ">Rig</label>
                                     <select
                                         {...register("rigId")}
-                                        value ={isUpdateModalOpen == true ? tempData.rigId : null}
+                                        value={isUpdateModalOpen == true ? tempData.rigId : null}
                                         onChange={handleChange}
                                         className="form-select form-select-solid form-control-solid border border-gray-300"
                                         aria-label="Select example">
-                                        {isUpdateModalOpen == false ? <option>Select</option>: null}
+                                         {isUpdateModalOpen === false ? <option value="Select">Select</option> : null}
                                         {
                                             allRigs?.data.map((item: any) => (
                                                 <option
@@ -381,7 +381,7 @@ const DrillEntry = () => {
                                         value={isUpdateModalOpen === true ? tempData?.shiftId : null}
                                         onChange={handleChange}
                                         className="form-select form-select-solid form-control-solid border border-gray-300" aria-label="Select example">
-                                        {!isUpdateModalOpen && <option>Select</option>}
+                                        {isUpdateModalOpen === false ? <option value="Select">Select</option> : null}
                                         {
                                             allShifts?.data.map((item: any) => (
                                                 <option
@@ -396,7 +396,7 @@ const DrillEntry = () => {
                                         {...register("activityMappingId")}
                                         onChange={handleChange}
                                         className="form-select form-select-solid form-control-solid border border-gray-300" aria-label="Select example">
-                                        {!isUpdateModalOpen && <option>Select</option>}
+                                        {isUpdateModalOpen === false ? <option value="Select">Select</option> : null}
                                         {
                                             activityMapping?.map((item: any) => (
                                                 <option
