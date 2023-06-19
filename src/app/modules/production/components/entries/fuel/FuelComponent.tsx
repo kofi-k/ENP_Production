@@ -38,7 +38,10 @@ const FuelComponent = ({ url, title }: any) => {
     const handleChange = (event: any) => {
         event.preventDefault()
         setTempData({ ...tempData, [event.target.name]: event.target.value });
-
+        // if event is pump id, parse the value to int
+        if (event.target.name === 'pumpId') {
+            setTempData({ ...tempData, [event.target.name]: parseInt(event.target.value) });
+        }
     }
     const [dataFromAddB, setDataFromAddB] = useState([])
     const [readFile, setReadFile] = useState<any>(null)
@@ -177,8 +180,8 @@ const FuelComponent = ({ url, title }: any) => {
                 return { ...item, key: index }
             }
             )
-            setDataFromAddB(data)
-            setBatchDataToSave(data)
+            setDataFromAddB(batchDataToSave)
+            // setBatchDataToSave(data)
         }
         setRowCount(batchDataToSave.length)
     }, [batchDataToSave]);
@@ -252,14 +255,16 @@ const FuelComponent = ({ url, title }: any) => {
 
     const updateItemInBatchData = () => {
         setBatchDataToSave((prevBatchData: any) => {
+
+
             const updatedBatchData = prevBatchData.map((item: any) =>
-                item.key === tempData.key ? tempData : item
+                item === dataToUpdate ? tempData : item
             );
 
             setDataFromAddB(updatedBatchData);
             setRowCount(updatedBatchData.length);
+            console.log('updated', tempData);
             handleCancel();
-
             return updatedBatchData;
         });
     };
