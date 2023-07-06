@@ -39,7 +39,7 @@ const FuelComponent = ({ url, title }: any) => {
         event.preventDefault()
         setTempData({ ...tempData, [event.target.name]: event.target.value });
         // if event is pump id, parse the value to int
-        if (event.target.name === 'pumpId') {
+        if (event.target.name === 'pumpId' || event.target.name === 'quantity') {
             setTempData({ ...tempData, [event.target.name]: parseInt(event.target.value) });
         }
     }
@@ -477,6 +477,7 @@ const FuelComponent = ({ url, title }: any) => {
 
     const readFuelIssue = (data: any) => {
         let stopReading = false;
+        
         return data
             .map((item: any) => {
 
@@ -532,7 +533,6 @@ const FuelComponent = ({ url, title }: any) => {
                 const workSheet: any = workBook.Sheets[targetSheetName];
 
                 const range = title === 'Fuel Issue' ? 'A3:F2300' : 'B2:AL36';
-
 
                 const rawData: any = XLSX.utils.sheet_to_json(workSheet, { header: 0, range: range, blankrows: false, defval: null })
 
@@ -788,7 +788,7 @@ const FuelComponent = ({ url, title }: any) => {
                                         justifyContent: 'center',
                                         alignItems: 'center',
                                     }}
-                                    icon={<UploadOutlined rev={''} />}>Click to Upload</Button>
+                                    icon={<UploadOutlined rev={''} />}> {uploading ? `...Reading` : `Click to Upload`}</Button>
                             </Upload>
                         </Space>
                     </Modal>

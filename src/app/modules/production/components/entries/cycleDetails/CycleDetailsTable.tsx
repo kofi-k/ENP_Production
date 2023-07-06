@@ -372,7 +372,34 @@ const CycleDetailsTable = () => {
                 // sets the range to be read from the excel file
                 const range = "A13:ZZ1200";
 
+
+                // check if these columns exist in the excel file else cancel upload
+                const requiredColumns = ['Date', 'Shift', 'Arrived', 'Loading Unit',
+                    'Loader Operator', 'Truck', 'Hauler Operator', 'Origin',
+                    'Material', 'Destination', 'Nominal Weight',
+                    'Payload Weight', 'Reported Weight', 'Volume',
+                    'Loads', 'Time Start', 'Travel Empty Duration']
+
+                const excelColumns = Object.keys(workSheet).map((key: any) => {
+                    return workSheet[key].v
+                })
+
+                const missingColumns = requiredColumns.filter((column: any) => !excelColumns.includes(column))
+
+                if (missingColumns.length > 0) {
+                    message.error(
+                        `Missing columns: ${missingColumns.join(', ')}`,
+                        6,
+                        )
+                    setUploading(false)
+                    setFileList([])
+                    setUploadedFile(null)
+                    setIsUploadModalOpen(false)
+                    return
+                }
+
                 const rawExcelData: any = XLSX.utils.sheet_to_json(workSheet, { header: 0, range: range, blankrows: false })
+
 
                 let stopReading = false;
                 const filteredData: any = rawExcelData
@@ -1168,7 +1195,7 @@ const CycleDetailsTable = () => {
                                         justifyContent: 'center',
                                         alignItems: 'center',
                                     }}
-                                    icon={<UploadOutlined rev={''} />}>Click to Upload</Button>
+                                    icon={<UploadOutlined rev={''} />}> {uploading ? `...Reading` : `Click to Upload`}</Button>
                             </Upload>
                         </Space>
                     </Modal>

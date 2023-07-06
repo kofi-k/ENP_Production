@@ -4,9 +4,13 @@ import axios from 'axios';
  */
 // export const ENP_URL = 'http://localhost:3001'
 // export const ENP_URL = 'https://cors-anywhere.herokuapp.com/http://208.117.44.15/SmWebApi/api'
-export const ENP_URL = 'http://208.117.44.15/SmWebApi/api'
+// export const ENP_URL = 'http://208.117.44.15/SmWebApi/api'
+// // export const ENP_URL = 'https://localhost:7144/api'
+// export const UsersEndpoint = "http://208.117.44.15/userapi/api";
+
+export const ENP_URL = 'https://app.sipconsult.net/SmWebApi/api'
 // export const ENP_URL = 'https://localhost:7144/api'
-export const UsersEndpoint = "http://208.117.44.15/userapi/api";
+export const UsersEndpoint = "https://app.sipconsult.net/userapi/api";
 
 
 export const fetchEquips= ()=>{
