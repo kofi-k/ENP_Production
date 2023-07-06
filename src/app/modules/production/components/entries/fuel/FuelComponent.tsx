@@ -1,14 +1,13 @@
 import { UploadOutlined } from '@ant-design/icons';
 import { Button, Divider, Modal, Space, Table, Tabs, TabsProps, Tag, Upload, UploadProps, message } from 'antd';
 import moment from 'moment';
-import * as XLSX from 'xlsx';
 import { useEffect, useState } from "react";
 import { useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
+import * as XLSX from 'xlsx';
 import { KTCardBody } from '../../../../../../_metronic/helpers';
 import { fetchDocument, postItem } from '../../../urls';
 import { ModalFooterButtons, PageActionButtons, calculateQuantityByField, convertExcelDateToJSDate, excelDateToJSDate, getDateFromDateString, roundOff } from '../../CommonComponents';
-import { setUploadFile } from '@devexpress/analytics-core/analytics-internal';
 
 
 

@@ -14,7 +14,7 @@ const Devexpres = () => {
                 style={{ height: '100%' }}
                 // endpoint='https://demos.devexpress.com/services/dashboard/api'
                 // endpoint='https ://208.117.44.15/dashboards/dashboardcontrol'
-                endpoint='http://208.117.44.15/dashboards/dashboardcontrol'
+                endpoint='https://app.sipconsult.net/dashboards/dashboardcontrol'
                 workingMode='ViewerOnly'
                 dashboardId='pro_cycleDetails'
             ></DashboardControl>
@@ -30,7 +30,7 @@ const Devexpres2 = () => {
                 style={{ height: '100%' }}
                 // endpoint='https://demos.devexpress.com/services/dashboard/api'
                 // endpoint='https ://208.117.44.15/dashboards/dashboardcontrol'
-                endpoint='http://208.117.44.15/dashboards/dashboardcontrol'
+                endpoint='https://app.sipconsult.net/dashboards/dashboardcontrol'
                 workingMode='ViewerOnly'
                 dashboardId='pro_fuelIntake'
             ></DashboardControl>
@@ -47,7 +47,7 @@ const CycleDetailsAnalysis = () => {
                 style={{ height: '100%' }}
                 // endpoint='https://demos.devexpress.com/services/dashboard/api'
                 // endpoint='https ://208.117.44.15/dashboards/dashboardcontrol'
-                endpoint='http://208.117.44.15/dashboards/dashboardcontrol'
+                endpoint='https://app.sipconsult.net/dashboards/dashboardcontrol'
                 workingMode='ViewerOnly'
                 dashboardId='pro_cycleDetailsAnalysis'
             ></DashboardControl>
@@ -64,7 +64,7 @@ const FuelAnalysis = () => {
                 style={{ height: '100%' }}
                 // endpoint='https://demos.devexpress.com/services/dashboard/api'
                 // endpoint='https ://208.117.44.15/dashboards/dashboardcontrol'
-                endpoint='http://208.117.44.15/dashboards/dashboardcontrol'
+                endpoint='https://app.sipconsult.net/dashboards/dashboardcontrol'
                 workingMode='ViewerOnly'
                 dashboardId='pro_fuelAnalysis'
             ></DashboardControl>
@@ -80,7 +80,7 @@ const DrillEntryAnalysis = () => {
                 style={{ height: '100%' }}
                 // endpoint='https://demos.devexpress.com/services/dashboard/api'
                 // endpoint='https ://208.117.44.15/dashboards/dashboardcontrol'
-                endpoint='http://208.117.44.15/dashboards/dashboardcontrol'
+                endpoint='https://app.sipconsult.net/dashboards/dashboardcontrol'
                 workingMode='ViewerOnly'
                 dashboardId='pro_drillEntryAnalysis'
             ></DashboardControl>
