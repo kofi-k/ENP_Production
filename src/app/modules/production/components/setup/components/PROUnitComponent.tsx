@@ -1,4 +1,4 @@
-import { Button, Input, Modal, Space, Table, message } from 'antd'
+import { Button, Input, Modal, Skeleton, Space, Table, message } from 'antd'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from 'react-query'
@@ -15,8 +15,6 @@ const ProUnitComponent = (props: any) => {
     let [filteredData] = useState([])
     const [submitLoading, setSubmitLoading] = useState(false)
     const [searchText, setSearchText] = useState('')
-
-    const [loading, setLoading] = useState(false)
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false)
     const [tempData, setTempData] = useState<any>()
     const { register, setValue, reset, handleSubmit } = useForm()
@@ -28,6 +26,7 @@ const ProUnitComponent = (props: any) => {
 
     const { data: equipments } = useQuery('equipments', () => fetchDocument(`equipments/tenant/${tenantId}`), { cacheTime: 5000 })
     const { data: models } = useQuery('models', () => fetchDocument(`models`), { cacheTime: 5000 })
+    const { data: componentData, isLoading: loading } = useQuery('models', () => fetchDocument(`${props.data.url}/tenant/${tenantId}`), { cacheTime: 5000 })
 
     // get modelId from selected equipment
     const getEquipmentModelId = (equipmentId: any) => {
@@ -106,8 +105,8 @@ const ProUnitComponent = (props: any) => {
     }
 
     const { mutate: deleteData, isLoading: deleteLoading } = useMutation(deleteItem, {
-        onSuccess: (data) => {
-            queryClient.setQueryData([props.data.url, tempData], data);
+        onSuccess: () => {
+            queryClient.invalidateQueries(props.data.url)
             loadData()
         },
         onError: (error) => {
@@ -188,13 +187,9 @@ const ProUnitComponent = (props: any) => {
     ]
 
     const loadData = async () => {
-        setLoading(true)
         try {
-            const response = await fetchDocument(`${props.data.url}/tenant/${tenantId}`)
-            setGridData(response.data)
-            setLoading(false)
+            setGridData(componentData?.data)
         } catch (error) {
-            setLoading(false)
             console.log(error)
             message.error(`${error}`)
         }
@@ -226,9 +221,9 @@ const ProUnitComponent = (props: any) => {
         // })
         // setGridData(filteredData)
     }
-    const { isLoading: updateLoading, mutate: updateData } = useMutation(updateItem, {
-        onSuccess: (data) => {
-            queryClient.setQueryData(['plannedOutput', tempData], data);
+    const {  mutate: updateData } = useMutation(updateItem, {
+        onSuccess: () => {
+            queryClient.invalidateQueries(props.data.url)
             reset()
             setTempData({})
             setEquipmentId(null)
@@ -286,9 +281,9 @@ const ProUnitComponent = (props: any) => {
         postData(item)
     })
 
-    const { mutate: postData, isLoading: postLoading } = useMutation(postItem, {
-        onSuccess: (data) => {
-            queryClient.setQueryData([props.data.url, tempData], data);
+    const { mutate: postData } = useMutation(postItem, {
+        onSuccess: () => {
+            queryClient.invalidateQueries(props.data.url)
             reset()
             setTempData({})
             setEquipmentId(null)
@@ -336,8 +331,10 @@ const ProUnitComponent = (props: any) => {
                             />
                         </Space>
                     </div>
-                    <Table columns={columns} dataSource={dataWithIndex} loading={loading} />
-
+                    {
+                        loading ? <Skeleton active /> :
+                            <Table columns={columns} dataSource={dataWithIndex} loading={loading} />
+                    }
                     <Modal
                         title={isUpdateModalOpen ? `${props.data.title} Update` : `${props.data.title} Setup`}
                         open={isModalOpen}

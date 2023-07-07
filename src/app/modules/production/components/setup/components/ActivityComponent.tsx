@@ -1,4 +1,4 @@
-import { Button, Input, Modal, Space, Table, message } from "antd"
+import { Button, Input, Modal, Skeleton, Space, Table, message } from "antd"
 import { useEffect, useState } from "react"
 import { } from "react-bootstrap"
 import { useForm } from "react-hook-form"
@@ -23,7 +23,6 @@ const ActivityComponent = ({ data, hasActivityType }: any) => {
     const [detailName, setDetailName] = useState('')
     const tenantId = localStorage.getItem('tenant')
     const navigate = useNavigate();
-    const [loading, setLoading] = useState(false)
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false)
     const [tempData, setTempData] = useState<any>()
     const { register, reset, handleSubmit } = useForm()
@@ -32,7 +31,7 @@ const ActivityComponent = ({ data, hasActivityType }: any) => {
     const activityTypes: any = [
         'Haul', 'Load', 'Drill'
     ]
-    const { data: activities } = useQuery('activities', () => fetchDocument(`ProductionActivity/tenant/${tenantId}`), { cacheTime: 5000 })
+    const { data: activities, isLoading: loading } = useQuery('activities', () => fetchDocument(`ProductionActivity/tenant/${tenantId}`), { cacheTime: 5000 })
 
 
     const handleChange = (event: any) => {
@@ -146,7 +145,6 @@ const ActivityComponent = ({ data, hasActivityType }: any) => {
     }
 
     const loadData = async () => {
-        setLoading(true)
         try {
             const response = await fetchDocument(`${data.url}/tenant/${tenantId}`)
             if (data.url === 'ProActivityDetails') {
@@ -156,9 +154,7 @@ const ActivityComponent = ({ data, hasActivityType }: any) => {
                 // console.log('detName: ', detName)
             }
             setGridData(response.data)
-            setLoading(false)
         } catch (error) {
-            setLoading(false)
             // console.log(error)
             message.error(`${error}`)
         }
@@ -195,7 +191,7 @@ const ActivityComponent = ({ data, hasActivityType }: any) => {
         // })
         //setGridData(filteredData)
     }
-    
+
     const { isLoading: updateLoading, mutate: updateData } = useMutation(updateItem, {
         onSuccess: (dataU) => {
             queryClient.setQueryData([data.url, tempData], dataU);
@@ -330,7 +326,10 @@ const ActivityComponent = ({ data, hasActivityType }: any) => {
                             />
                         </Space>
                     </div>
-                    <Table columns={columns} dataSource={data.url === 'ProActivityDetails' ? dataByActivityDetails : dataWithIndex} loading={loading} />
+                    {
+                        loading ? <Skeleton active /> :
+                            <Table columns={columns} dataSource={data.url === 'ProActivityDetails' ? dataByActivityDetails : dataWithIndex} />
+                    }
 
                     <Modal
                         title={isUpdateModalOpen ? `${data.title} Update` : `${data.title} Setup`}
@@ -373,7 +372,7 @@ const ActivityComponent = ({ data, hasActivityType }: any) => {
                                                         // selected={isUpdateModalOpen && tempData.activityType === item}
                                                         value={item}>{item}
                                                     </option>
-                                                    ))
+                                                ))
                                             }
                                         </select>
                                     </div>
