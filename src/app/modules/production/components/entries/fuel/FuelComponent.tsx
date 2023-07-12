@@ -1,18 +1,17 @@
 import { UploadOutlined } from '@ant-design/icons';
 import { Button, Divider, Modal, Space, Table, Tabs, TabsProps, Tag, Upload, UploadProps, message } from 'antd';
 import moment from 'moment';
-import * as XLSX from 'xlsx';
 import { useEffect, useState } from "react";
 import { useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
+import * as XLSX from 'xlsx';
 import { KTCardBody } from '../../../../../../_metronic/helpers';
 import { fetchDocument, postItem } from '../../../urls';
 import { ModalFooterButtons, PageActionButtons, calculateQuantityByField, convertExcelDateToJSDate, excelDateToJSDate, getDateFromDateString, roundOff } from '../../CommonComponents';
-import { setUploadFile } from '@devexpress/analytics-core/analytics-internal';
 
 
 
-const FuelComponent = ({url, title}: any) => {
+const FuelComponent = ({ url, title }: any) => {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [uploading, setUploading] = useState(false)
     const [uploadedFile, setUploadedFile] = useState<any>(null)
@@ -31,12 +30,17 @@ const FuelComponent = ({url, title}: any) => {
     const [isConfirmSaveModalOpen, setIsConfirmSaveModalOpen] = useState(false) // to show the modal to confirm the save
     const [isCheckDataModalOpen, setIsCheckDataModalOpen] = useState(false)  // to show the modal to check the data summaries from the uploaded file
 
+    const [dataToUpdate, setDataToUpdate] = useState<any[]>([]) // to hold the data to be updated
     const [batchDataToSave, setBatchDataToSave]: any = useState<any[]>([]);
 
     const [rowCount, setRowCount] = useState(0) // to hold the number of rows read from the uploaded file
     const handleChange = (event: any) => {
         event.preventDefault()
         setTempData({ ...tempData, [event.target.name]: event.target.value });
+        // if event is pump id, parse the value to int
+        if (event.target.name === 'pumpId' || event.target.name === 'quantity') {
+            setTempData({ ...tempData, [event.target.name]: parseInt(event.target.value) });
+        }
     }
     const [dataFromAddB, setDataFromAddB] = useState([])
     const [readFile, setReadFile] = useState<any>(null)
@@ -78,7 +82,7 @@ const FuelComponent = ({url, title}: any) => {
 
     const handleSaveClicked = () => {
         setIsConfirmSaveModalOpen(true)
-        console.log('batchDataToSave: ', batchDataToSave)
+        // console.log('batchDataToSave: ', batchDataToSave)
     }
     const showCheckDataModal = (values: any) => {
         setIsCheckDataModalOpen(true)
@@ -123,7 +127,8 @@ const FuelComponent = ({url, title}: any) => {
         showModal()
         setIsUpdateModalOpen(true)
         setTempData(values);
-        console.log(values)
+        setDataToUpdate(values)
+        // console.log(values)
     }
 
 
@@ -168,9 +173,14 @@ const FuelComponent = ({url, title}: any) => {
     }
 
     useEffect(() => {
-        console.log('batch', batchDataToSave);
+        // console.log('batch', batchDataToSave);
         if (batchDataToSave.length > 0) {
+            const data = batchDataToSave.map((item: any, index: number) => {
+                return { ...item, key: index }
+            }
+            )
             setDataFromAddB(batchDataToSave)
+            // setBatchDataToSave(data)
         }
         setRowCount(batchDataToSave.length)
     }, [batchDataToSave]);
@@ -243,16 +253,16 @@ const FuelComponent = ({url, title}: any) => {
     };
 
     const updateItemInBatchData = () => {
-        setBatchDataToSave((prevBatchData: any[]) => {
-            const updatedBatchData: any = prevBatchData.map((item) =>
-                item === tempData ? tempData : item
+        setBatchDataToSave((prevBatchData: any) => {
+            const updatedBatchData = prevBatchData.map((item: any) =>
+                item === dataToUpdate ? tempData : item
             );
-            console.log('manualUpdate: ', updatedBatchData)
-            setDataFromAddB(updatedBatchData)
-            setRowCount(updatedBatchData.length)
-            handleCancel()
+
+            setDataFromAddB(updatedBatchData);
+            setRowCount(updatedBatchData.length);
+            handleCancel();
             return updatedBatchData;
-        })
+        });
     };
 
     const removeItemFromBatchData = (itemToRemove: any) => {
@@ -321,7 +331,7 @@ const FuelComponent = ({url, title}: any) => {
         setIsModalOpen(false)
         message.success('Item added to batch.')
         reset()
-        console.log('batchDataToSave', batchDataToSave)
+        // console.log('batchDataToSave', batchDataToSave)
     })
 
     const handleBatchSave = () => {
@@ -338,7 +348,7 @@ const FuelComponent = ({url, title}: any) => {
                     };
                 });
 
-            console.log('batchData', batchDataToSave.slice(0, 10))
+            // console.log('batchData', batchDataToSave.slice(0, 10))
             // const filteredSavedData = dataToSave.filter((data: any) => data !== null && data !== undefined)
             const item = {
                 data: dataToSaveWithDateStamp,
@@ -348,13 +358,13 @@ const FuelComponent = ({url, title}: any) => {
             message.success(
                 `Saving ${dataToSaveWithDateStamp.length} ${dataToSaveWithDateStamp.length > 1 ? 'records' : 'record'} of batch data`, 6
             )
-            console.log('batchDataWithDateStamp', dataToSaveWithDateStamp.slice(0, 10))
+            // console.log('batchDataWithDateStamp', dataToSaveWithDateStamp.slice(0, 10))
             handleConfirmSaveCancel()
             setIsConfirmSaveModalOpen(false)
             setLoading(false)
             clearBatchData()
         } catch (err) {
-            console.log('fileSaveError: ', err)
+            // console.log('fileSaveError: ', err)
             setLoading(false)
         }
     }
@@ -369,7 +379,7 @@ const FuelComponent = ({url, title}: any) => {
             setIsModalOpen(false)
         },
         onError: (error: any) => {
-            console.log('batch post error: ', error)
+            // console.log('batch post error: ', error)
             message.error(`${error}`)
         }
     })
@@ -466,6 +476,7 @@ const FuelComponent = ({url, title}: any) => {
 
     const readFuelIssue = (data: any) => {
         let stopReading = false;
+        
         return data
             .map((item: any) => {
 
@@ -473,7 +484,10 @@ const FuelComponent = ({url, title}: any) => {
                     return null; // Skip processing the remaining rows
                 }
                 // check for blanks in the row
-                const isRowBblank = item['DATE'] === undefined && item['PUMP ID'] === undefined && item['EQUIPMENT'] === undefined && item['QTY'] === undefined;
+                const isRowBblank = item['DATE'] === undefined &&
+                    item['PUMP ID'] === undefined &&
+                    item['EQUIPMENT'] === undefined &&
+                    item['QTY'] === undefined;
 
                 if (isRowBblank) {
                     stopReading = true;
@@ -487,219 +501,105 @@ const FuelComponent = ({url, title}: any) => {
                     quantity: item['QTY'],
                 }
             }).filter((item: any) => item !== null || item !== undefined);
-
     }
 
     const readFuelReceipt = (data: any) => {
-        let stopReading = false;
-        return data
-            .map((item: any) => {
-
-                if (stopReading) {
-                    return null; // Skip processing the remaining rows
-                }
-                // check for blanks in the row
-                const isRowBblank = item['DATE'] === undefined && item['PUMP ID'] === undefined && item['QTY'] === undefined;
-
-                if (isRowBblank) {
-                    stopReading = true;
-                    return null;
-                }
-
+        return data.map((item: any) => {
+            const intakeDate = item['DATE'];
+            const pumps = ['FT007', 'FT010', 'ST42', 'FT013'];
+            const filteredData = pumps.map((pump) => {
+                const fuelReceived = item[pump]?.['FUEL RECEIVED'] || null;
                 return {
-                    intakeDate: item['DATE'],
-                    pump: item['PUMP ID'],
-                    quantity: item['QTY'],
-                }
-            }).filter((item: any) => item !== null || item !== undefined);
-
+                    Date: intakeDate,
+                    pump,
+                    Quantity: fuelReceived,
+                };
+            });
+            return filteredData;
+        }).flat();
     }
 
-    // const handleUpload = () => {
-
-    //     const reader = new FileReader()
-    //     try {
-    //         setUploading(true)
-    //         reader.onload = (e: any) => {
-    //             const file = new Uint8Array(e.target.result)
-    //             // const dataRead = readFromFile(file)
-    //             const workBook = XLSX.read(file, { type: 'array' })
-
-    //             const targetSheetName = title === 'Fuel Issue' ? `LV'S - RAW DATA` : ``
-    //             const workSheet: any = workBook.Sheets[targetSheetName]
-
-    //             const range = title === 'Fuel Issue' ? "A3:F2300" : ''
-
-    //             const rawData = XLSX.utils.sheet_to_json(workSheet, { header: 0, range: range, blankrows: false, defval: null })
-
-    //             // what to read from the file
-    //             const filteredData: any = title === 'Fuel Issue' ? readFuelIssue(rawData) : readFuelReceipt(rawData)
-
-    //             const batchSize = 100; // Number of rows to process at a time                
-
-    //             // valiate the data to uploadable format
-    //             const uploadableData = filteredData.map((item: any) => {
-    //                 const pumpId = pumps?.data.find((pump: any) => pump.name.trim() === item.pump.trim());
-    //                 const equipment = equipments?.data.find((equipment: any) => equipment.equipmentId.trim() === item.equipment.trim());
-
-    //                 return {
-    //                     intakeDate: convertExcelDateToJSDate(item.intakeDate).toISOString(),
-    //                     pumpId: parseInt(pumpId?.id),
-    //                     quantity: parseInt(item.quantity),
-    //                     equipmentId: equipment?.equipmentId,
-    //                     transactionType: title,
-    //                     tenantId: tenantId,
-    //                 }
-    //             })
-
-    //             const uploadableDataLength = uploadableData.length;
-
-
-    //             const ignoredRows: any[] = [];
-    //             uploadableData.map((item: any) => {
-    //                 // Check if the item already exists in batchDataToSave
-    //                 const found = title === 'Fuel Issue' ?
-    //                     batchDataToSave.find((data: any) =>
-    //                         data.intakeDate === item.intakeDate &&
-    //                         data.pumpId === item.pumpId &&
-    //                         data.equipmentId === item.equipmentId &&
-    //                         data.quantity === item.quantity
-    //                     )
-    //                     : batchDataToSave.find((data: any) =>
-    //                         data.intakeDate === item.intakeDate &&
-    //                         data.pumpId === item.pumpId &&
-    //                         data.quantity === item.quantity
-    //                     );
-
-    //                 // Add the item to batchDataToSave only if it doesn't already exist
-    //                 if (!found) {
-    //                     setBatchDataToSave((prevBatchData: any) => [...prevBatchData, item]);
-    //                 } else {
-    //                     ignoredRows.push(item);
-    //                 }
-    //             });
-
-    //             const ignoredRowCount = ignoredRows.length;
-    //             if (ignoredRowCount > 0) {
-    //                 message.info(`${ignoredRowCount} row(s) were ignored because they already exist.`);
-    //                 setUploading(false)
-    //                 setIsUploadModalOpen(false)
-    //                 return
-    //             }
-    //             setUploading(false)
-    //             setIsUploadModalOpen(false)
-    //             message.success(`${uploadableData.length} rows uploaded from ${fileName}`)
-    //             handleRemove()
-    //         }
-    //     } catch (error) {
-    //         setIsUploadModalOpen(false)
-    //     }
-    //     reader.readAsArrayBuffer(readFile)
-    // }
-
-
-
-    // const handleBatchSave1 = () => {
-    //     try {
-    //         setLoading(true)
-    //         const filteredSavedData = dataToSave.filter((data: any) => data !== null && data !== undefined)
-    //         const item = {
-    //             data: filteredSavedData,
-    //             url: url,
-    //         }
-    //         postData(item)
-    //         setLoading(true)
-    //         message.success(`Saving ${filteredSavedData.length}  of ${dataToSave.length} ${filteredSavedData.length > 1 ? 'records' : 'record'} of uploaded data`, 6)
-    //         loadData()
-    //         setIsFileUploaded(false)
-    //         setIsConfirmSaveModalOpen(false)
-    //         setUploadedFile(null)
-    //         setUploadData([])
-    //         setDataToSave([])
-    //     } catch (err) {
-    //         console.log('fileSaveError: ', err)
-    //         setLoading(false)
-    //     }
-    // }
 
     const handleUpload = () => {
         const reader = new FileReader();
         try {
-          setUploading(true);
-          reader.onload = (e: any) => {
-            const file = new Uint8Array(e.target.result);
-            const workBook = XLSX.read(file, { type: 'array' });
-      
-            const targetSheetName = title === 'Fuel Issue' ? `LV'S - RAW DATA` : '';
-            const workSheet: any = workBook.Sheets[targetSheetName];
-      
-            const range = title === 'Fuel Issue' ? 'A3:F2300' : '';
-      
-            const rawData = XLSX.utils.sheet_to_json(workSheet, { header: 0, range: range, blankrows: false, defval: null });
-      
-            const filteredData: any = title === 'Fuel Issue' ? readFuelIssue(rawData) : readFuelReceipt(rawData);
-      
-            const uploadableData = filteredData.map((item: any) => {
-              const pumpId = pumps?.data.find((pump: any) => pump.name.trim() === item.pump.trim());
-              const equipment = equipments?.data.find((equipment: any) => equipment.equipmentId.trim() === item.equipment.trim());
-      
-              return {
-                intakeDate: convertExcelDateToJSDate(item.intakeDate).toISOString(),
-                pumpId: parseInt(pumpId?.id),
-                quantity: parseInt(item.quantity),
-                equipmentId: equipment?.equipmentId,
-                transactionType: title,
-                tenantId: tenantId,
-              };
-            });
-      
-            const batchSize = 100; // Set an appropriate batch size
-            const ignoredRows: any[] = [];
-      
-            for (let i = 0; i < uploadableData.length; i += batchSize) {
-              const batchItems = uploadableData.slice(i, i + batchSize);
-      
-              const existingItemsSet = new Set(
-                batchDataToSave.map((data: any) =>
-                  title === 'Fuel Issue'
-                    ? `${data.intakeDate}-${data.pumpId}-${data.equipmentId}-${data.quantity}`
-                    : `${data.intakeDate}-${data.pumpId}-${data.quantity}`
-                )
-              );
-      
-              const existingItems = batchItems.filter((item: any) =>
-                existingItemsSet.has(
-                  title === 'Fuel Issue'
-                    ? `${item.intakeDate}-${item.pumpId}-${item.equipmentId}-${item.quantity}`
-                    : `${item.intakeDate}-${item.pumpId}-${item.quantity}`
-                )
-              );
-      
-              const newBatchItems = batchItems.filter((item: any) => !existingItems.includes(item));
-              setBatchDataToSave((prevBatchData: any) => [...prevBatchData, ...newBatchItems]);
-      
-              ignoredRows.push(...existingItems);
-            }
-      
-            const ignoredRowCount = ignoredRows.length;
-            if (ignoredRowCount > 0) {
-              message.info(`${ignoredRowCount} row(s) were ignored because they already exist.`);
-              setUploading(false);
-              setIsUploadModalOpen(false);
-              return;
-            }
-      
-            setUploading(false);
-            setIsUploadModalOpen(false);
-            message.success(`${uploadableData.length} rows uploaded from ${fileName}`);
-            handleRemove();
-          };
+            setUploading(true);
+            reader.onload = (e: any) => {
+                const file = new Uint8Array(e.target.result);
+                const workBook = XLSX.read(file, { type: 'array' });
+
+                const targetSheetName = title === 'Fuel Issue' ? `LV'S - RAW DATA` : 'ST BULK RECEIVED';
+                const workSheet: any = workBook.Sheets[targetSheetName];
+
+                const range = title === 'Fuel Issue' ? 'A3:F2300' : 'B2:AL36';
+
+                const rawData: any = XLSX.utils.sheet_to_json(workSheet, { header: 0, range: range, blankrows: false, defval: null })
+
+
+                const filteredData: any = title === 'Fuel Issue' ? readFuelIssue(rawData) : readFuelReceipt(rawData);
+                console.log('rawData: ', rawData);
+
+                const uploadableData = filteredData.map((item: any) => {
+                    const pumpId = pumps?.data.find((pump: any) => pump.name.trim() === item.pump.trim());
+                    const equipment = equipments?.data.find((equipment: any) => equipment.equipmentId.trim() === item.equipment.trim());
+
+                    return {
+                        intakeDate: convertExcelDateToJSDate(item.intakeDate).toISOString(),
+                        pumpId: parseInt(pumpId?.id),
+                        quantity: parseInt(item.quantity),
+                        equipmentId: equipment?.equipmentId,
+                        transactionType: title,
+                        tenantId: tenantId,
+                    };
+                });
+
+                const batchSize = 100; // Set an appropriate batch size
+                const ignoredRows: any[] = [];
+
+                for (let i = 0; i < uploadableData.length; i += batchSize) {
+                    const batchItems = uploadableData.slice(i, i + batchSize);
+
+                    const existingItemsSet = new Set(
+                        batchDataToSave.map((data: any) =>
+                            title === 'Fuel Issue'
+                                ? `${data.intakeDate}-${data.pumpId}-${data.equipmentId}-${data.quantity}`
+                                : `${data.intakeDate}-${data.pumpId}-${data.quantity}`
+                        )
+                    );
+
+                    const existingItems = batchItems.filter((item: any) =>
+                        existingItemsSet.has(
+                            title === 'Fuel Issue'
+                                ? `${item.intakeDate}-${item.pumpId}-${item.equipmentId}-${item.quantity}`
+                                : `${item.intakeDate}-${item.pumpId}-${item.quantity}`
+                        )
+                    );
+
+                    const newBatchItems = batchItems.filter((item: any) => !existingItems.includes(item));
+                    setBatchDataToSave((prevBatchData: any) => [...prevBatchData, ...newBatchItems]);
+
+                    ignoredRows.push(...existingItems);
+                }
+
+                const ignoredRowCount = ignoredRows.length;
+                if (ignoredRowCount > 0) {
+                    message.info(`${ignoredRowCount} row(s) were ignored because they already exist.`);
+                    setUploading(false);
+                    setIsUploadModalOpen(false);
+                    return;
+                }
+
+                setUploading(false);
+                setIsUploadModalOpen(false);
+                message.success(`${uploadableData.length} rows uploaded from ${fileName}`);
+                handleRemove();
+            };
         } catch (error) {
-          setIsUploadModalOpen(false);
+            setIsUploadModalOpen(false);
         }
         reader.readAsArrayBuffer(readFile);
-      };
-      
+    };
+
 
     return (
         <div className="card-custom card-flush">
@@ -795,13 +695,14 @@ const FuelComponent = ({url, title}: any) => {
                                                 <label htmlFor="exampleFormControlInput1" className="form-label text-gray-500">Equipment</label>
                                                 <select
                                                     {...register("equipmentId")}
+                                                    value={isUpdateModalOpen === true ? tempData?.equipmentId : null}
                                                     onChange={handleChange}
                                                     className="form-select form-select-solid form-control-solid border border-gray-300" aria-label="Select example">
-                                                    {!isUpdateModalOpen && <option>Select</option>}
+                                                    {isUpdateModalOpen === false ? <option value="Select">Select</option> : null}
                                                     {
                                                         equipments?.data.map((item: any) => (
                                                             <option
-                                                                selected={isUpdateModalOpen && tempData.equipmentId === item.equipmentId}
+                                                                // selected={isUpdateModalOpen && tempData.equipmentId === item.equipmentId}
                                                                 value={item.equipmentId}>{item.equipmentId}</option>
                                                         ))
                                                     }
@@ -812,13 +713,14 @@ const FuelComponent = ({url, title}: any) => {
                                                 <label htmlFor="exampleFormControlInput1" className="form-label text-gray-500">Pump</label>
                                                 <select
                                                     {...register("pumpId")}
+                                                    value={isUpdateModalOpen === true ? tempData?.pumpId : null}
                                                     onChange={handleChange}
                                                     className="form-select form-select-solid border border-gray-300" aria-label="Select example">
-                                                    {!isUpdateModalOpen && <option>Select</option>}
+                                                    {isUpdateModalOpen === false ? <option value="Select">Select</option> : null}
                                                     {
                                                         pumps?.data.map((item: any) => (
                                                             <option
-                                                                selected={isUpdateModalOpen && tempData.pumpId === item.id}
+                                                                // selected={isUpdateModalOpen && tempData.pumpId === item.id}
                                                                 value={item.id}>{item.name}</option>
                                                         ))
                                                     }
@@ -839,13 +741,14 @@ const FuelComponent = ({url, title}: any) => {
                                                 <label htmlFor="exampleFormControlInput1" className="form-label text-gray-500">Pump</label>
                                                 <select
                                                     {...register("pumpId")}
+                                                    value={isUpdateModalOpen === true ? tempData?.pumpId : null}
                                                     onChange={handleChange}
                                                     className="form-select form-select-solid border border-gray-300" aria-label="Select example">
-                                                    {!isUpdateModalOpen && <option>Select</option>}
+                                                    {isUpdateModalOpen === false ? <option value="Select">Select</option> : null}
                                                     {
                                                         pumps?.data.map((item: any) => (
                                                             <option
-                                                                selected={isUpdateModalOpen && tempData.pumpId === item.id}
+                                                                // selected={isUpdateModalOpen && tempData.pumpId === item.id}
                                                                 value={item.id}>{item.name}</option>
                                                         ))
                                                     }
@@ -884,7 +787,7 @@ const FuelComponent = ({url, title}: any) => {
                                         justifyContent: 'center',
                                         alignItems: 'center',
                                     }}
-                                    icon={<UploadOutlined rev={''} />}>Click to Upload</Button>
+                                    icon={<UploadOutlined rev={''} />}> {uploading ? `...Reading` : `Click to Upload`}</Button>
                             </Upload>
                         </Space>
                     </Modal>
@@ -907,7 +810,7 @@ const FuelComponent = ({url, title}: any) => {
                     >
 
                         <Tabs defaultActiveKey="1"
-                            items={title === 'Fuel Issue' ? tabItems: tabItems.slice(0,1)}
+                            items={title === 'Fuel Issue' ? tabItems : tabItems.slice(0, 1)}
                             onChange={onTabsChange}
                             tabBarExtraContent={
                                 <>

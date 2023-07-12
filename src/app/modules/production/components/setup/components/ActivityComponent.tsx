@@ -1,4 +1,4 @@
-import { Button, Input, Modal, Space, Table, message } from "antd"
+import { Button, Input, Modal, Skeleton, Space, Table, message } from "antd"
 import { useEffect, useState } from "react"
 import { } from "react-bootstrap"
 import { useForm } from "react-hook-form"
@@ -23,7 +23,6 @@ const ActivityComponent = ({ data, hasActivityType }: any) => {
     const [detailName, setDetailName] = useState('')
     const tenantId = localStorage.getItem('tenant')
     const navigate = useNavigate();
-    const [loading, setLoading] = useState(false)
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false)
     const [tempData, setTempData] = useState<any>()
     const { register, reset, handleSubmit } = useForm()
@@ -32,7 +31,7 @@ const ActivityComponent = ({ data, hasActivityType }: any) => {
     const activityTypes: any = [
         'Haul', 'Load', 'Drill'
     ]
-    const { data: activities } = useQuery('activities', () => fetchDocument(`ProductionActivity/tenant/${tenantId}`), { cacheTime: 5000 })
+    const { data: activities, isLoading: loading } = useQuery('activities', () => fetchDocument(`ProductionActivity/tenant/${tenantId}`), { cacheTime: 5000 })
 
 
     const handleChange = (event: any) => {
@@ -141,24 +140,22 @@ const ActivityComponent = ({ data, hasActivityType }: any) => {
 
     // show columns if based on props of hasDescription and hasDuration
     if (!hasActivityType) {
+        delete columns[0]
         delete columns[2]
     }
 
     const loadData = async () => {
-        setLoading(true)
         try {
             const response = await fetchDocument(`${data.url}/tenant/${tenantId}`)
             if (data.url === 'ProActivityDetails') {
                 const getActivity = activities?.data.find((item: any) => item.id.toString() === param.id)
                 const detName = getActivity?.name
                 setDetailName(detName)
-                console.log('detName: ', detName)
+                // console.log('detName: ', detName)
             }
             setGridData(response.data)
-            setLoading(false)
         } catch (error) {
-            setLoading(false)
-            console.log(error)
+            // console.log(error)
             message.error(`${error}`)
         }
     }
@@ -168,7 +165,7 @@ const ActivityComponent = ({ data, hasActivityType }: any) => {
     }, [])
 
     const dataByActivityDetails = gridData.filter((item: any) => item.activityId?.toString() === param.id)
-    console.log('dataByActivityDetails: ', dataByActivityDetails)
+    // console.log('dataByActivityDetails: ', dataByActivityDetails)
 
 
 
@@ -194,6 +191,7 @@ const ActivityComponent = ({ data, hasActivityType }: any) => {
         // })
         //setGridData(filteredData)
     }
+
     const { isLoading: updateLoading, mutate: updateData } = useMutation(updateItem, {
         onSuccess: (dataU) => {
             queryClient.setQueryData([data.url, tempData], dataU);
@@ -328,7 +326,10 @@ const ActivityComponent = ({ data, hasActivityType }: any) => {
                             />
                         </Space>
                     </div>
-                    <Table columns={columns} dataSource={data.url === 'ProActivityDetails' ? dataByActivityDetails : dataWithIndex} loading={loading} />
+                    {
+                        loading ? <Skeleton active /> :
+                            <Table columns={columns} dataSource={data.url === 'ProActivityDetails' ? dataByActivityDetails : dataWithIndex} />
+                    }
 
                     <Modal
                         title={isUpdateModalOpen ? `${data.title} Update` : `${data.title} Setup`}
@@ -344,10 +345,13 @@ const ActivityComponent = ({ data, hasActivityType }: any) => {
                         <form onSubmit={isUpdateModalOpen ? handleUpdate : OnSubmit}>
                             <hr></hr>
                             <div style={{ padding: "20px 20px 0 20px" }} className='row mb-0 '>
-                                <div className=' mb-7'>
-                                    <label htmlFor="exampleFormControlInput1" className="form-label text-gray-500">Code</label>
-                                    <input {...register("code")} name='code' defaultValue={!isUpdateModalOpen ? '' : tempData?.code} onChange={handleChange} className="form-control form-control-white form-control-solid border border-gray-300" />
-                                </div>
+                                {
+                                    hasActivityType &&
+                                    <div className=' mb-7'>
+                                        <label htmlFor="exampleFormControlInput1" className="form-label text-gray-500">Code</label>
+                                        <input {...register("code")} name='code' defaultValue={!isUpdateModalOpen ? '' : tempData?.code} onChange={handleChange} className="form-control form-control-white form-control-solid border border-gray-300" />
+                                    </div>
+                                }
                                 <div className=' mb-7'>
                                     <label htmlFor="exampleFormControlInput1" className="form-label text-gray-500">Name</label>
                                     <input {...register("name")} name='name' defaultValue={!isUpdateModalOpen ? '' : tempData?.name} onChange={handleChange} className="form-control form-control-white form-control-solid border border-gray-300" />
@@ -358,13 +362,14 @@ const ActivityComponent = ({ data, hasActivityType }: any) => {
                                         <label htmlFor="exampleFormControlInput1" className="form-label text-gray-500">Activity Type</label>
                                         <select
                                             {...register("activityType")}
+                                            value={isUpdateModalOpen === true ? tempData?.activityType : null}
                                             onChange={handleChange}
                                             className="form-select form-select-solid border border-gray-300" aria-label="Select example">
-                                            {!isUpdateModalOpen && <option>Select</option>}
+                                            {isUpdateModalOpen === false ? <option value="Select service">Select Activity Type</option> : null}
                                             {
                                                 activityTypes.map((item: any) => (
                                                     <option
-                                                        selected={isUpdateModalOpen && tempData.activityType === item}
+                                                        // selected={isUpdateModalOpen && tempData.activityType === item}
                                                         value={item}>{item}
                                                     </option>
                                                 ))

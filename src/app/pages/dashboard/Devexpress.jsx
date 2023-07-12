@@ -14,7 +14,7 @@ const Devexpres = () => {
                 style={{ height: '100%' }}
                 // endpoint='https://demos.devexpress.com/services/dashboard/api'
                 // endpoint='https ://208.117.44.15/dashboards/dashboardcontrol'
-                endpoint='http://208.117.44.15/dashboards/dashboardcontrol'
+                endpoint='https://app.sipconsult.net/dashboards/dashboardcontrol'
                 workingMode='ViewerOnly'
                 dashboardId='pro_cycleDetails'
             ></DashboardControl>
@@ -30,33 +30,64 @@ const Devexpres2 = () => {
                 style={{ height: '100%' }}
                 // endpoint='https://demos.devexpress.com/services/dashboard/api'
                 // endpoint='https ://208.117.44.15/dashboards/dashboardcontrol'
-                endpoint='http://208.117.44.15/dashboards/dashboardcontrol'
+                endpoint='https://app.sipconsult.net/dashboards/dashboardcontrol'
                 workingMode='ViewerOnly'
                 dashboardId='pro_fuelIntake'
             ></DashboardControl>
         </div>
-    )
+    ) 
 }
 
 const CycleDetailsAnalysis = () => {
 
     return (
-        // <div className='col-xl-12 border border-gray-400'>
         <div style={{ width: '100%', height: '80vh' }}>
             <DashboardControl
                 id='web-dashboard'
                 style={{ height: '100%' }}
                 // endpoint='https://demos.devexpress.com/services/dashboard/api'
                 // endpoint='https ://208.117.44.15/dashboards/dashboardcontrol'
-                endpoint='http://208.117.44.15/dashboards/dashboardcontrol'
+                endpoint='https://app.sipconsult.net/dashboards/dashboardcontrol'
                 workingMode='ViewerOnly'
                 dashboardId='pro_cycleDetailsAnalysis'
             ></DashboardControl>
         </div>
-        // </div>
+    )
+}
+
+const FuelAnalysis = () => {
+
+    return (
+        <div style={{ width: '100%', height: '80vh' }}>
+            <DashboardControl
+                id='web-dashboard'
+                style={{ height: '100%' }}
+                // endpoint='https://demos.devexpress.com/services/dashboard/api'
+                // endpoint='https ://208.117.44.15/dashboards/dashboardcontrol'
+                endpoint='https://app.sipconsult.net/dashboards/dashboardcontrol'
+                workingMode='ViewerOnly'
+                dashboardId='pro_fuelAnalysis'
+            ></DashboardControl>
+        </div>
+    )
+}
+const DrillEntryAnalysis = () => {
+
+    return (
+        <div style={{ width: '100%', height: '80vh' }}>
+            <DashboardControl
+                id='web-dashboard'
+                style={{ height: '100%' }}
+                // endpoint='https://demos.devexpress.com/services/dashboard/api'
+                // endpoint='https ://208.117.44.15/dashboards/dashboardcontrol'
+                endpoint='https://app.sipconsult.net/dashboards/dashboardcontrol'
+                workingMode='ViewerOnly'
+                dashboardId='pro_drillEntryAnalysis'
+            ></DashboardControl>
+        </div>
     )
 }
 
 
 
-export { Devexpres, Devexpres2, CycleDetailsAnalysis }
+export { Devexpres, Devexpres2, CycleDetailsAnalysis, FuelAnalysis, DrillEntryAnalysis }

@@ -106,7 +106,7 @@ export function Login() {
           placeholder='username'
           {...formik.getFieldProps('username')}
           className={clsx(
-            'form-control form-control-lg form-control-solid',
+            'form-control form-control-solid border border-gray-300',
             {'is-invalid': formik.touched.username && formik.errors.username},
             {
               'is-valid': formik.touched.username && !formik.errors.username,
@@ -147,7 +147,7 @@ export function Login() {
           autoComplete='off'
           {...formik.getFieldProps('password')}
           className={clsx(
-            'form-control form-control-lg form-control-solid',
+            'form-control form-control-solid border border-gray-300',
             {
               'is-invalid': formik.touched.password && formik.errors.password,
             },
@@ -169,7 +169,7 @@ export function Login() {
           <label className='form-label fw-bold'>Company:</label>
           <div>
             <select
-              className='form-select form-select-solid'
+              className='form-select form-select-solid border border-gray-300'
               data-kt-select2='true'
               data-placeholder='Select option'
               data-allow-clear='true'
